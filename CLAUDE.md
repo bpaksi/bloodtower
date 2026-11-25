@@ -5,7 +5,7 @@ See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all chan
 <!-- forgekit:local:start -->
 ## Bloodtower
 
-Many small apps around the *Return to Dark Tower* tower. Bob owns intent and approvals; Claude plans, builds and self-verifies. The coordinator merges a PR once CI and review pass; Claude Code opens PRs and never merges them. The full process is in [docs/sdlc.md](docs/sdlc.md).
+Many small apps around the *Return to Dark Tower* tower. Bob owns intent and approvals; Claude plans, builds and self-verifies. Bob merges a PR, with a squash merge, once CI is green and the required reviews approve the same head (AGENTS.md); coding agents, the coordinator and Grok Bot never merge. The full process is in [docs/sdlc.md](docs/sdlc.md).
 
 ## Repo map
 
@@ -47,7 +47,7 @@ Active planning and parallel dispatch follow forgekit: plans live as GitHub issu
 2. One branch per plan step/issue: `plan/<issue>-<slug>` (or `<type>/<app>-<slug>` / `chore/<slug>` for non-plan work). Never commit on `main`.
 3. If the work deviates from the plan or spec, update that document in the same commit.
 4. Before handing over, run `pnpm check`, push the branch and open a PR with the evidence and the plan step id in the body.
-5. CI runs Gitleaks on the PR, and `pnpm check` unless the diff stays on the lite allowlist (game-design, docs, packs, story scripts, app icons). A lite diff runs the card lint when it touches cards and the pack checks when it touches packs. A PR that can reach the Bloodtower build also runs the e2e suite (four parallel shards), and a red e2e fails `check`. The `verifier` posts the eval table on the PR head and again after each fix round that changes code. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. The coordinator squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
+5. CI runs Gitleaks on the PR, and `pnpm check` unless the diff stays on the lite allowlist (game-design, docs, packs, story scripts, app icons). A lite diff runs the card lint when it touches cards and the pack checks when it touches packs. A PR that can reach the Bloodtower build also runs the e2e suite (four parallel shards), and a red e2e fails `check`. The `verifier` posts the eval table on the PR head and again after each fix round that changes code. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. Bob squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; no agent merges. After round 3 with blockers left, the coordinator labels the PR `needs-bob` (`needs-owner` for `Plan:` milestones) and stops that step. Bob signs off only at the plan's gate steps.
 
 ## Conventions
 

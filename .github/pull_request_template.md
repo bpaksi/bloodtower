@@ -1,16 +1,29 @@
+Closes #<n>
+
 ## Feature
-<plan-name>/<##-feature> — apps/bloodtower/plans/briefs/<plan-name>/<##-feature>/plan.md
+<plan-name>/<##-feature> — apps/bloodtower/plans/briefs/<plan-name>/<##-feature>/plan.md (or "none" for a PR outside a brief)
+
+## Summary
+<!-- What changed and why, in 3–6 bullets. Spec or DEC ids where they exist. -->
 
 ## Touches
-<copy the issue's `Touches:` line; list any file changed outside it and why>
+<!-- Paths this PR changes, from the issue's Touches line. Name any file outside it and why. -->
+<!-- Overlap with other open plan PRs: none | #<pr> (<files>) -->
+
+## Review level
+<!-- Pick one: product-behavior (Grok Bot + non-author agent) | test-only | docs-only | config (one Low review, non-author agent) | art (one Low review, not Grok) | design/story (none) -->
 
 ## Requirement review
 <findings / "none">
 
-## pnpm check
-<exit code, test counts>
+## Test evidence (head `<sha>`)
+<!-- Update on every push. -->
+- `pnpm check`: <exit code, test counts>
+- CI: <run link> — green | pending | red
+- Local, targeted: <unit packages>, <e2e specs added or changed> — <counts>
+- Left to CI: the full e2e suite
 
-## Eval table  (verifier only, fresh context; implementer does not fill)
+## Eval table  (feature PRs only; verifier only, fresh context; implementer does not fill)
 Head SHA: <sha> · Verifier run: <link> · Round: <1-3>
 
 | EV | Result | Proof (test name / CI link / screenshot pair) |
@@ -20,10 +33,16 @@ Head SHA: <sha> · Verifier run: <link> · Round: <1-3>
 
 Done = every row pass on the current head. Any code change → verifier reruns.
 
+## Risks
+<!-- What could break that the tests might not show: state, restart and restore paths, protocol or schema changes, migrations, tower hardware. -->
+
+## Assumptions
+<!-- Decisions made without asking. Each is one a reviewer could reject. "None" only if true. -->
+
 ## Not verified
-<list, or "none">
+<!-- Be specific, for example "real tower: mock only". "None" only if true. -->
 
 ## Round log
-| Round | Head | Review | Verdict |
-|-------|------|--------|---------|
-| 1 | <sha> | <Review A / B / Low> | <APPROVE / REQUEST_CHANGES> |
+| Round | Head | Findings fixed (reviewer) | Tests added |
+| --- | --- | --- | --- |
+| 1 | `<sha>` | — | — |

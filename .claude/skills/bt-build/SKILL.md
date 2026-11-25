@@ -13,13 +13,13 @@ A front door to the `plan-run` skill with Bloodtower's answers filled in, so sta
 | Bob types | Batch |
 | --- | --- |
 | `bt-build` | Every issue in plan.py's `dispatch` list right now. |
-| `bt-build 3` | The first 3 issues in `dispatch` (lowest number first). |
-| `bt-build #445 #446` | Those issues only. Any that aren't in `dispatch` are reported with their status (blocked, held for overlap, hitl, running), and the rest start. |
+| `bt-build 3` | A batch of 3: the first 3 ready issues, lowest number first. `--max` still limits how many run at once, so with the default cap of 2 the third starts when plan.py next shows a free slot (the cap counts `plan:in-progress` issues). plan.py's `dispatch` list is cut to the cap, so take the batch from its ready issues, not only from `dispatch`. |
+| `bt-build #445 #446` | Those issues only. plan.py has no issue filter: run it as usual and keep only these numbers from its output. Any that aren't ready are reported with their status (blocked, held for overlap, hitl, running), and the rest start under the cap. |
 | `--both` | Balance across Hammer and Anvil. Default: Hammer only. |
 | `--max N` | Concurrency cap passed to plan.py as `--max-running N`. Default: 2. |
 | `--until-done` | Keep starting newly ready issues until the plan is done. Default: stop after this batch merges or escalates. |
 
-The milestone is always the newest open `Plan:` milestone (today `Plan: Bloodtower v1.0`); plan.py picks it.
+The milestone is the newest open `Plan:` milestone; plan.py picks it.
 
 ## Intake
 

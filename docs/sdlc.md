@@ -2,7 +2,7 @@
 
 > **Note:** Active planning and parallel dispatch now follow forgekit — see [AGENTS.md](../AGENTS.md) and [`.claude/skills/plan-run/PLAN-FORMAT.md`](../.claude/skills/plan-run/PLAN-FORMAT.md). This document remains the reference for Bloodtower-specific guardrails, lite CI allowlist, verifier/adversary review, plan gates, and brief/eval conventions.
 
-Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead. Agents plan, build and self-verify, and every change reaches `main` through a pull request on `bpaksi/bloodtower` that the coordinator merges ("Who runs the agents" and "Named roles" say which agent does what; Claude Code opens PRs and never merges them). Bob's sign-off is required only at the named gates (below); merging is not one of them.
+Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead. Agents plan, build and self-verify, and every change reaches `main` through a pull request on `bpaksi/bloodtower` that Bob squash-merges ("Who runs the agents" and "Named roles" say which agent does what; no agent merges, per [AGENTS.md](../AGENTS.md)). Bob's sign-off is also required at the named gates (below).
 
 The repo holds many apps. **Process, guardrails and Claude config are shared at the root; intent, spec and plans belong to each app.**
 
@@ -14,7 +14,7 @@ apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──appro
      │                                                                   worktree + branch + PR per step
      │                                                                   CI + verifier + adversaries on the PR (≤3 rounds)
      │                                                                                                    ▼
- new gap / finding ◄──── Bob gates (playtest, judgement, sign-off) ◄──── squash merge, one PR at a time (coordinator)
+ new gap / finding ◄──── Bob gates (playtest, judgement, sign-off) ◄──── squash merge, one PR at a time (Bob)
 ```
 
 | Playbook stage | What we do here | Artifact | Gate (Bob) |
@@ -23,7 +23,7 @@ apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──appro
 | 2. Design | Claude drafts or updates the app's spec and flags conflicts. Cross-app decisions also get a record in `research/decisions/`. | `apps/<app>/spec.md` (with decision log) | Approve spec |
 | 3. Build | Plan mode first. One plan per milestone; each step is one branch in its own worktree and one PR. Steps carry `Depends on`, `Touches`, `Deps change` and `Runs`, and the plan groups them into batches (see Parallel work). Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan (gate G-plan) |
 | 4. Test | The developer runs `pnpm check` in its worktree and puts the output in the PR body. GitHub Actions runs the `check` workflow on every PR. It reruns `pnpm check` unless every changed path is on the lite allowlist (game-design, docs, packs, story scripts, app icons; Bob / Warden, 2026-10-25/26). A lite change still runs Gitleaks, the card lint when it touches `research/game-design/` and the pack checks when it touches `packs/`. A PR that can reach the Bloodtower build also runs the Playwright suite (see Merging). The verifier, launched in a fresh context, posts the eval table on the PR. | Vitest, Playwright, screenshots, `.github/workflows/check.yml` | Only at a named gate (playtest, judgement) |
-| 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs Gitleaks on every commit, and on a code commit the part of `pnpm check` the staged files can break (`scripts/pre-commit-check.mjs`); CI runs Gitleaks on every PR, `pnpm check` except on a lite docs/design/packs diff (which runs the card lint and the pack checks instead), and the e2e suite when the diff can reach the Bloodtower build; one adversarial review (round 1) posts findings, the developer fixes the blockers, and fix-check rounds confirm the fixes, for up to 3 rounds in all. The coordinator squash-merges, one PR at a time, once CI is green and the latest review says `Blocking: none`, and, for a feature PR, the eval table is all-pass on the head (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | None. Bob may look at any PR; it is optional. Nobody commits to `main` directly. |
+| 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs Gitleaks on every commit, and on a code commit the part of `pnpm check` the staged files can break (`scripts/pre-commit-check.mjs`); CI runs Gitleaks on every PR, `pnpm check` except on a lite docs/design/packs diff (which runs the card lint and the pack checks instead), and the e2e suite when the diff can reach the Bloodtower build; one adversarial review (round 1) posts findings, the developer fixes the blockers, and fix-check rounds confirm the fixes, for up to 3 rounds in all. Bob squash-merges, one PR at a time, once CI is green and the latest review says `Blocking: none`, and, for a feature PR, the eval table is all-pass on the head (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | The merge. Nobody commits to `main` directly. |
 | 6. Maintain | Skipped during Explore. Findings become gap entries, research notes, or a new intent. | Gap register, `research/` | — |
 
 ## Tiers
@@ -159,7 +159,7 @@ An app plan names which of these it uses. Batch evidence (below) is posted for B
 ## Who runs the agents
 
 - **Coding agents are Cursor cloud agents.** Wright (Bob's Grok Bot build partner) launches one per plan step, each on its own branch. Each cloud agent follows `.claude/agents/developer.md`, runs `pnpm check`, and opens a PR on `bpaksi/bloodtower` with the plan step id and evidence.
-- **Wright (Bob's Grok Bot build partner) is the coordinator** (`.claude/agents/coordinator.md`). He runs the adversary loop (§4), either by asking the step's cloud agent to run the `adversary-*` instructions or by launching separate reviewer cloud agents with them, and he merges when CI is green and nothing is blocking.
+- **Wright (Bob's Grok Bot build partner) is the coordinator** (`.claude/agents/coordinator.md`). He runs the adversary loop (§4), either by asking the step's cloud agent to run the `adversary-*` instructions or by launching separate reviewer cloud agents with them, and reports a PR ready to Bob when CI is green and nothing is blocking. For `Plan:` milestones, plan-run is the coordinator (AGENTS.md).
 - **Claude Code on the Mac** stays valid for tower and hardware work, which needs the Bluetooth link. Local agents use the `pnpm wt` worktree flow below; cloud agents already run in their own clones, so they skip it.
 - **Claude Desktop sessions** each make their own worktree under `.claude/worktrees/` on a `claude/<name>` branch. They do not use `pnpm wt`, so they have no `.wt.json` and no `worktree-guard`. A session that ends without a PR, or whose PR has merged, removes that worktree and branch (§8).
 
@@ -170,8 +170,8 @@ The plans, briefs and cards name these roles. This table records how the documen
 | Name | What the documents have it do | Where that is said |
 |---|---|---|
 | Bob | Owns intent and the design rulings, approves plans, evals and mockups, signs the gates, and runs anything on the real tower | "Human gates" above; `CLAUDE.md` |
-| Wright | Bob's Grok Bot build partner. The coordinator: launches the developers, runs the review loop, squash-merges code PRs | "Who runs the agents" above; `AGENTS.md`; `.claude/agents/coordinator.md` |
-| Gamewright | Game design and planning. Writes each feature's `plan.md` and `eval.md`, makes design proposals for Bob to accept, reviews requirements with Wright, and reviews and squash-merges design-session PRs | `apps/bloodtower/plans/briefs/README.md`; "Requirement review before build" below; the `bt-design-session` skill |
+| Wright | Bob's Grok Bot build partner. The coordinator: launches the developers, runs the review loop, reports PRs ready for Bob to merge | "Who runs the agents" above; `AGENTS.md`; `.claude/agents/coordinator.md` |
+| Gamewright | Game design and planning. Writes each feature's `plan.md` and `eval.md`, makes design proposals for Bob to accept, reviews requirements with Wright, and reviews design-session PRs for Bob to merge | `apps/bloodtower/plans/briefs/README.md`; "Requirement review before build" below; the `bt-design-session` skill |
 | Warden | Review and the rules of the process. Reviews briefs for completeness, may record Bob's approval in `approval.md`, and set the lite CI rule with Bob | `apps/bloodtower/plans/briefs/README.md`; the lite CI rows in this file |
 | Illusionist | The look, art, voices and sound. Draws each screen feature's `mockup.html` and owns the render pipeline | `apps/bloodtower/plans/briefs/README.md`; `research/game-design/asset-organization.md` |
 | Loremaster | Story scripts and lines. Also the name of the in-game narrator in the packs, so read it in context | `research/stories/dracula/dracula-asset-map.md`; `apps/bloodtower/plans/A1-asset-adapter.md` |
@@ -186,7 +186,7 @@ When Cursor cloud agents cannot run, a batch is built in Claude Code on Bob's Ma
 - Deliver as a PR to `main`. The required `check` still gates it.
 - The review loop is the one in §4 "Review loop": one Opus adversarial pass in round 1, Sonnet fix-checks after it. The developer and its fixes run on Sonnet unless the step says `Model: opus`. The developer's PR body carries the `Done when` checklist with evidence, so there is no separate spec-conformance reviewer.
 - Blockers still open after round 3 get the `needs-bob` label, and the step stops.
-- Claude Code never merges. Wright reviews and merges as in §4.
+- No agent merges. Wright reviews as in §4, and Bob merges.
 
 ## Parallel work (several developer agents at once)
 
@@ -270,11 +270,11 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
    - **What blocks** (nothing else does): a regression against `main`; a `Done when` item that is not met, or not proven by a test that can fail; a broken standing rule (tower safety, privacy, D7-style message rules, unknown shown as zero, an error eaten, hidden or not shown to the person whose action caused it, in code the PR adds or changes); a change outside `Touches` or an unflagged dependency change. Everything else is non-blocking: a nit (cap 5), a spec hole for Bob, or a follow-up the coordinator files as an issue.
    - **Short reports.** At most about 1,500 characters: findings with file, line, what breaks and how to reproduce. No restated test counts or measurement tables unless they prove a blocker. Later rounds and the developer read every report, so length costs every round after it.
    The developer fixes the blocking findings, pushes, and answers on the PR in one short comment (finding → commit). Claude Code's agent `model:` field takes an alias (`opus`, `sonnet`, `haiku`) or a full Claude model id, and the Agent tool can override it per call; that is how rounds 2 and 3 run `adversary-bugs` on Sonnet.
-5. **Merge** when CI is green and the latest review says `Blocking: none` (and `adversary-prd`'s round 1 report, when it ran). A feature PR also needs the eval table all-pass on the head. Docs-only, design, art, and pack PRs have no eval table. The coordinator merges one PR at a time, in the batch's merge order: optionally `gh pr update-branch`, only when the PR has a merge conflict or the change is risky against what just landed, then wait for CI again, then `gh pr merge --squash --delete-branch`. A conflict or a red check after an update goes back to the developer and counts as a new round.
+5. **Merge** when CI is green and the latest review says `Blocking: none` (and `adversary-prd`'s round 1 report, when it ran). A feature PR also needs the eval table all-pass on the head. Docs-only, design, art, and pack PRs have no eval table. Bob merges one PR at a time, in the batch's merge order, with a squash merge. Before reporting a PR ready, the coordinator optionally runs `gh pr update-branch`, only when the PR has a merge conflict or the change is risky against what just landed, then waits for CI again. A conflict or a red check after an update goes back to the developer and counts as a new round.
 6. **Escalation.** If the same EV fails in 2 rounds in a row, or if round 3 ends with blocking findings still open, the coordinator labels the PR `needs-bob`, disables auto-merge on it (`gh pr merge --disable-auto`, a no-op while auto-merge is unavailable), stops that step, and reports it to Bob with the open findings. Steps that depend on it wait; the rest of the batch continues. Bob decides: fix himself, re-scope the step, override a finding, or drop it.
 7. `pnpm wt:rm <branch>` after the merge.
 
-Branch protection on `main` requires the `check` status, so a red PR cannot merge. The branch need not be up to date; `e2e-main.yml` catches clashes after the merge. The adversary condition stays the coordinator's to enforce. `pnpm land` stays as an optional local recheck.
+Branch protection on `main` requires the `check` status, so a red PR cannot merge. The branch need not be up to date; `e2e-main.yml` catches clashes after the merge. The coordinator reports a PR ready only when the adversary condition holds; Bob merges. `pnpm land` stays as an optional local recheck.
 
 ### 5. Evidence per batch
 
@@ -286,10 +286,10 @@ When a batch has merged, the coordinator posts one summary (as a comment on the 
 
 - reads the approved plan and the next batch whose dependencies are met,
 - runs `pnpm wt` for each step and starts one developer agent per worktree,
-- runs the verifier in a fresh context (the eval table on each head that A/B review reads, and after each code-changing fix round) and the review loop on each PR for up to 3 rounds, merges PRs serially as in §4, and escalates with `needs-bob`,
+- runs the verifier in a fresh context (the eval table on each head that A/B review reads, and after each code-changing fix round) and the review loop on each PR for up to 3 rounds, reports PRs ready for Bob to merge serially as in §4, and escalates with `needs-bob`,
 - writes the batch summary,
 - stops at a gate step and asks for Bob's sign-off,
-- never commits to `main`, never edits intent, never merges a PR without green CI and `Blocking: none` from the latest review, never merges a feature PR whose eval table is not all-pass on the head, and never starts a step outside the approved plan.
+- never commits to `main`, never edits intent, never merges a PR (Bob merges), never reports a PR ready without green CI and `Blocking: none` from the latest review or a feature PR whose eval table is not all-pass on the head, and never starts a step outside the approved plan.
 
 Start with two or three agents per batch. Raise the cap once first-pass CI success stays high.
 
@@ -306,7 +306,7 @@ Token use and wall-clock time are the same problem here: on 2026-10-19 the visua
 
 Local worktrees and branches should mirror open work: one branch per open PR, plus anything still being built. Squash merges and `gh pr merge --delete-branch` remove only the remote branch, so the local side drifts unless something removes it.
 
-- **After a merge by the coordinator:** `pnpm wt:rm <branch>` (§4, step 7).
+- **After Bob merges a coordinator batch PR:** `pnpm wt:rm <branch>` (§4, step 7).
 - **Everything else** (Desktop session worktrees, branches with no worktree, detached review worktrees, a PR merged by hand or by a cloud agent): `pnpm cleanup:worktrees`. It prints SAFE and KEEP rows and changes nothing; `--apply` removes the SAFE rows (`git worktree remove` without `--force`, then `git branch -D`, then `git worktree prune`). A row is SAFE only when it is clean, has no open PR, and its tip is a merged PR's head or inside it, or it holds no commit beyond `origin/main`. It never touches `main`, the main checkout, the worktree it runs in, or the remote.
 - **When:** after each batch (the coordinator includes the report in its summary and does not apply it), and when Bob runs `/cleanup-worktrees`. Bob says OK before anything is removed. A KEEP row with unmerged commits or uncommitted files is Bob's to push, finish or drop.
 - **A Desktop session** that ends with no PR removes its own worktree and branch, or leaves it for the next report.
