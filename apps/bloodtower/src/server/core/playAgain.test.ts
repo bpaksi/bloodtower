@@ -185,6 +185,13 @@ describe("a game's stats and Play again across a host restart (C2/07)", () => {
         }
       }
     }
+    for (let guard = 0; guard < 20 && second.state().screen === "piece-check"; guard += 1) {
+      const open = second.state().offered.filter((o) => o.open);
+      const next =
+        open.find((o) => o.actionId === "turn-drums") ?? open.find((o) => o.actionId === "confirm");
+      if (!next) break;
+      await resumedPad.act(next.promptId, next.actionId);
+    }
     const resumed = second.state();
     expect(resumed.screen).toBe("play");
     expect(resumed.seed).toBe(newSeed);

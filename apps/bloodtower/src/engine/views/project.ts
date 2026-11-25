@@ -88,6 +88,7 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
       ...(state.hint ? { hint: state.hint } : {}),
       ...(state.gear ? { gear: state.gear } : {}),
       ...(state.chance ? { chance: state.chance } : {}),
+      ...(state.pieceCheck ? { pieceCheck: state.pieceCheck } : {}),
     });
   }
 
@@ -153,5 +154,6 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
     actions: deviceActions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
     ...(state.settings && state.settings.length > 0 ? { settings: state.settings } : {}),
     ...(state.gear ? { gear: state.gear } : {}),
+    ...(state.pieceCheck ? { pieceCheck: state.pieceCheck } : {}),
   });
 }

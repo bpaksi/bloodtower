@@ -5,6 +5,7 @@ import { type Browser, expect, type Page, type TestInfo, test } from "@playwrigh
 import {
   enterWithoutTower,
   enterWithTower,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -233,6 +234,7 @@ const resumeTable = async (
   await clickAct(pad, "continue", "continue-saved-game");
   // Continue seats the saved party on the iPads joined now (CU/16).
   await holdHeroesFromTest(pad, ["hero-a"]);
+  await finishPieceCheck(pad);
   return {
     pad,
     board,

@@ -6,6 +6,12 @@ import type { LoopRegistry } from "../../loop/types.ts";
 import type { ViewState } from "../../views/state.ts";
 import type { PlayContent, PlayState } from "../chapter/playState.ts";
 import type { ShellStory } from "./pack.ts";
+import {
+  DRUM_HOME,
+  type DrumPositions,
+  type PieceCheckState,
+  type PieceCheckStepId,
+} from "./pieceCheck.ts";
 import { PROVING_GROUNDS_PLAY } from "./playContent.ts";
 import { createShellRegistry } from "./registry.ts";
 import type { ShellScreen } from "./screens.ts";
@@ -23,7 +29,7 @@ export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [SHELL_ENGINE_VE
 export type PauseCause = "disconnect" | "tower-lost";
 
 /** The screen a tower-lost pause came from: Reconnect and Go on without return to it (DEC-711). */
-export type PauseReturn = "play" | "setup" | "begin";
+export type PauseReturn = "play" | "setup" | "begin" | "piece-check";
 
 /**
  * A Reconnect running after a tower was lost mid-game (DEC-301): the connect, then the tower check
@@ -206,6 +212,15 @@ export type ShellState = {
   hintHold: HintHold | null;
   /** Tower volume 0, 1, or 2. Kept across a panel close and a restart. */
   towerVolume: 0 | 1 | 2;
+  /**
+   * Saved drum positions (DEC-716, C2-11), updated by every rotate the engine sends, including
+   * Turn the drums during Continue's piece check. Absent in older saves -> home (0, 0, 0).
+   */
+  drums: DrumPositions;
+  /** Active Continue piece check (C2-11), or null outside the check. */
+  pieceCheck: PieceCheckState | null;
+  /** Piece-check steps skipped and still unconfirmed (MEC-018, C2-11), shown in the board top band. */
+  unconfirmedPieces: PieceCheckStepId[];
   /** C2 never splits the party. The label stays "Split party". */
   partySplit: boolean;
   /** Ephemeral. A restart clears these even if a checkpoint captured them. */
@@ -283,6 +298,9 @@ export const initialShellState = (input: {
     hintQueue: [],
     hintHold: null,
     towerVolume: 1,
+    drums: { ...DRUM_HOME },
+    pieceCheck: null,
+    unconfirmedPieces: [],
     partySplit: false,
     gearPanel: null,
     gearOwner: null,

@@ -3,6 +3,7 @@ import {
   ensureClock,
   heroSheet,
   markQuestWon,
+  recordHeldSkull,
   setBuildingSkulls,
   setHeroSheet,
 } from "../day/clock.ts";
@@ -11,6 +12,7 @@ import { forceEvent, forceEventLine } from "../event/ledger.ts";
 import { ensureQuests } from "../quest/store.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
+import { configureChapters, tryChapters } from "./chapters.ts";
 
 export type MoveRollConfig = {
   dice: string;
@@ -51,6 +53,13 @@ export type QueuedRegroup = {
   deviceId: string | null;
 };
 
+/** A foe standing on the physical board (DEC-710, C2-11). */
+export type BoardFoe = {
+  id: string;
+  name: string;
+  spaceId: string;
+};
+
 export type PlayState = {
   content: PlayContent;
   groups: GroupState[];
@@ -62,6 +71,8 @@ export type PlayState = {
   /** Moves rolled for the current day, per group id. */
   dayRolls: Record<string, number>;
   lastSkull: { kingdom: KingdomId; spaceId: string; building: string | null } | null;
+  /** Foes standing on the board, if any (DEC-710, C2-11). Absent in saves with none. */
+  foes?: BoardFoe[];
   /**
    * Split and Rejoin picked from the gear, in pick order (PT-18, Q4.2). They apply at the next
    * day start, before the roll. Absent on a checkpoint from before CU/04: nothing queued.
@@ -256,6 +267,16 @@ export const TEST_SEALS = "~test-seals";
  * done, so a test wins the chapter at the day's end without playing each quest.
  */
 export const TEST_QUESTS_DONE = "~test-quests-done:";
+/**
+ * TEST ONLY (C2-11): seed markers for Continue piece-check e2e tests.
+ * `~test-foes:<id>@<spaceId>` places foes on the board, `~test-broken-seals:<sealId>` marks broken
+ * seals, `~test-inside:<count>` records skulls trapped inside the tower, and `~test-drums:<t>,<m>,<b>`
+ * sets saved drum positions (parsed by the shell step). Real seeds never carry them.
+ */
+export const TEST_FOES = "~test-foes:";
+export const TEST_BROKEN_SEALS = "~test-broken-seals:";
+export const TEST_INSIDE = "~test-inside:";
+export const TEST_DRUMS = "~test-drums:";
 
 /** Every marker the hook reads. A seed with none of them is a real seed. */
 export const TEST_SEED_MARKERS = [
@@ -279,6 +300,10 @@ export const TEST_SEED_MARKERS = [
   TEST_CHAPTER_LINE,
   TEST_SEALS,
   TEST_QUESTS_DONE,
+  TEST_FOES,
+  TEST_BROKEN_SEALS,
+  TEST_INSIDE,
+  TEST_DRUMS,
 ] as const;
 
 export const isTestSeed = (seed: string): boolean =>
@@ -384,6 +409,53 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
   if (buildingLine !== null) {
     if (buildingLine === "") throw new Error("The test building-line seed needs a line id.");
     clock.buildingLine = buildingLine;
+  }
+  const foes = markerBody(seed, TEST_FOES, /^[\w,@+-]*/);
+  if (foes !== null) {
+    const entries = foes
+      .split(",")
+      .filter((part) => part.length > 0)
+      .map((part) => {
+        const [id, spaceId] = part.split("@");
+        if (!id || !spaceId || !play.content.board.spaceById.has(spaceId)) {
+          throw new Error(`The test foes seed cannot read "${part}".`);
+        }
+        const name = id.charAt(0).toUpperCase() + id.slice(1).replaceAll("-", " ");
+        return { id, name, spaceId };
+      });
+    play.foes = entries;
+  }
+  const brokenSeals = markerBody(seed, TEST_BROKEN_SEALS, /^[\w+-]*/);
+  if (brokenSeals !== null) {
+    const ids = brokenSeals.split("+").filter((id) => id.length > 0);
+    if (ids.length === 0) throw new Error("The test broken-seals seed needs seal ids.");
+    const chapters =
+      tryChapters(play) ??
+      configureChapters(play, {
+        chapters: [{ id: "ch1", index: 1, kingdoms: ["N", "E", "S", "W"], quests: [] }],
+        seals: ids.map((id) => ({
+          id,
+          name: id
+            .split("-")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" "),
+          glyph: id,
+          boon: "+1",
+        })),
+        c3EndAfterChapter1: false,
+        sealBreakMin: 0,
+        foeLevel: { chapter1: 1, perChapter: 1 },
+      });
+    for (const id of ids) {
+      if (!chapters.brokenSeals.includes(id)) chapters.brokenSeals.push(id);
+    }
+  }
+  const inside = markerBody(seed, TEST_INSIDE, /^\d+/);
+  if (inside !== null) {
+    const count = Number(inside);
+    for (let i = 0; i < count; i += 1) {
+      recordHeldSkull(play);
+    }
   }
 };
 

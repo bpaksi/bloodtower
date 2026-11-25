@@ -14,6 +14,7 @@ import type { MockTower } from "../../server/tower/mock.ts";
 import {
   enterWithoutTowerKeepSound,
   enterWithTowerKeepSound,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
@@ -320,6 +321,7 @@ test("connect track: the session screen, its confirms, Done for tonight, and a n
     // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
     // This evening already connected the tower, so the re-pick ends on play.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await finishPieceCheck(pad.page);
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(pad.page).locator("[data-roster]")).toBeVisible({ timeout: 20_000 });
     const after = await readStatus(pad.page);
@@ -518,6 +520,7 @@ test("a restart during play: Pick story with Continue above the stories, no Ente
     // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
     // The saved game never linked a tower, so the re-pick does not open a tower pause.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await finishPieceCheck(pad.page);
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(pad.page).locator("[data-roster]")).toBeVisible({ timeout: 20_000 });
     const after = await readStatus(pad.page);
@@ -611,6 +614,7 @@ test("Tower lost: Continue runs the tower block before the resumed game (EV-08)"
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "tower-choice");
     expect(session.tower.sent().length).toBe(sent);
     await pad.page.locator('button[data-prompt-id="play-without-tower"]').click();
+    await finishPieceCheck(pad.page);
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   } finally {
     await closeAll(contexts);

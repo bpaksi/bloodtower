@@ -1,6 +1,6 @@
 "use client";
 
-import type { BoardView } from "bloodtower-protocols";
+import type { BoardView, PieceCheckView } from "bloodtower-protocols";
 import { joinWarning } from "../../lib/boardView";
 import { JoinQr } from "../../lib/qr";
 import {
@@ -398,7 +398,440 @@ function SessionPanel({ view }: { view: BoardView }) {
   );
 }
 
+const KINGDOM_POINT: Record<"N" | "E" | "S" | "W", { x: number; y: number }> = {
+  N: { x: 140, y: 42 },
+  E: { x: 238, y: 110 },
+  S: { x: 140, y: 178 },
+  W: { x: 42, y: 110 },
+};
+
+function PieceCheckTowerMark() {
+  return (
+    <div className="bt-tower-band" role="img" aria-label="The Tower">
+      <svg viewBox="0 0 30 40" width="45" height="60" aria-hidden="true">
+        <path d="M15 1 L18 10 L12 10 Z" fill="#2a2420" stroke="#c9a85a" strokeWidth="0.8" />
+        <circle cx="15" cy="6.5" r="1.3" fill="#d4543a" />
+        <path d="M10 13 L20 13 L22 37 L8 37 Z" fill="#1f1b18" stroke="#c9a85a" strokeWidth="0.9" />
+        <rect x="14.2" y="17" width="1.6" height="4" rx="0.8" fill="#d4543a" />
+        <rect x="12.4" y="25" width="1.4" height="3.2" rx="0.7" fill="#8a1e14" />
+        <rect x="16.2" y="25" width="1.4" height="3.2" rx="0.7" fill="#8a1e14" />
+        <path
+          d="M13 37 v-4 a2 2 0 0 1 4 0 v4 Z"
+          fill="#0e0c0a"
+          stroke="#c9a85a"
+          strokeWidth="0.6"
+        />
+        <line x1="4" y1="37.5" x2="26" y2="37.5" stroke="#c9a85a" strokeWidth="0.8" />
+      </svg>
+    </div>
+  );
+}
+
+function UnconfirmedBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      className="bt-badge bt-badge--outline"
+      role="status"
+      data-unconfirmed-badge=""
+      data-unconfirmed-count={count}
+      aria-label={`${count} unconfirmed`}
+    >
+      <svg className="bt-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="8" cy="4.6" r="0.9" fill="currentColor" />
+        <rect x="7.3" y="6.8" width="1.4" height="4.8" rx="0.6" fill="currentColor" />
+      </svg>{" "}
+      {count}
+    </span>
+  );
+}
+
+/** SVG board diagram for each piece-check step (SCR-011, EV-09, EV-16, EV-22). Display only. */
+function PieceCheckDiagram({ pieceCheck }: { pieceCheck: PieceCheckView }) {
+  if (pieceCheck.stepId === "drums" && pieceCheck.drums) {
+    const { rows } = pieceCheck.drums;
+    return (
+      <svg
+        className="bt-piece-check-diagram"
+        data-piece-check-diagram="drums"
+        viewBox="0 0 360 170"
+        role="img"
+        aria-label="Expected glyphs per drum side"
+      >
+        <rect
+          x="4"
+          y="4"
+          width="352"
+          height="162"
+          rx="8"
+          fill="rgba(26,20,16,0.08)"
+          stroke="#c9a85a"
+          strokeWidth="1.2"
+        />
+        <text x="16" y="24" fontSize="11" fontWeight="700" fill="#5a4a30">
+          DRUM
+        </text>
+        {(["N", "E", "S", "W"] as const).map((dir, i) => (
+          <text
+            key={dir}
+            x={112 + i * 64}
+            y="24"
+            fontSize="11"
+            fontWeight="700"
+            textAnchor="middle"
+            fill="#5a4a30"
+          >
+            {dir}
+          </text>
+        ))}
+        {rows.map((row, rowIdx) => {
+          const y = 52 + rowIdx * 42;
+          return (
+            <g key={row.level}>
+              <line x1="12" y1={y - 18} x2="348" y2={y - 18} stroke="rgba(90,74,48,0.22)" />
+              <text x="16" y={y + 4} fontSize="12" fontWeight="700" fill="#2a2420">
+                {row.level.toUpperCase()}
+              </text>
+              <text x="16" y={y + 18} fontSize="10" fill="#6b5739">
+                {row.side}
+              </text>
+              {row.faces.map((face, faceIdx) => (
+                <g key={face.side}>
+                  <rect
+                    x={84 + faceIdx * 64}
+                    y={y - 12}
+                    width="56"
+                    height="28"
+                    rx="4"
+                    fill={face.glyph ? "rgba(201,168,90,0.28)" : "rgba(42,36,32,0.06)"}
+                    stroke={face.glyph ? "#8a6828" : "rgba(90,74,48,0.25)"}
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={112 + faceIdx * 64}
+                    y={y + 6}
+                    fontSize="10"
+                    fontWeight={face.glyph ? "700" : "400"}
+                    textAnchor="middle"
+                    fill={face.glyph ? "#2a2420" : "#8a7a60"}
+                  >
+                    {face.glyph ?? "—"}
+                  </text>
+                </g>
+              ))}
+            </g>
+          );
+        })}
+      </svg>
+    );
+  }
+
+  if (pieceCheck.stepId === "trapped-skulls") {
+    const count = pieceCheck.trappedSkulls ?? 0;
+    return (
+      <svg
+        className="bt-piece-check-diagram"
+        data-piece-check-diagram="trapped-skulls"
+        viewBox="0 0 280 180"
+        role="img"
+        aria-label={`Drop ${count} skulls in the top of the tower`}
+      >
+        <path
+          d="M112 72 L168 72 L180 166 L100 166 Z"
+          fill="#1f1b18"
+          stroke="#c9a85a"
+          strokeWidth="2"
+        />
+        <ellipse
+          cx="140"
+          cy="72"
+          rx="28"
+          ry="8"
+          fill="#0e0c0a"
+          stroke="#c9a85a"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M140 24 L140 58 M132 50 L140 60 L148 50"
+          stroke="#8a1e14"
+          strokeWidth="3"
+          fill="none"
+        />
+        <circle cx="140" cy="118" r="22" fill="#8a1e14" stroke="#e8dcc0" strokeWidth="2" />
+        <text x="140" y="125" fontSize="20" fontWeight="700" textAnchor="middle" fill="#f7eed9">
+          {count}
+        </text>
+      </svg>
+    );
+  }
+
+  if (pieceCheck.stepId === "broken-seals") {
+    const seals = pieceCheck.seals ?? [];
+    return (
+      <svg
+        className="bt-piece-check-diagram"
+        data-piece-check-diagram="broken-seals"
+        viewBox="0 0 280 180"
+        role="img"
+        aria-label="Broken seals on the tower"
+      >
+        <path
+          d="M108 26 L172 26 L186 164 L94 164 Z"
+          fill="#1f1b18"
+          stroke="#c9a85a"
+          strokeWidth="2"
+        />
+        {seals.slice(0, 6).map((seal, i) => {
+          const y = 48 + i * 20;
+          return (
+            <g key={seal.id}>
+              <rect
+                x="114"
+                y={y - 10}
+                width="52"
+                height="14"
+                rx="3"
+                fill="#8a1e14"
+                stroke="#e8dcc0"
+                strokeWidth="1"
+              />
+              <text x="140" y={y} fontSize="8" fontWeight="700" textAnchor="middle" fill="#f7eed9">
+                {seal.name.slice(0, 12)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    );
+  }
+
+  // Board-based diagram for hero-minis, skulls, foes, and quest-tokens.
+  return (
+    <svg
+      className="bt-piece-check-diagram"
+      data-piece-check-diagram={pieceCheck.stepId}
+      viewBox="0 0 280 220"
+      role="img"
+      aria-label={`Board diagram for ${pieceCheck.stepId}`}
+    >
+      <circle
+        cx="140"
+        cy="110"
+        r="96"
+        fill="rgba(201,168,90,0.14)"
+        stroke="#8a6828"
+        strokeWidth="2"
+      />
+      <line x1="140" y1="14" x2="140" y2="206" stroke="rgba(90,74,48,0.3)" strokeDasharray="4 4" />
+      <line x1="44" y1="110" x2="236" y2="110" stroke="rgba(90,74,48,0.3)" strokeDasharray="4 4" />
+      <circle cx="140" cy="110" r="22" fill="#1f1b18" stroke="#c9a85a" strokeWidth="1.8" />
+      <text x="140" y="114" fontSize="9" fontWeight="700" textAnchor="middle" fill="#e8dcc0">
+        TOWER
+      </text>
+      {(["N", "E", "S", "W"] as const).map((k) => {
+        const pt = KINGDOM_POINT[k];
+        return (
+          <text
+            key={k}
+            x={pt.x}
+            y={pt.y - 14}
+            fontSize="10"
+            fontWeight="700"
+            textAnchor="middle"
+            fill="#6b5739"
+          >
+            {k}
+          </text>
+        );
+      })}
+      {pieceCheck.stepId === "hero-minis"
+        ? (pieceCheck.heroes ?? []).map((hero, index) => {
+            const pt = KINGDOM_POINT[hero.kingdom];
+            const offset = (index % 2 === 0 ? -1 : 1) * Math.floor(index / 2) * 18;
+            return (
+              <g key={hero.heroId}>
+                <circle
+                  cx={pt.x + offset}
+                  cy={pt.y + 6}
+                  r="11"
+                  fill="#2a2420"
+                  stroke="#c9a85a"
+                  strokeWidth="1.5"
+                />
+                <text
+                  x={pt.x + offset}
+                  y={pt.y + 10}
+                  fontSize="9"
+                  fontWeight="700"
+                  textAnchor="middle"
+                  fill="#f7eed9"
+                >
+                  {hero.heroName.slice(0, 2).toUpperCase()}
+                </text>
+              </g>
+            );
+          })
+        : null}
+      {pieceCheck.stepId === "skulls"
+        ? (pieceCheck.buildings ?? []).map((b, index) => {
+            const pt = KINGDOM_POINT[b.kingdom];
+            const offset = (index - 1) * 16;
+            return (
+              <g key={b.spaceId}>
+                <circle
+                  cx={pt.x + offset}
+                  cy={pt.y + 8}
+                  r="11"
+                  fill="#8a1e14"
+                  stroke="#e8dcc0"
+                  strokeWidth="1.4"
+                />
+                <text
+                  x={pt.x + offset}
+                  y={pt.y + 12}
+                  fontSize="10"
+                  fontWeight="700"
+                  textAnchor="middle"
+                  fill="#f7eed9"
+                >
+                  {b.skulls}
+                </text>
+              </g>
+            );
+          })
+        : null}
+      {pieceCheck.stepId === "foes"
+        ? (pieceCheck.foes ?? []).map((foe, index) => {
+            const angle = (index / Math.max(1, (pieceCheck.foes ?? []).length)) * Math.PI * 2;
+            const x = 140 + Math.cos(angle) * 62;
+            const y = 110 + Math.sin(angle) * 62;
+            return (
+              <g key={foe.id}>
+                <polygon
+                  points={`${x},${y - 12} ${x + 11},${y + 10} ${x - 11},${y + 10}`}
+                  fill="#8a1e14"
+                  stroke="#e8dcc0"
+                  strokeWidth="1.4"
+                />
+              </g>
+            );
+          })
+        : null}
+      {pieceCheck.stepId === "quest-tokens"
+        ? (pieceCheck.questTokens ?? []).map((token, index) => {
+            const pt = KINGDOM_POINT[token.kingdom];
+            const offset = (index % 2 === 0 ? -1 : 1) * Math.floor(index / 2) * 18;
+            return (
+              <g key={token.spaceId}>
+                <rect
+                  x={pt.x + offset - 10}
+                  y={pt.y - 4}
+                  width="20"
+                  height="20"
+                  rx="4"
+                  fill="#c9a85a"
+                  stroke="#2a2420"
+                  strokeWidth="1.4"
+                />
+                <text
+                  x={pt.x + offset}
+                  y={pt.y + 10}
+                  fontSize="10"
+                  fontWeight="700"
+                  textAnchor="middle"
+                  fill="#1f1b18"
+                >
+                  Q
+                </text>
+              </g>
+            );
+          })
+        : null}
+    </svg>
+  );
+}
+
+function PieceCheckPanel({ pieceCheck }: { pieceCheck: PieceCheckView }) {
+  return (
+    <div
+      className="bt-piece-check"
+      data-startup-panel="piece-check"
+      data-piece-check-step={pieceCheck.stepId}
+      data-piece-check-number={pieceCheck.stepNumber}
+    >
+      <div className="bt-piece-check-head">
+        <PieceCheckTowerMark />
+        <UnconfirmedBadge count={pieceCheck.skippedCount} />
+      </div>
+      {pieceCheck.title ? (
+        <h1 className="bt-startup-title bt-title" data-piece-check-title="">
+          {pieceCheck.title}
+        </h1>
+      ) : null}
+      <PieceCheckDiagram pieceCheck={pieceCheck} />
+      {pieceCheck.stepId === "hero-minis" && pieceCheck.heroes ? (
+        <ul className="bt-piece-check-list" data-piece-check-items="">
+          {pieceCheck.heroes.map((hero) => (
+            <li key={hero.heroId} data-hero-space={hero.spaceId}>
+              {hero.heroName}: {hero.spaceName} ({hero.spaceId})
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {pieceCheck.stepId === "skulls" && pieceCheck.buildings ? (
+        <ul className="bt-piece-check-list" data-piece-check-items="">
+          {pieceCheck.buildings.length === 0 ? (
+            <li>No skulls on buildings.</li>
+          ) : (
+            pieceCheck.buildings.map((b) => (
+              <li key={b.spaceId} data-building-skulls={`${b.spaceId}:${b.skulls}`}>
+                {b.name}: {b.skulls}
+              </li>
+            ))
+          )}
+        </ul>
+      ) : null}
+      {pieceCheck.stepId === "foes" && pieceCheck.foes ? (
+        <ul className="bt-piece-check-list" data-piece-check-items="">
+          {pieceCheck.foes.map((foe) => (
+            <li key={foe.id} data-foe-space={foe.spaceId}>
+              {foe.name}: {foe.spaceName} ({foe.spaceId})
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {pieceCheck.stepId === "broken-seals" && pieceCheck.seals ? (
+        <ul className="bt-piece-check-list" data-piece-check-items="">
+          {pieceCheck.seals.map((seal) => (
+            <li key={seal.id} data-broken-seal={seal.id}>
+              {seal.name}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {pieceCheck.stepId === "quest-tokens" && pieceCheck.questTokens ? (
+        <ul className="bt-piece-check-list" data-piece-check-items="">
+          {pieceCheck.questTokens.map((token) => (
+            <li key={token.spaceId} data-quest-token={token.spaceId}>
+              {token.spaceName} ({token.spaceId})
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {pieceCheck.line ? (
+        <p className="bt-startup-cue bt-piece-check-line" data-piece-check-line="">
+          {pieceCheck.line}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function StartupPanel({ view }: { view: BoardView }) {
+  if (view.screen === "piece-check" && view.pieceCheck) {
+    return <PieceCheckPanel pieceCheck={view.pieceCheck} />;
+  }
   if (view.screen === "splash") return <SplashPanel view={view} />;
   if (view.screen === "pick-story") return <PickStoryPanel view={view} />;
   if (view.screen === "not-playable") return <NotPlayablePanel view={view} />;
@@ -458,6 +891,9 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
       data-board-layer="startup"
       data-screen={view.screen}
       data-setup-step={setupStep}
+      data-piece-check-step={view.pieceCheck?.stepId ?? undefined}
+      data-piece-check-number={view.pieceCheck?.stepNumber ?? undefined}
+      data-unconfirmed-count={view.pieceCheck?.skippedCount ?? undefined}
       data-paused={view.gear?.paused ? "true" : "false"}
       data-gear-opens={view.gear?.opens ?? 0}
       data-volume={view.gear?.volume ?? undefined}

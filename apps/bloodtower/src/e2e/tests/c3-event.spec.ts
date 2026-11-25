@@ -9,6 +9,7 @@ import {
 import {
   enterWithoutTower,
   enterWithoutTowerKeepSound,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   passChapterCard,
@@ -359,6 +360,7 @@ const resumeGame = async (
   await pad.goto(`/join?code=${session.host.joinCode}`);
   await clickAct(pad, "continue", "continue-saved-game");
   await holdHeroesFromTest(pad, [...FOUR]);
+  await finishPieceCheck(pad);
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   return { session, context, pad, board };
 };

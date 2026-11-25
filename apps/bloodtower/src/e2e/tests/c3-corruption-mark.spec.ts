@@ -8,6 +8,7 @@ import {
 } from "@playwright/test";
 import {
   enterWithoutTower,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -221,6 +222,7 @@ test.describe("CU/10 the corruption mark on the band", { tag: "@ipad-only" }, ()
       await pad2.goto(`/join?code=${restarted.host.joinCode}`);
       await clickAct(pad2, "continue", "continue-saved-game");
       await holdHeroesFromTest(pad2, [...FOUR]);
+      await finishPieceCheck(pad2);
       await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(board2.locator("[data-band]")).toBeVisible({ timeout: 20_000 });
       await expect.poll(() => markIds(board2), { timeout: 20_000 }).toEqual(["hero-b"]);

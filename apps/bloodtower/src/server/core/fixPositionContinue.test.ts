@@ -115,6 +115,13 @@ describe("Fix my position survives Continue", () => {
         await second.act("hero-hold", "take", { heroId });
       }
     }
+    for (let guard = 0; guard < 20 && second.session.state().screen === "piece-check"; guard += 1) {
+      const open = second.session.state().offered.filter((o) => o.open);
+      const next =
+        open.find((o) => o.actionId === "turn-drums") ?? open.find((o) => o.actionId === "confirm");
+      if (!next) break;
+      await second.act(next.promptId, next.actionId);
+    }
     expect(second.session.state().screen).toBe("play");
     expect(second.session.state().play?.groups[0]?.spaceId).toBe(target.id);
   });
@@ -215,6 +222,13 @@ describe("Fix my position survives Continue", () => {
       if (second.session.state().holdings[heroId] == null) {
         await second.act("hero-hold", "take", { heroId });
       }
+    }
+    for (let guard = 0; guard < 20 && second.session.state().screen === "piece-check"; guard += 1) {
+      const open = second.session.state().offered.filter((o) => o.open);
+      const next =
+        open.find((o) => o.actionId === "turn-drums") ?? open.find((o) => o.actionId === "confirm");
+      if (!next) break;
+      await second.act(next.promptId, next.actionId);
     }
     expect(second.session.state().screen).toBe("play");
     expect(second.session.state().play?.groups.find((g) => g.id === groupId)?.spaceId).toBe(tapped);

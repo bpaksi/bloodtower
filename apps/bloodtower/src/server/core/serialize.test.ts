@@ -44,4 +44,18 @@ describe("serializeShellState", () => {
     expect(restored.gearOpens).toBe(0);
     expect(restored.towerVolume).toBe(2);
   });
+
+  it("reads a pre-C2-11 checkpoint without drums as calibrated home (0, 0, 0)", () => {
+    const state = initialShellState({ sessionId: "s1", seed: "old-save" });
+    const serialized = serializeShellState(state) as Record<string, unknown>;
+    delete serialized.drums;
+    delete serialized.pieceCheck;
+    delete serialized.unconfirmedPieces;
+    const restored = deserializeShellState(
+      serialized as unknown as ReturnType<typeof serializeShellState>,
+    );
+    expect(restored.drums).toEqual({ top: 0, middle: 0, bottom: 0 });
+    expect(restored.pieceCheck).toBeNull();
+    expect(restored.unconfirmedPieces).toEqual([]);
+  });
 });

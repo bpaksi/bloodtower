@@ -11,6 +11,7 @@ import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
 import {
   enterWithoutTower,
   enterWithTower,
+  finishPieceCheck,
   finishTonight,
   gateControls,
   holdHeroesFromTest,
@@ -604,6 +605,7 @@ test("AREA-077 continue after a walk stays in play when the tower was never conn
     await setSoundAndKeep(page);
     await clickAct(page, "continue", "continue-saved-game");
     await holdHeroesFromTest(page, [...HERO_IDS]);
+    await finishPieceCheck(page);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     const restored = await readStatus(page);
     expect(restored.space).toBe(snapshot?.space);

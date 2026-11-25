@@ -12,6 +12,7 @@ export const STARTUP_SCREENS = new Set<ViewScreen>([
   "claim-heroes",
   "setup",
   "begin",
+  "piece-check",
   "session",
   "session-over",
   "not-playable",
@@ -30,6 +31,7 @@ const STEP_NAME: Record<ViewScreen, string> = {
   "claim-heroes": "Party Join",
   setup: "Setup",
   begin: "Begin",
+  "piece-check": "Piece check",
   play: "Play",
   pause: "Paused",
   session: "Session",
@@ -249,6 +251,8 @@ export const waitingFor = (view: BoardView): string => {
       return "Waiting for an iPad to mark this step done.";
     case "begin":
       return "Waiting for an iPad to begin the story.";
+    case "piece-check":
+      return "Waiting for an iPad to confirm or skip this step.";
     case "session": {
       const session = sessionBoard(view);
       if (session.dropped !== null) return "Waiting for an iPad to join.";

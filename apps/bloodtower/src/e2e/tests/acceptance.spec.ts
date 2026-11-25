@@ -4,6 +4,7 @@ import { DEVICE_TOKEN_KEY } from "../../web/lib/session.ts";
 import {
   captureFrames,
   enterWithTower,
+  finishPieceCheck,
   finishTonight,
   gateControls,
   holdHeroesFromTest,
@@ -201,6 +202,7 @@ test("quit from pause lands on session; continue resumes after host restart", as
     });
     await clickAct(page2, "continue", "continue-saved-game");
     await holdHeroesFromTest(page2, [...HERO_IDS]);
+    await finishPieceCheck(page2);
     await expect(deviceMain(page2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(page2).getByText(/Day 3/i)).toBeVisible({ timeout: 20_000 });
     await expect(page2.getByText(/seed/i)).toHaveCount(0);

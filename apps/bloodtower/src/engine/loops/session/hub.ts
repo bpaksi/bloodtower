@@ -7,6 +7,7 @@ import type { GameEnd } from "../game/end.ts";
 import { partySize, refreshSetupSteps } from "../game/setupFlow.ts";
 import { ensureQuests } from "../quest/store.ts";
 import type { ShellEffect } from "./effects.ts";
+import { DRUM_HOME } from "./pieceCheck.ts";
 import { emptyTally, initialHoldings, type ShellState, type TonightGame } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
@@ -151,6 +152,9 @@ export const toPickStory = (state: ShellState): void => {
   state.stage = "lobby";
   state.pause = null;
   state.play = null;
+  state.drums = { ...DRUM_HOME };
+  state.pieceCheck = null;
+  state.unconfirmedPieces = [];
   state.openingIndex = -1;
   state.chosenStoryId = null;
   state.setupAt = 0;
@@ -216,6 +220,9 @@ export const beginPlayAgain = (
   state.tally = emptyTally();
   state.pause = null;
   state.play = null;
+  state.drums = { ...DRUM_HOME };
+  state.pieceCheck = null;
+  state.unconfirmedPieces = [];
   state.openingIndex = -1;
   state.screen = "claim-heroes";
   state.stage = "lobby";

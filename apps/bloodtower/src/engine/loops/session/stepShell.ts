@@ -12,7 +12,9 @@ import {
   applyTestSeed,
   bindPlayState,
   initPlayState,
+  markerBody,
   seatAtCitadels,
+  TEST_DRUMS,
 } from "../chapter/playState.ts";
 import { type DayLocal, parseEventChoicePrompt } from "../day/loop.ts";
 import { eventPressRefusal } from "../day/press.ts";
@@ -54,6 +56,19 @@ import {
 import { momentsBetween, snapshotMoments } from "./keyMoments.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
+import {
+  applyPieceCheckConfirm,
+  applyPieceCheckDrumResult,
+  applyPieceCheckSkip,
+  applyPieceCheckTurnDrums,
+  buildPieceCheck,
+  type DrumSideIndex,
+  dropTowerStepsFromPieceCheck,
+  ensurePieceCheckOffers,
+  PIECE_CHECK_CONFIRM_ACTION,
+  PIECE_CHECK_SKIP_ACTION,
+  PIECE_CHECK_TURN_DRUMS_ACTION,
+} from "./pieceCheck.ts";
 import {
   applyTowerPick,
   cancelMenuReconnect,
@@ -180,6 +195,10 @@ const resumeLoopsOrPauseOffers = (
   }
   if (next.pause && next.screen === "pause") {
     ensurePauseOffers(next);
+    return;
+  }
+  if (next.pieceCheck && next.screen === "piece-check") {
+    ensurePieceCheckOffers(next);
     return;
   }
   bindPlayState(next.play);
@@ -400,7 +419,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     if (next.stage === "paused" && next.pause?.cause === "disconnect" && allHeroesHeld(next)) {
       next.pause = null;
       next.stage = "playing";
-      next.screen = "play";
+      next.screen = next.pieceCheck ? "piece-check" : "play";
       pauseIfNeeded(next);
       // The pause replaced the offers with Quit: Set the table's Done or a freed skull's
       // prompt is offered again (C3/15, EV-23).
@@ -441,8 +460,107 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     if (!state.play) throw new Error("There is no running game to seed.");
     applyTestSeed(state.play, e.markers);
     applyQuestTestSeed(state.play, e.markers);
+    const drumsRaw = markerBody(e.markers, TEST_DRUMS, /^[0-3],[0-3],[0-3]/);
+    let nextDrums = state.drums;
+    if (drumsRaw !== null) {
+      const parts = drumsRaw.split(",").map(Number);
+      if (parts.length !== 3 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 3)) {
+        throw new Error(`The test drums seed needs top,middle,bottom (0..3), got "${drumsRaw}".`);
+      }
+      nextDrums = {
+        top: parts[0] as DrumSideIndex,
+        middle: parts[1] as DrumSideIndex,
+        bottom: parts[2] as DrumSideIndex,
+      };
+    }
     effects.push({ kind: "view-refresh", v: 1 });
-    return withEffects({ ...state, eventSeq: eventSeq + 1 }, effects);
+    return withEffects({ ...state, drums: nextDrums, eventSeq: eventSeq + 1 }, effects);
+  }
+
+  if (e.kind === "piece-check-start") {
+    const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
+    if (!next.pieceCheck) {
+      const check = buildPieceCheck(next, e.towerInPlay);
+      if (check) {
+        next.pieceCheck = check;
+        if (e.towerInPlay) {
+          next.towerLinked = true;
+          next.towerWithout = false;
+          next.towerChoice = "connect";
+        } else {
+          if (next.towerLinked || next.pause?.cause === "tower-lost") next.towerWithout = true;
+          next.towerLinked = false;
+          next.towerChoice = "without";
+          if (next.pause?.cause === "tower-lost") {
+            next.pause = null;
+            next.reconnect = null;
+          }
+        }
+        if (!next.pause) {
+          next.screen = "piece-check";
+          next.stage = "playing";
+        } else if (next.pause.cause === "tower-lost") {
+          next.pause = { ...next.pause, returnTo: "piece-check" };
+        }
+      }
+    } else if (!e.towerInPlay) {
+      const hadTower =
+        next.towerLinked ||
+        next.towerWithout ||
+        next.pause?.cause === "tower-lost" ||
+        next.pieceCheck.towerInPlay;
+      next.pieceCheck = {
+        ...next.pieceCheck,
+        steps: [...next.pieceCheck.steps],
+        confirmed: [...next.pieceCheck.confirmed],
+        skipped: [...next.pieceCheck.skipped],
+      };
+      if (hadTower) {
+        goOnWithout(next);
+      } else {
+        next.towerLinked = false;
+        next.towerChoice = "without";
+        dropTowerStepsFromPieceCheck(next);
+      }
+    }
+    bindShellState(next);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
+    clearShellState();
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(next, effects);
+  }
+
+  if (e.kind === "piece-check-drum-result") {
+    const next: ShellState = {
+      ...state,
+      eventSeq: eventSeq + 1,
+      pieceCheck: state.pieceCheck ? { ...state.pieceCheck } : null,
+    };
+    const res = applyPieceCheckDrumResult(next, e.drumIndex, e.position, e.ok);
+    if (res.checkpoint && next.play) {
+      const gameId = next.autosave?.gameId ?? next.activeGameId;
+      if (gameId) {
+        effects.push({
+          kind: "checkpoint-write",
+          v: 1,
+          gameId,
+          day: Math.max(1, next.play.dayNumber),
+        });
+      }
+    }
+    if (res.nextCommand) {
+      effects.push({
+        kind: "tower-command",
+        v: 1,
+        capabilityId: res.nextCommand.capabilityId,
+        params: res.nextCommand.params,
+      });
+    }
+    bindShellState(next);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
+    clearShellState();
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(next, effects);
   }
 
   if (e.kind === "wait-end") {
@@ -722,6 +840,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
       if (gameFrame) {
         gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
         if ((gameFrame.local as GameLocal).phase === "done") {
+          next.pieceCheck = null;
           collapsePlayLoopsOnQuit(next);
           pushQuitRecord(next, effects);
         }
@@ -738,6 +857,27 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
       e.promptId.startsWith("pause-")
     ) {
       goOnWithout(next);
+    } else if (next.pieceCheck && next.screen === "piece-check") {
+      next.pieceCheck = {
+        ...next.pieceCheck,
+        confirmed: [...next.pieceCheck.confirmed],
+        skipped: [...next.pieceCheck.skipped],
+      };
+      if (e.actionId === PIECE_CHECK_TURN_DRUMS_ACTION) {
+        const turned = applyPieceCheckTurnDrums(next, e.promptId);
+        if (turned.command) {
+          effects.push({
+            kind: "tower-command",
+            v: 1,
+            capabilityId: turned.command.capabilityId,
+            params: turned.command.params,
+          });
+        }
+      } else if (e.actionId === PIECE_CHECK_CONFIRM_ACTION) {
+        applyPieceCheckConfirm(next, e.promptId);
+      } else if (e.actionId === PIECE_CHECK_SKIP_ACTION) {
+        applyPieceCheckSkip(next, e.promptId);
+      }
     } else if (isHubPrompt(e.promptId)) {
       applyHubPress(next, e.promptId, effects);
       // Continue from Pick story: the game loop moves on to the saved game as the Pick Game press did.

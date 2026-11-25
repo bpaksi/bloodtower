@@ -22,7 +22,11 @@ export type EffectsContext = {
 };
 
 /** How a tower command the effects sent ended. The caller feeds it back to the engine. */
-export type TowerOutcome = { capabilityId: string; result: "ok" | "failed" };
+export type TowerOutcome = {
+  capabilityId: string;
+  params: Record<string, unknown>;
+  result: "ok" | "failed";
+};
 
 export const runShellEffects = async (
   state: ShellState,
@@ -144,7 +148,7 @@ export const runShellEffects = async (
           );
           result = "failed";
         }
-        outcomes.push({ capabilityId: effect.capabilityId, result });
+        outcomes.push({ capabilityId: effect.capabilityId, params: effect.params, result });
         break;
       }
       default:

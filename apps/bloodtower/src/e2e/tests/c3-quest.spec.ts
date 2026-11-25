@@ -10,6 +10,7 @@ import { openDatabase } from "../../server/db/client.ts";
 import { createEventStore } from "../../server/events/store.ts";
 import {
   enterWithoutTower,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   passChapterCard,
@@ -603,6 +604,7 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       await clickAct(pad, "continue", "continue-saved-game");
       // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
       await holdHeroesFromTest(pad, [...FOUR]);
+      await finishPieceCheck(pad);
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       return { session, context, pad, board };
     };
@@ -734,6 +736,7 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       await clickAct(pad, "continue", "continue-saved-game");
       // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
       await holdHeroesFromTest(pad, [...FOUR]);
+      await finishPieceCheck(pad);
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
       await tick(game, 4_100);
@@ -766,6 +769,7 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       const { context, pad, board } = await openTable(browser, session);
       await clickAct(pad, "continue", "continue-saved-game");
       await holdHeroesFromTest(pad, [...FOUR]);
+      await finishPieceCheck(pad);
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       return { session, context, pad, board };
     };

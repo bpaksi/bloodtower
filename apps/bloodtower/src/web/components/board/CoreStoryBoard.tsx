@@ -156,6 +156,47 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           )}
           <span data-chapter>{table.chapter}</span>
           <span data-day>Day {table.day}</span>
+          <span className="bt-band-tower" data-band-tower="">
+            <svg viewBox="0 0 30 40" width="18" height="24" role="img" aria-label="The Tower">
+              <path d="M15 1 L18 10 L12 10 Z" fill="#2a2420" stroke="#c9a85a" strokeWidth="0.9" />
+              <circle cx="15" cy="6.5" r="1.3" fill="#d4543a" />
+              <path
+                d="M10 13 L20 13 L22 37 L8 37 Z"
+                fill="#1f1b18"
+                stroke="#c9a85a"
+                strokeWidth="1"
+              />
+            </svg>
+            {(table.unconfirmedPieces ?? 0) > 0 ? (
+              <span
+                className="bt-badge bt-badge--outline"
+                role="status"
+                data-unconfirmed-badge=""
+                data-unconfirmed-count={table.unconfirmedPieces}
+                aria-label={`${table.unconfirmedPieces} unconfirmed`}
+              >
+                <svg
+                  className="bt-icon"
+                  viewBox="0 0 16 16"
+                  width="14"
+                  height="14"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="8"
+                    cy="8"
+                    r="6.8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <circle cx="8" cy="4.6" r="0.9" fill="currentColor" />
+                  <rect x="7.3" y="6.8" width="1.4" height="4.8" rx="0.6" fill="currentColor" />
+                </svg>{" "}
+                {table.unconfirmedPieces}
+              </span>
+            ) : null}
+          </span>
           <DayBandExtras table={table} />
           {table.actingGroup ? <span data-acting>{table.actingGroup}</span> : null}
           <span data-moves={table.movesLeft ?? "unavailable"}>

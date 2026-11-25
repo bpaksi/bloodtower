@@ -36,6 +36,9 @@ export const CONTROL_ACTIONS = [
   "end-turn",
   "record",
   "spin",
+  "confirm",
+  "skip",
+  "turn-drums",
 ] as const;
 export const controlActionSchema = z.enum(CONTROL_ACTIONS);
 export type ControlAction = z.infer<typeof controlActionSchema>;
@@ -62,6 +65,7 @@ export const FLOW_SCREENS = [
   "play",
   "quit",
   "claim-heroes",
+  "piece-check",
   "pause",
   "session",
   "session-over",

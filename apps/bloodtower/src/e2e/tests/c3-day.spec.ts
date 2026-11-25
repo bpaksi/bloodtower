@@ -15,6 +15,7 @@ import {
   enterWithoutTower,
   enterWithoutTowerKeepSound,
   enterWithTower,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   passChapterCard,
@@ -536,6 +537,7 @@ test.describe("C3/11 the day on the board", { tag: "@ipad-only" }, () => {
       await clickAct(pad, "continue", "continue-saved-game");
       // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
       await holdHeroesFromTest(pad, [...TWO]);
+      await finishPieceCheck(pad);
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       // Continue lands on day 3: at the step it left, or at the day's start from the last save.
       await expect.poll(async () => (await wireTable(board))?.day, { timeout: 20_000 }).toBe(3);
@@ -615,6 +617,7 @@ test.describe("C3/11 the day on the board", { tag: "@ipad-only" }, () => {
       // pause shows; the table goes on without it, as before this test's Continue.
       await pad2.locator('button[data-pause-ask="go-on-without"]').click({ timeout: 30_000 });
       await pad2.locator('button[data-action-id="go-on-without"]').click();
+      await finishPieceCheck(pad2);
       await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(pad2.locator("[data-menu]")).toHaveCount(0);
       await expect(pad2.locator("[data-panel]")).toHaveCount(0);
@@ -814,6 +817,7 @@ test.describe("C3/11 the day on the board", { tag: "@ipad-only" }, () => {
           await setSoundAndKeep(pad);
           await clickAct(pad, "continue", "continue-saved-game");
           await holdHeroesFromTest(pad, [...TWO]);
+          await finishPieceCheck(pad);
           await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", {
             timeout: 30_000,
           });
@@ -827,6 +831,7 @@ test.describe("C3/11 the day on the board", { tag: "@ipad-only" }, () => {
           });
           await clickAct(pad, "continue", "continue-saved-game");
           await holdHeroesFromTest(pad, [...TWO]);
+          await finishPieceCheck(pad);
           await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", {
             timeout: 30_000,
           });
@@ -1073,6 +1078,7 @@ const saveQuitContinue = async (pad: Page, heroes: readonly string[]) => {
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", { timeout: 30_000 });
   await clickAct(pad, "continue", "continue-saved-game");
   await holdHeroesFromTest(pad, [...heroes]);
+  await finishPieceCheck(pad);
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
 };
 
