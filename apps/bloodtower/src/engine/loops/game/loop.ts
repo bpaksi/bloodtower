@@ -531,6 +531,7 @@ export const handleGamePress = (
   ) {
     shell.stage = "ended";
     shell.pause = null;
+    shell.pieceCheck = null;
     shell.screen = "play";
     return { phase: "done", awaitingPress: false, playStarted: local.playStarted };
   }

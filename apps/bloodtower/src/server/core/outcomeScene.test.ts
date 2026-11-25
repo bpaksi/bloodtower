@@ -202,6 +202,17 @@ const realGame = async (
 };
 
 const outcomeOf = (game: Game) => game.session.projectDevice(game.pad).table?.outcome ?? null;
+
+/** Continue now opens the piece check (C2-11, #628); step through it like the other Continue tests. */
+const passPieceCheck = async (game: Game) => {
+  for (let guard = 0; guard < 20 && game.session.state().screen === "piece-check"; guard += 1) {
+    const open = game.session.projectDevice(game.pad).actions.filter((a) => a.open);
+    const next =
+      open.find((a) => a.actionId === "turn-drums") ?? open.find((a) => a.actionId === "confirm");
+    if (!next) break;
+    await game.act(next.promptId, next.actionId);
+  }
+};
 const boardOutcomeOf = (game: Game) =>
   game.session.projectBoard({ code: "000000", url: "http://x", reachable: true }).table?.outcome ??
   null;
@@ -430,6 +441,7 @@ describe("C3/16 outcome scene (win or loss)", () => {
       await rebooted.act("tower-calibrate", "tower-calibrate");
     }
     await rebooted.act("hero-hold", "take", { heroId: "hero-a" });
+    await passPieceCheck(rebooted);
     expect(outcomeOf(rebooted)?.stage).toBe("scene");
     expect(rebooted.session.state().gearPanel).toBeNull();
     expect(rebooted.session.state().gearPaused).toBe(false);
@@ -471,6 +483,7 @@ describe("C3/16 outcome scene (win or loss)", () => {
         }
       }
     }
+    await passPieceCheck(game);
     expect(outcomeOf(game)?.stage).toBe("summary");
     await game.tick(4_000);
     expect(game.session.state().screen).toBe("session");

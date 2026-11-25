@@ -4,6 +4,7 @@ import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import type { ShellEffect } from "./effects.ts";
+import { dropTowerStepsFromPieceCheck } from "./pieceCheck.ts";
 import type { PauseReturn, ShellState } from "./state.ts";
 
 type Effects = Array<EngineEffect | ShellEffect>;
@@ -21,7 +22,12 @@ export const TOWER_PICK_WITHOUT = "Go on without";
 
 /** The screen a tower-lost pause came from, or null when a game is not in a state that pauses. */
 export const pauseReturnOf = (state: ShellState): PauseReturn | null => {
-  if (state.screen === "play" || state.screen === "setup" || state.screen === "begin") {
+  if (
+    state.screen === "play" ||
+    state.screen === "setup" ||
+    state.screen === "begin" ||
+    state.screen === "piece-check"
+  ) {
     return state.screen;
   }
   return null;
@@ -50,11 +56,11 @@ export const reofferPlayPrompts = (state: ShellState): void => {
 
 /** Ends a tower-lost pause: the game goes back to the node it paused at. */
 export const resumeAfterTowerPause = (state: ShellState): void => {
-  const back = state.pause?.returnTo ?? "play";
+  const back = state.pause?.returnTo ?? (state.pieceCheck ? "piece-check" : "play");
   state.pause = null;
   state.reconnect = null;
   state.screen = back;
-  state.stage = back === "play" ? "playing" : "lobby";
+  state.stage = back === "play" || back === "piece-check" ? "playing" : "lobby";
   reofferPlayPrompts(state);
 };
 
@@ -67,6 +73,7 @@ export const goOnWithout = (state: ShellState): void => {
   state.towerLinked = false;
   state.towerChoice = "without";
   if (state.pause?.cause === "tower-lost") resumeAfterTowerPause(state);
+  if (state.pieceCheck) dropTowerStepsFromPieceCheck(state);
 };
 
 /** Reconnect, on a press only: connect the tower, then the tower check (MEC-018) before play goes on. */

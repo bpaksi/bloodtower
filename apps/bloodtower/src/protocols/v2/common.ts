@@ -31,6 +31,7 @@ export const RUNTIME_SCREENS = [
   "base-board",
   "tower-choice",
   "tower-wake",
+  "piece-check",
   "play",
   "pause",
   "session",

@@ -9,6 +9,7 @@ import {
 } from "@playwright/test";
 import {
   enterWithoutTower,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -299,7 +300,8 @@ const pickAndResume = async (
   // Play has not started with a seat empty.
   await expect(deviceMain(pickers.a)).toHaveAttribute("data-screen", "pause");
   await hunter(pickers.b, "hero-b").click();
-  // The last pick ends the pause with no other press.
+  // The last pick ends the pause with no other press; then Continue's piece check runs (C2-11).
+  await finishPieceCheck(pickers.a);
   await expect(deviceMain(pickers.a)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   await expect(deviceMain(pickers.b)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   await expect(boardMain(rig.board)).toHaveAttribute("data-screen", "play");
@@ -440,6 +442,7 @@ test.describe("CU/16 Continue re-pick", { tag: "@ipad-only" }, () => {
       await expect(boardMain(rig.board).locator("[data-pick-status]")).toHaveText("1 of 2 picked");
       await expect(hunter(pad3, "hero-b")).toBeEnabled();
       await hunter(pad3, "hero-b").click();
+      await finishPieceCheck(pad1);
       await expect(deviceMain(pad1)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect.poll(async () => (await wireTable(rig.board))?.day).toBe(noted.day);
       expect(await noteGame(rig)).toEqual(noted);

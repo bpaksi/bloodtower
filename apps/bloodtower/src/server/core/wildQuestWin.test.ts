@@ -146,6 +146,13 @@ const realGame = async (
         }
       }
     }
+    for (let guard = 0; guard < 20 && again.session.state().screen === "piece-check"; guard += 1) {
+      const open = again.session.state().offered.filter((o) => o.open);
+      const next =
+        open.find((o) => o.actionId === "turn-drums") ?? open.find((o) => o.actionId === "confirm");
+      if (!next) break;
+      await again.pad.act(next.promptId, next.actionId);
+    }
     return next;
   };
   const storyId = options.storyId ?? "test";

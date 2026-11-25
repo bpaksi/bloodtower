@@ -62,11 +62,33 @@ export const createBloodtowerTower = (options: TowerHostOptions = {}): Bloodtowe
   const feed = feedStateStore(session, store, { skulls: records });
   let idleOutcome: "ok" | "failed" | null = null;
   let idleReason = "";
+  let rotateOutcome: "ok" | "failed" | null = null;
+  let rotateReason = "";
   const executor = createCommandExecutor({
     session,
     records,
     onLifecycle: (payload) => {
       feed.refresh();
+      if (payload.capabilityId === "mechanics.rotate-drum") {
+        if (payload.stage === "confirmed") {
+          rotateOutcome = "ok";
+          return;
+        }
+        if (
+          payload.stage === "failed" ||
+          payload.stage === "timed-out" ||
+          payload.stage === "rejected" ||
+          payload.stage === "indeterminate"
+        ) {
+          rotateOutcome = "failed";
+          rotateReason =
+            payload.reason ??
+            (payload.stage === "indeterminate"
+              ? "Tower command mechanics.rotate-drum was not answered."
+              : `Tower command mechanics.rotate-drum ${payload.stage}.`);
+        }
+        return;
+      }
       if (payload.capabilityId !== "lighting.all-off") return;
       if (payload.stage === "confirmed") {
         idleOutcome = "ok";
@@ -132,6 +154,27 @@ export const createBloodtowerTower = (options: TowerHostOptions = {}): Bloodtowe
             idleReason.trim() === ""
               ? "Tower command lighting.all-off was not answered."
               : idleReason,
+          );
+          return "failed";
+        }
+        return "ok";
+      }
+      if (capabilityId === "mechanics.rotate-drum") {
+        rotateOutcome = null;
+        rotateReason = "";
+        await executor.submit({
+          commandId: `cmd-${Date.now()}`,
+          clientId: "bloodtower-host",
+          capabilityId,
+          params,
+        });
+        notify();
+        if (rotateOutcome !== "ok") {
+          log.error(
+            "tower-command-failed",
+            rotateReason.trim() === ""
+              ? "Tower command mechanics.rotate-drum was not answered."
+              : rotateReason,
           );
           return "failed";
         }

@@ -74,5 +74,9 @@ export {
   gearViewSchema,
   type HintView,
   type PackedLine,
+  PIECE_CHECK_STEP_IDS,
+  type PieceCheckStepIdWire,
+  type PieceCheckView,
   packedLineSchema,
+  pieceCheckViewSchema,
 } from "./views.ts";

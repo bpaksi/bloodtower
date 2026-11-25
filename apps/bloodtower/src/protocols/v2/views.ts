@@ -431,6 +431,8 @@ const tableBandSchema = z.strictObject({
   chapterBeat: chapterBeatSchema.nullable().optional(),
   /** The outcome scene and summary at the end of a game, only while it shows (C3/16). */
   outcome: outcomeViewSchema.nullable().optional(),
+  /** Count of piece-check steps skipped and still unconfirmed (MEC-018, C2-11). */
+  unconfirmedPieces: z.number().int().min(0).max(16).optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),
@@ -572,6 +574,106 @@ const chanceSchema = z.strictObject({
 });
 export type ChanceView = z.infer<typeof chanceSchema>;
 
+/** Continue's piece check step ids in order (C2-11, DEC-710, DEC-716, DEC-717, PT-08). */
+export const PIECE_CHECK_STEP_IDS = [
+  "hero-minis",
+  "skulls",
+  "foes",
+  "broken-seals",
+  "quest-tokens",
+  "drums",
+  "trapped-skulls",
+] as const;
+export type PieceCheckStepIdWire = (typeof PIECE_CHECK_STEP_IDS)[number];
+
+const pieceCheckDrumSideSchema = z.strictObject({
+  side: z.enum(["north", "east", "south", "west"]),
+  glyph: z.string().min(1).max(40).nullable(),
+});
+
+const pieceCheckDrumSchema = z.strictObject({
+  level: z.enum(["top", "middle", "bottom"]),
+  position: z.number().int().min(0).max(3),
+  side: z.enum(["north", "east", "south", "west"]),
+  turned: z.boolean(),
+  faces: z.array(pieceCheckDrumSideSchema).length(4),
+});
+
+export const pieceCheckViewSchema = z.strictObject({
+  stepId: z.enum(PIECE_CHECK_STEP_IDS),
+  stepNumber: z.enum(["1", "2", "3", "4", "4a", "5", "6"]),
+  stepIndex: z.number().int().min(0).max(15),
+  stepCount: z.number().int().min(1).max(16),
+  title: z.string().min(1).max(120).nullable(),
+  line: z.string().min(1).max(200).nullable(),
+  skippedCount: z.number().int().min(0).max(16),
+  heroes: z
+    .array(
+      z.strictObject({
+        heroId: heroIdSchema,
+        heroName: z.string().min(1).max(80),
+        spaceId: z.string().min(1).max(80),
+        spaceName: z.string().min(1).max(80),
+        kingdom: z.enum(["N", "E", "S", "W"]),
+      }),
+    )
+    .max(16)
+    .optional(),
+  buildings: z
+    .array(
+      z.strictObject({
+        spaceId: z.string().min(1).max(80),
+        name: z.string().min(1).max(80),
+        kingdom: z.enum(["N", "E", "S", "W"]),
+        skulls: z.number().int().min(0).max(99),
+        fallen: z.boolean(),
+      }),
+    )
+    .max(64)
+    .optional(),
+  foes: z
+    .array(
+      z.strictObject({
+        id: z.string().min(1).max(80),
+        name: z.string().min(1).max(80),
+        spaceId: z.string().min(1).max(80),
+        spaceName: z.string().min(1).max(80),
+      }),
+    )
+    .max(32)
+    .optional(),
+  seals: z
+    .array(
+      z.strictObject({
+        id: z.string().min(1).max(80),
+        name: z.string().min(1).max(80),
+        glyph: z.string().min(1).max(40).nullable(),
+      }),
+    )
+    .max(12)
+    .optional(),
+  questTokens: z
+    .array(
+      z.strictObject({
+        questId: z.string().min(1).max(80),
+        spaceId: z.string().min(1).max(80),
+        spaceName: z.string().min(1).max(80),
+        kingdom: z.enum(["N", "E", "S", "W"]),
+      }),
+    )
+    .max(16)
+    .optional(),
+  drums: z
+    .strictObject({
+      turned: z.boolean(),
+      turning: z.boolean(),
+      rows: z.array(pieceCheckDrumSchema).length(3),
+    })
+    .optional(),
+  trappedSkulls: z.number().int().min(1).max(99).optional(),
+});
+export type PieceCheckView = z.infer<typeof pieceCheckViewSchema>;
+
 /**
  * Public view for the story board. Loop levels and the text each one shows,
  * which heroes are held, the public narration line, and the actions on offer.
@@ -594,6 +696,8 @@ export const boardViewPayloadSchema = z
     gear: gearViewSchema.optional(),
     /** The starting purse's spin result and coin cue (CU/15). Present only on that setup step. */
     chance: chanceSchema.nullable().optional(),
+    /** Continue's piece check step (C2-11). Present only while screen is "piece-check". */
+    pieceCheck: pieceCheckViewSchema.nullable().optional(),
     /** The demo's packed line (A1-8b-2, D49). Omitted until the demo entry plays one. */
     packedLine: packedLineSchema.nullable().optional(),
   })
@@ -684,6 +788,8 @@ export const deviceViewPayloadSchema = z
       .optional(),
     /** Same gear snapshot as the board, so this iPad can press the panel's buttons. */
     gear: gearViewSchema.optional(),
+    /** Continue's piece check step (C2-11). Present only while screen is "piece-check". */
+    pieceCheck: pieceCheckViewSchema.nullable().optional(),
   })
   .superRefine((value, ctx) => {
     uniqueIds(

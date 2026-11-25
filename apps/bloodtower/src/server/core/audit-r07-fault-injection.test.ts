@@ -189,6 +189,17 @@ const restart = async (h: Harness, track: Track): Promise<Table> => {
   for (const heroId of HEROES) {
     if (session.state().holdings[heroId] == null) await table.act("hero-hold", "take", { heroId });
   }
+  // C2-11: Continue runs the piece check before the resumed chapter.
+  for (let guard = 0; guard < 20 && session.state().screen === "piece-check"; guard += 1) {
+    const turn = table.open().find((action) => action.actionId === "turn-drums");
+    if (turn) {
+      await table.act(turn.promptId, turn.actionId);
+      continue;
+    }
+    const done = table.open().find((action) => action.actionId === "confirm");
+    if (!done) break;
+    await table.act(done.promptId, done.actionId);
+  }
   expect(session.state().screen).toBe("play");
   return table;
 };
