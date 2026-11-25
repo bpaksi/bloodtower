@@ -3,7 +3,7 @@ import type { ControlPress } from "bloodtower-protocols";
 import { openChapterWait } from "../../engine/loops/chapter/chapters.ts";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { openDayWait } from "../../engine/loops/day/wait.ts";
-import type { GameLocal } from "../../engine/loops/game/loop.ts";
+import { type GameLocal, isOnOutcome, openOutcomeWait } from "../../engine/loops/game/loop.ts";
 import { seatOnContinue } from "../../engine/loops/session/continueSeats.ts";
 import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/effects.ts";
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
@@ -270,7 +270,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const marker = state.sessionEnded
       ? "ended"
       : state.enter === null && state.towerChoice !== "undecided"
-        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => game.rating ?? "-").join("")}-${state.screen === "session" ? "session" : "game"}-${state.focusStoryId}`
+        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => `${game.outcome}:${game.rating ?? "-"}`).join("")}-${isOnOutcome(state.loops.stack) ? "outcome" : state.screen === "session" ? "session" : "game"}-${state.focusStoryId}`
         : "";
     if (marker === "" || marker === savedMarker) return;
     writeStateCheckpoint();
@@ -319,7 +319,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   // The game clock: it runs while the game is played and stops for a pause, a quit or the end.
   // Each change is a logged row, so the active length survives a restart (DEC-107, PT-10).
   const clockLogged = new Map<string, boolean>();
-  const playClockRunning = (): boolean => state.screen === "play" && state.stage === "playing";
+  const playClockRunning = (): boolean =>
+    state.screen === "play" && state.stage === "playing" && !isOnOutcome(state.loops.stack);
   const syncPlayClock = () => {
     const gameId = gameIdOf(state);
     if (!gameId) return;
@@ -588,12 +589,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         continue;
       }
       if (outcome.capabilityId === "lighting.sequence") {
-        // The starting purse's Spin (CU/15): the purse is set whatever the lights did, but the
-        // iPad that pressed must hear that the chase did not run (decision 0003).
-        if (!ok)
+        // The starting purse's Spin (CU/15) or the defeat light (CUE-003, C3/16): the game state
+        // stays set whatever the lights did, and any failure is told to the iPad (decision 0003).
+        if (!ok) {
           tellDevice(
-            "The tower did not run the light chase. The purse is set. Nothing was retried.",
+            state.screen === "setup"
+              ? "The tower did not run the light chase. The purse is set. Nothing was retried."
+              : "The tower did not run the light sequence. Nothing was retried.",
           );
+        }
         continue;
       }
       if (outcome.capabilityId === "mechanics.rotate-drum") {
@@ -659,14 +663,20 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       return () => clearTimeout(handle);
     });
   const scheduleEffectsWait = (): void => {
-    const wait = openDayWait(state.loops.stack) ?? openChapterWait(state.loops.stack, state.play);
+    const outcomeWait = openOutcomeWait(state.loops.stack);
+    const wait =
+      openDayWait(state.loops.stack) ??
+      openChapterWait(state.loops.stack, state.play) ??
+      outcomeWait;
+    // Outcome beats never count down while a hint holds the board (C3/16).
     const running =
       wait !== null &&
       wait.lineId === null &&
       state.screen === "play" &&
       state.stage === "playing" &&
       state.pause === null &&
-      !state.gearPaused;
+      !state.gearPaused &&
+      (outcomeWait === null || state.hint === null);
     const key = running && wait ? wait.id : null;
     if (key === waitTimerFor) return;
     waitCancel?.();
@@ -1059,13 +1069,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           const frame = state.loops.stack.find((row) => row.loopId === "session");
           if (frame)
             frame.local = { ...(frame.local as object), phase: "hub", awaitingPress: false };
-          // Back to the session screen if that is where the evening stood, else Pick story.
+          // Back to the session screen if that is where the evening stood (or if the host
+          // restarted on the outcome scene, EV-14), else Pick story.
+          const landSession = resumed.screen === "session" || isOnOutcome(resumed.loops.stack);
           state = {
             ...state,
             enter: null,
             towerChoice: resumed.towerChoice,
             games: resumed.games,
-            screen: resumed.screen === "session" ? "session" : "pick-story",
+            screen: landSession ? "session" : "pick-story",
             // The focused door comes back if that story is still loaded, else the default.
             focusStoryId: state.stories.some((story) => story.card.id === resumed.focusStoryId)
               ? resumed.focusStoryId
@@ -1138,7 +1150,9 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             return;
           }
           const wait =
-            openDayWait(state.loops.stack) ?? openChapterWait(state.loops.stack, state.play);
+            openDayWait(state.loops.stack) ??
+            openChapterWait(state.loops.stack, state.play) ??
+            openOutcomeWait(state.loops.stack);
           if (!wait || wait.lineId !== lineId) {
             options.log.debug(
               "narration-ended-ignored",

@@ -136,6 +136,11 @@ test.describe("C3/10 tonight's games shows how a game ended", () => {
       }
 
       await playToSession(pad);
+      // C3/16 lands on Game stats for the finished game; Back shows Tonight's games on the session screen.
+      if ((await pad.locator("[data-game-stats]").count()) > 0) {
+        await clickAct(pad, "back", "stats-back");
+        await expect(pad.locator("[data-session-buttons]")).toBeVisible({ timeout: 20_000 });
+      }
 
       // The record is the loss, once.
       const records = recordsIn(databasePath);

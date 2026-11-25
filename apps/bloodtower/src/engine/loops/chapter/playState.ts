@@ -268,6 +268,15 @@ export const TEST_SEALS = "~test-seals";
  */
 export const TEST_QUESTS_DONE = "~test-quests-done:";
 /**
+ * TEST ONLY (C3/16): `~test-supply:<n>` shortens the skull supply; `~test-flag:<id>` sets a
+ * quest/ending flag; `~test-finale` turns the running chapter into a won finale (DEC-664);
+ * `~test-outcome-line:<lineId>` gives the outcome scene a narration line for audio-end tests.
+ */
+export const TEST_SUPPLY = "~test-supply:";
+export const TEST_FLAG = "~test-flag:";
+export const TEST_FINALE = "~test-finale";
+export const TEST_OUTCOME_LINE = "~test-outcome-line:";
+/**
  * TEST ONLY (C2-11): seed markers for Continue piece-check e2e tests.
  * `~test-foes:<id>@<spaceId>` places foes on the board, `~test-broken-seals:<sealId>` marks broken
  * seals, `~test-inside:<count>` records skulls trapped inside the tower, and `~test-drums:<t>,<m>,<b>`
@@ -300,6 +309,10 @@ export const TEST_SEED_MARKERS = [
   TEST_CHAPTER_LINE,
   TEST_SEALS,
   TEST_QUESTS_DONE,
+  TEST_SUPPLY,
+  TEST_FLAG,
+  TEST_FINALE,
+  TEST_OUTCOME_LINE,
   TEST_FOES,
   TEST_BROKEN_SEALS,
   TEST_INSIDE,
@@ -409,6 +422,35 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
   if (buildingLine !== null) {
     if (buildingLine === "") throw new Error("The test building-line seed needs a line id.");
     clock.buildingLine = buildingLine;
+  }
+  const supply = markerBody(seed, TEST_SUPPLY, /^\d*/);
+  if (supply !== null) {
+    if (!/^\d+$/.test(supply)) {
+      throw new Error(`The test supply seed needs a whole number, got "${supply}".`);
+    }
+    clock.supply = Number(supply);
+  }
+  const flag = markerBody(seed, TEST_FLAG, /^[\w+-]*/);
+  if (flag !== null) {
+    const ids = flag.split("+").filter((id) => id.length > 0);
+    if (ids.length === 0) throw new Error("The test flag seed needs flag ids.");
+    const quests = ensureQuests(play);
+    for (const id of ids) if (!quests.flags.includes(id)) quests.flags.push(id);
+  }
+  if (seed.includes(TEST_FINALE)) {
+    const chapters = tryChapters(play);
+    if (chapters) {
+      const current = chapters.plan.chapters.find((c) => c.index === chapters.current);
+      if (current) {
+        chapters.plan = {
+          ...chapters.plan,
+          chapters: [current],
+          c3EndAfterChapter1: false,
+          c4EndAfterChapter3: false,
+        };
+      }
+      chapters.towerWon = true;
+    }
   }
   const foes = markerBody(seed, TEST_FOES, /^[\w,@+-]*/);
   if (foes !== null) {

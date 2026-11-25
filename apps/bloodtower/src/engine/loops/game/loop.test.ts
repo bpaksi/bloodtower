@@ -371,6 +371,7 @@ describe("D1 EV-07 the game end runs once with the reason", () => {
       skullRecordPromptId(run.play.dayNumber, fatal),
     );
     advance(run);
+    passChapterBeats(run.runtime, run.play, () => advance(run));
     expectOneLoss(run, "buildings", "loss-buildings");
     // PT-21: chapter 2's card (its enter) and Set the table came before the freed skulls.
     expect(ensureChapters(run.play).entered).toEqual([1, 2]);

@@ -3,17 +3,33 @@ import {
   openingActiveIndex,
   openingPromptId,
 } from "../../../protocols/opening.ts";
+import { AUTO_ADVANCE_MS } from "../../../protocols/v2/views.ts";
 import type { LoopDefinition } from "../../loop/types.ts";
 import { drawPurse, isPurseAmount } from "../../rules/purse/index.ts";
+import {
+  type OutcomeClosing,
+  type OutcomeStage,
+  type OutcomeSummaryCounts,
+  resolveOutcomeClosing,
+} from "../../views/outcome.ts";
+import { tryChapters } from "../chapter/chapters.ts";
 import type { ChapterResult } from "../chapter/loop.ts";
-import { CONTINUE_PROMPT, canContinue, finishGame } from "../session/hub.ts";
+import { markerBody, TEST_OUTCOME_LINE } from "../chapter/playState.ts";
+import { ensureClock } from "../day/clock.ts";
+import { ensureQuests } from "../quest/store.ts";
+import { CONTINUE_PROMPT, canContinue, finishGame, recordGame } from "../session/hub.ts";
 import {
   pauseGoWithoutPrompt,
   pauseQuitPrompt,
   pauseReconnectPrompt,
 } from "../session/reconnect.ts";
 import type { ShellScreen } from "../session/screens.ts";
-import { recordOffer, requestTowerCommand, shellState } from "../session/shellRef.ts";
+import {
+  recordOffer,
+  requestCheckpoint,
+  requestTowerCommand,
+  shellState,
+} from "../session/shellRef.ts";
 import { type GameEnd, gameEndFrom } from "./end.ts";
 import {
   allHeroesHeld,
@@ -30,6 +46,24 @@ import {
 const PURSE_SPIN_SEQUENCE = "twinkle";
 /** Placeholder library sound for the coin cue, until Bob's sound notes pick one (as CUE-006). */
 const PURSE_COIN_SOUND = 1;
+/** CUE-003 (LSQ-011 Defeat + SND-096 Tower Gloat 1): plays once with a loss scene (EV-07). */
+const DEFEAT_LIGHT_SEQUENCE = "defeat";
+const DEFEAT_SOUND_INDEX = 96;
+
+/** Auto-advance wait for one outcome beat, run by the host (EV-06, EV-11, EV-12). */
+export type OutcomeWait = { id: string; maxMs: number; lineId: string | null };
+
+export type OutcomeState = {
+  stage: OutcomeStage;
+  end: GameEnd;
+  closing: OutcomeClosing | null;
+  summary: OutcomeSummaryCounts;
+  /** CUE-003 fired once on a loss; preserved in checkpoints so Continue never replays it (EV-13). */
+  cueFired: boolean;
+  cues: "CUE-003"[];
+  wait: OutcomeWait | null;
+  waitDone: boolean;
+};
 
 export type GameLocal = {
   phase:
@@ -40,6 +74,7 @@ export type GameLocal = {
     | "setup"
     | "begin"
     | "play"
+    | "outcome"
     | "done";
   awaitingPress: boolean;
   playStarted: boolean;
@@ -47,6 +82,8 @@ export type GameLocal = {
   lastChapter?: number;
   /** Set when a chapter report ended the game; the close writes the record from it. */
   end?: GameEnd | null;
+  /** The active outcome scene (SCR-018, C3/16) while `phase === "outcome"`. */
+  outcome?: OutcomeState | null;
 };
 
 export type GameResult = {
@@ -57,8 +94,89 @@ export type GameResult = {
 
 const syncScreen = (local: GameLocal) => {
   const shell = shellState();
-  if (local.phase === "play") shell.screen = "play";
+  if (local.phase === "play" || local.phase === "outcome") shell.screen = "play";
   else if (local.phase !== "done") shell.screen = local.phase;
+};
+
+const outcomeWaitFor = (stage: OutcomeStage, seed: string): OutcomeWait => {
+  const line = stage === "scene" ? markerBody(seed, TEST_OUTCOME_LINE, /^[\w.-]*/) : null;
+  return { id: `outcome-${stage}`, maxMs: AUTO_ADVANCE_MS, lineId: line || null };
+};
+
+const startOutcome = (end: GameEnd): OutcomeState => {
+  const shell = shellState();
+  const play = shell.play;
+  const days = play?.dayNumber ?? 0;
+  const questsDone = play ? ensureQuests(play).done.length : 0;
+  const skullsOnBoard = play
+    ? Object.values(ensureClock(play).skulls).reduce((sum, count) => sum + count, 0)
+    : 0;
+  const chapters = play ? tryChapters(play) : null;
+  const c3Chapter1 = end.chapter === 1 && chapters?.plan.c3EndAfterChapter1 === true;
+  const flags = new Set(play ? ensureQuests(play).flags : []);
+  const closing = resolveOutcomeClosing(end, { c3Chapter1, flags });
+  const lost = end.outcome === "lost";
+  const cues: "CUE-003"[] = [];
+  if (lost) {
+    cues.push("CUE-003");
+    if (shell.towerLinked && !shell.towerWithout) {
+      requestTowerCommand("lighting.sequence", {
+        sequence: DEFEAT_LIGHT_SEQUENCE,
+        soundIndex: DEFEAT_SOUND_INDEX,
+      });
+    }
+  }
+  // List the outcome in tonight's games at once so a host restart on the outcome scene lands on
+  // the session screen with the game listed won or lost, never in progress (EV-14).
+  if (shell.activeGameId) {
+    recordGame(shell, shell.activeGameId, end.outcome);
+    requestCheckpoint(shell.activeGameId, Math.max(1, days));
+  }
+  return {
+    stage: "scene",
+    end,
+    closing,
+    summary: { days, questsDone, skullsOnBoard },
+    cueFired: lost,
+    cues,
+    wait: outcomeWaitFor("scene", shell.seed),
+    waitDone: false,
+  };
+};
+
+/** The outcome state while the game loop is on the outcome scene, else null. */
+export const activeOutcome = (
+  stack: readonly { loopId: string; local: unknown }[],
+): OutcomeState | null => {
+  const frame = stack.find((row) => row.loopId === "game");
+  const local = frame?.local as GameLocal | undefined;
+  return local?.phase === "outcome" && local.outcome ? local.outcome : null;
+};
+
+export const isOnOutcome = (stack: readonly { loopId: string; local: unknown }[]): boolean =>
+  activeOutcome(stack) !== null;
+
+/** The open auto-advance wait of the outcome scene, or null. The host runs it (EV-06, EV-11). */
+export const openOutcomeWait = (
+  stack: readonly { loopId: string; local: unknown }[],
+): OutcomeWait | null => {
+  const outcome = activeOutcome(stack);
+  if (!outcome?.wait || outcome.waitDone) return null;
+  return outcome.wait;
+};
+
+/** Marks the open outcome wait done when `waitId` names it. False means none was open for it. */
+export const endOutcomeWait = (
+  stack: readonly { loopId: string; local: unknown }[],
+  waitId: string,
+): boolean => {
+  const frame = stack.find((row) => row.loopId === "game");
+  const local = frame?.local as GameLocal | undefined;
+  const outcome = local?.phase === "outcome" ? local.outcome : null;
+  if (!frame || !local || !outcome?.wait || outcome.waitDone) return false;
+  if (outcome.wait.id !== waitId) return false;
+  frame.local = { ...local, outcome: { ...outcome, waitDone: true } };
+  return true;
 };
 
 const offerContinueOrBack = (
@@ -209,9 +327,88 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
           ctx.startChild("chapter");
           return { local: { ...read, playStarted: true }, passComplete: false };
         }
-        if (next) return { local: { ...read, phase: "done", end: next }, passComplete: true };
+        if (next) {
+          return {
+            local: { ...read, phase: "outcome", end: next, outcome: startOutcome(next) },
+            passComplete: false,
+          };
+        }
       }
       return { local, passComplete: false };
+    }
+
+    if (local.phase === "outcome") {
+      syncScreen(local);
+      shell.stage = shell.pause ? "paused" : "playing";
+      if (shell.pause) {
+        const offer = (promptId: string, actionId: string) => {
+          ctx.offerPrompt(promptId, actionId);
+          recordOffer(promptId, actionId);
+        };
+        if (shell.pause.cause === "tower-lost") {
+          offer(pauseReconnectPrompt(shell.pauseSerial), "reconnect");
+          offer(pauseGoWithoutPrompt(shell.pauseSerial), "go-on-without");
+        }
+        offer(pauseQuitPrompt(shell.pauseSerial), "quit-story");
+        return { local, passComplete: false };
+      }
+      const outcome = local.outcome;
+      if (!outcome) return { local: { ...local, phase: "done" }, passComplete: true };
+      if (!outcome.wait) {
+        return {
+          local: {
+            ...local,
+            outcome: {
+              ...outcome,
+              wait: outcomeWaitFor(outcome.stage, shell.seed),
+              waitDone: false,
+            },
+          },
+          passComplete: false,
+        };
+      }
+      if (!outcome.waitDone) return { local, passComplete: false };
+      const saveBeat = () => {
+        if (shell.activeGameId) {
+          requestCheckpoint(shell.activeGameId, Math.max(1, outcome.summary.days));
+        }
+      };
+      if (outcome.stage === "scene") {
+        const nextStage: OutcomeStage =
+          outcome.end.outcome === "won" && outcome.closing ? "closing" : "summary";
+        saveBeat();
+        return {
+          local: {
+            ...local,
+            outcome: {
+              ...outcome,
+              stage: nextStage,
+              wait: outcomeWaitFor(nextStage, shell.seed),
+              waitDone: false,
+            },
+          },
+          passComplete: false,
+        };
+      }
+      if (outcome.stage === "closing") {
+        saveBeat();
+        return {
+          local: {
+            ...local,
+            outcome: {
+              ...outcome,
+              stage: "summary",
+              wait: outcomeWaitFor("summary", shell.seed),
+              waitDone: false,
+            },
+          },
+          passComplete: false,
+        };
+      }
+      return {
+        local: { ...local, phase: "done", outcome: { ...outcome, wait: null, waitDone: false } },
+        passComplete: true,
+      };
     }
 
     return { local: { ...local, phase: "done" }, passComplete: true };
@@ -328,7 +525,7 @@ export const handleGamePress = (
 
   // A pause during piece setup is quit from the setup step it paused (DEC-711).
   if (
-    (local.phase === "play" || shell.pause) &&
+    (local.phase === "play" || local.phase === "outcome" || shell.pause) &&
     actionId === "quit-story" &&
     (promptId === "menu-quit" || (shell.pause && promptId === `pause-${shell.pauseSerial}-quit`))
   ) {
