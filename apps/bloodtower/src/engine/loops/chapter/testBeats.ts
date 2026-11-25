@@ -1,4 +1,5 @@
 import type { LoopFrame } from "../../loop/types.ts";
+import { endOutcomeWait, openOutcomeWait } from "../game/loop.ts";
 import { endChapterWait, openChapterWait, tryChapters } from "./chapters.ts";
 import {
   type ChapterLocal,
@@ -9,8 +10,9 @@ import {
 import type { PlayState } from "./playState.ts";
 
 /**
- * TEST ONLY (C3/15). Plays through the chapter's beats as the host would: ends each open chapter
- * wait (the card, stamp, close and Reveal) and, unless `stopAtTable`, presses Set the table's Done.
+ * TEST ONLY (C3/15, C3/16). Plays through the chapter's beats and the outcome scene as the host
+ * would: ends each open chapter or outcome wait (the card, stamp, close, Reveal, outcome scene,
+ * closing line and summary) and, unless `stopAtTable`, presses Set the table's Done.
  * `resume` runs the loops after each change. Unit tests with no host use it; the host never does.
  */
 export const passChapterBeats = (
@@ -23,6 +25,12 @@ export const passChapterBeats = (
     const wait = openChapterWait(runtime.stack, play);
     if (wait) {
       endChapterWait(runtime.stack, play, wait.id);
+      resume();
+      continue;
+    }
+    const outcomeWait = openOutcomeWait(runtime.stack);
+    if (outcomeWait) {
+      endOutcomeWait(runtime.stack, outcomeWait.id);
       resume();
       continue;
     }

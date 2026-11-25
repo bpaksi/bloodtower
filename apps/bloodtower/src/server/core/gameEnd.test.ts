@@ -215,7 +215,7 @@ const playOn = async (session: CoreSession, pad: Pad, until: () => boolean) => {
       await session.whenIdle();
       if (!session.state().offered.some((offer) => offer.open && offer.actionId !== "quit-story"))
         idle += 1;
-      if (idle > 5) break;
+      if (idle > 20) break;
       continue;
     }
     idle = 0;

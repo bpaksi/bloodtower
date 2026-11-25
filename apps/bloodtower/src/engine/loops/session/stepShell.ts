@@ -20,8 +20,7 @@ import { type DayLocal, parseEventChoicePrompt } from "../day/loop.ts";
 import { eventPressRefusal } from "../day/press.ts";
 import { type EncounterLocal, endBuildingWait, takeBuildingRefusal } from "../encounter/loop.ts";
 import { seedHeroSheets } from "../event/index.ts";
-import type { GameLocal } from "../game/loop.ts";
-import { handleGamePress } from "../game/loop.ts";
+import { endOutcomeWait, type GameLocal, handleGamePress } from "../game/loop.ts";
 import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
 import { type GroupTurnLocal, isVirtuePrompt, virtuePressRefusal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
@@ -571,10 +570,13 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     const waiting = local?.phase === "effects" || (local?.phase === "event" && !local.waitDone);
     const dayWaits = Boolean(dayFrame && local && waiting && local.wait?.id === e.waitId);
     if (!dayWaits) {
-      // A building result's wait (C3/13), or a chapter beat's (C3/15), ends the same way.
+      // A building result's wait (C3/13), a chapter beat's (C3/15), or an outcome beat's (C3/16) ends the same way.
       const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
       const buildingEnded = endBuildingWait(next.loops.stack, e.waitId);
-      if (buildingEnded || endChapterWait(next.loops.stack, next.play, e.waitId)) {
+      const chapterEnded = !buildingEnded && endChapterWait(next.loops.stack, next.play, e.waitId);
+      const outcomeEnded =
+        !buildingEnded && !chapterEnded && endOutcomeWait(next.loops.stack, e.waitId);
+      if (buildingEnded || chapterEnded || outcomeEnded) {
         // A building wait's end moves the step on (rewards to the end hook, a result to the menu).
         // A press saves, so this must too: a host that stops now must not resume a step behind (#589).
         if (buildingEnded && next.play && next.activeGameId) {
@@ -583,6 +585,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
         bindShellState(next);
         resumeLoopsOrPauseOffers(next, eventSeq, effects);
         clearShellState();
+        ensureSessionHubOffers(next);
         effects.push({ kind: "view-refresh", v: 1 });
         return withEffects(next, effects);
       }

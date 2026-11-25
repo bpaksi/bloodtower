@@ -31,15 +31,30 @@ export const HELP_LINES: Record<string, string> = {
   "outcome-scene": "The chapter is over. See how it ended; the game stats come next.",
 };
 
-/** The help sheet a play view shows: the event scene, a quest's scene, or the gear's own (C3/12, C3/14). */
+/** The help sheet a play view shows: the outcome, event, quest, or the gear's own (C3/12, C3/14, C3/16). */
 export const helpScreenFor = (
   view: {
+    screen?: string | undefined;
     gear?: { helpScreen?: string | undefined } | undefined;
-    table?: { building?: { quest?: unknown } | null | undefined } | null | undefined;
+    table?:
+      | {
+          building?: { quest?: unknown } | null | undefined;
+          outcome?: unknown;
+        }
+      | null
+      | undefined;
   },
   inEvent: boolean,
-): string | undefined =>
-  inEvent ? "event-scene" : view.table?.building?.quest ? "quest-scene" : view.gear?.helpScreen;
+): string | undefined => {
+  const onPlay = !view.screen || view.screen === "play";
+  return onPlay && view.table?.outcome
+    ? "outcome-scene"
+    : inEvent
+      ? "event-scene"
+      : onPlay && view.table?.building?.quest
+        ? "quest-scene"
+        : view.gear?.helpScreen;
+};
 
 export const MENU_VERSION = "v0.0.0";
 
