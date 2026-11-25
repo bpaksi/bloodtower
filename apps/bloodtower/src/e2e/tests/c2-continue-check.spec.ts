@@ -423,7 +423,8 @@ test.describe("C2/11 Continue piece check", { tag: "@ipad-only" }, () => {
       await deviceMain(padB.page).locator('button[data-action-id="skip"]').click();
       await padA.gate.held(1);
       await padB.gate.held(1);
-      // padA's Done releases first and wins; padB's simultaneous Skip for hero-minis changes nothing.
+      // Both presses go out together over two sockets, so either can reach the host first. The
+      // first to arrive wins hero-minis; the other finds the step closed and changes nothing (#631).
       releaseTogether(padA.gate, padB.gate);
 
       // Both iPads advance to skulls (not past it — second press changed nothing).
@@ -442,27 +443,32 @@ test.describe("C2/11 Continue piece check", { tag: "@ipad-only" }, () => {
       });
       await clickAct(padA.page, "confirm", "piece-check-quest-tokens");
 
-      // In play: board top band shows outline badge beside Tower with count 1; heroes are not marked.
+      // In play: board top band shows outline badge beside Tower; heroes are not marked.
       await expect(deviceMain(padA.page)).toHaveAttribute("data-screen", "play", {
         timeout: 30_000,
       });
+
+      // SQLite event log: exactly one winning press for hero-minis (Done or Skip, whichever arrived
+      // first), 1 winning skip for skulls and 1 winning confirm for quest-tokens.
+      const { presses } = readPieceCheckPressLog(session.databasePath);
+      const winners = presses.filter((p) => p.winner);
+      const heroMinis = presses.filter((p) => p.promptId === "piece-check-hero-minis");
+      expect(heroMinis.map((p) => p.action).sort()).toEqual(["confirm", "skip"]);
+      const heroMinisWinners = heroMinis.filter((p) => p.winner);
+      expect(heroMinisWinners).toHaveLength(1);
+      // Skipped steps stay unconfirmed: skulls always, hero-minis only when Skip won it.
+      const unconfirmed = heroMinisWinners[0]?.action === "skip" ? "2" : "1";
       const towerBand = boardMain(board).locator("#band [data-band-tower]");
       await expect(towerBand).toBeVisible({ timeout: 20_000 });
       const badge = towerBand.locator("[data-unconfirmed-badge]");
       await expect(badge).toBeVisible();
       await expect(badge).toHaveClass(/bt-badge--outline/);
-      await expect(badge).toHaveAttribute("data-unconfirmed-count", "1");
-      await expect(badge).toContainText("1");
+      await expect(badge).toHaveAttribute("data-unconfirmed-count", unconfirmed);
+      await expect(badge).toContainText(unconfirmed);
       await expect(
         boardMain(board).locator("[data-hero-panel] [data-unconfirmed-badge]"),
       ).toHaveCount(0);
 
-      // SQLite event log has 1 winning confirm for hero-minis and 1 winning skip for skulls.
-      const { presses } = readPieceCheckPressLog(session.databasePath);
-      const winners = presses.filter((p) => p.winner);
-      expect(
-        winners.filter((p) => p.promptId === "piece-check-hero-minis" && p.action === "confirm"),
-      ).toHaveLength(1);
       expect(
         winners.filter((p) => p.promptId === "piece-check-skulls" && p.action === "skip"),
       ).toHaveLength(1);
