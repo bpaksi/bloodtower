@@ -207,18 +207,18 @@ describe("the Quest row and the quest pick (F1/02)", () => {
     expect(turnHasEnded(play, groupId(state))).toBe(true);
     expect(movesOf(state)).toBe(0);
     expect(enc(state).movesLeft).toBe(0);
-    expect(gold(state)).toBe(13);
+    expect(gold(state)).toBe(18);
     // C3/14: the rewards step, then the end hook, then the menu; the effects ran once, before them.
     expect(model(state).step).toBe("result");
     expect(model(state).result?.quest).toMatchObject({
       phase: "rewards",
       questId: "herald",
       gold: 10,
-      questGold: 5,
+      questGold: 10,
       presentHeroes: 1,
     });
     state = closeQuest(state);
-    expect(gold(state)).toBe(13);
+    expect(gold(state)).toBe(18);
     const now = model(state);
     expect(now.step).toBe("menu");
     expect(labels(state)).toEqual(["Rest", "Cleanse", "Leave"]);
@@ -229,7 +229,7 @@ describe("the Quest row and the quest pick (F1/02)", () => {
     expect(option(state, "Leave").enabled).toBe(true);
     // The group leaves and its turn closes: Feral's loss is not taken a second time.
     state = press(state, "Leave");
-    expect(gold(state)).toBe(13);
+    expect(gold(state)).toBe(18);
   });
 
   it("EV-06: leaving the quest partway is a retreat: the turn ends, the progress stays", () => {

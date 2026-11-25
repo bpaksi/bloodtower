@@ -307,6 +307,10 @@ const questOpenAt = (play: PlayState, spaceId: string): boolean =>
 /** The Quest pick costs one move (DEC-948). */
 export const QUEST_MOVES = 1;
 
+/** The moves the Quest pick takes now: a pending free pick waives its one move (DEC-913, DEC-946). */
+export const questMovesNeeded = (play: PlayState, groupId: string): number =>
+  freePickPending(play, groupId) ? 0 : QUEST_MOVES;
+
 const spaceOf = (play: PlayState, groupId: string) => {
   const group = groupById(play, groupId);
   if (!group) return null;
@@ -354,7 +358,7 @@ export const openMenu = (
         id: "quest",
         label,
         price: null,
-        disabled: (store.moves[groupId] ?? 0) < QUEST_MOVES,
+        disabled: (store.moves[groupId] ?? 0) < questMovesNeeded(play, groupId),
       };
     }
     const kind = LABEL_TO_KIND[label];
@@ -415,13 +419,20 @@ export const questPickGate = (
     return { ok: false, reason: "not-offered" };
   const store = ensurePicks(play);
   if (store.giveBack[groupId]) return { ok: false, reason: "give-back-first" };
-  if ((store.moves[groupId] ?? 0) < QUEST_MOVES) return { ok: false, reason: "no-moves" };
+  if ((store.moves[groupId] ?? 0) < questMovesNeeded(play, groupId)) {
+    return { ok: false, reason: "no-moves" };
+  }
   return { ok: true };
 };
 
-/** The quest pick took hold: its move is spent. */
+/** The quest pick took hold: its move is spent, or the pending free pick is (DEC-913). */
 export const spendQuestMove = (play: PlayState, groupId: string): void => {
   const store = ensurePicks(play);
+  if (freePickPending(play, groupId)) {
+    store.freePickDay = { ...store.freePickDay, [groupId]: play.dayNumber };
+    endFreePick(play, groupId);
+    return;
+  }
   store.moves[groupId] = (store.moves[groupId] ?? 0) - QUEST_MOVES;
 };
 

@@ -94,9 +94,8 @@ const viewOf = (play: PlayState, groupId: string, def: QuestDef): QuestView => {
 
 const finish = (play: PlayState, groupId: string, def: QuestDef): void => {
   const store = ensureQuests(play);
-  const heroes = presentHeroes(play, groupId);
-  // DEC-700: quest gold to each present hero; a gain goes to the heroes present (DEC-944).
-  earnGold(play, groupId, store.tuning.questGold * heroes.length);
+  // DEC-827 (over DEC-700's 5 a hero): a won quest pays the group 10 gold, whatever its size.
+  earnGold(play, groupId, store.tuning.questGold);
   store.done.push(def.id);
   delete store.progress[def.id];
   markQuestWon(play);

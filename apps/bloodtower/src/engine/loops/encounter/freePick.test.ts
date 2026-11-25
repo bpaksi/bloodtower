@@ -6,6 +6,8 @@ import {
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, setBuildingSkulls } from "../day/clock.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import { HERALD } from "../quest/fixtures.ts";
+import { configureQuests, ensureQuests } from "../quest/store.ts";
 import { TEST_STORY } from "../session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import { bindShellState, clearShellState } from "../session/shellRef.ts";
@@ -365,5 +367,74 @@ describe("D6 01 survival", () => {
       expect(freePickPending(playOf(again), group)).toBe(true);
       expect(movesOf(again)).toBe(0);
     }
+  });
+});
+
+/*
+ * R02 (audit F2, DEC-913): the quest and Fortunate's free pick. A quest taken first ends the turn
+ * at once and the free pick is lost; a quest taken second is the free pick, needs no move, and
+ * ends the turn as usual (DEC-821, DEC-948).
+ */
+const HERALD_DEFS = [{ id: "herald", chapter: 1, scene: HERALD }];
+
+/** The village with an open Herald quest, Fortunate held, and `moves` left. */
+const withQuest = (extra: string, moves: number): ShellState => {
+  const state = inside("village", `${FORT}${extra}`, moves);
+  const play = playOf(state);
+  const spaceId = play.groups[0]?.spaceId ?? "";
+  configureQuests(play, { defs: HERALD_DEFS, bySpace: { [spaceId]: "herald" } });
+  refreshOffersAfterRestore(state);
+  return state;
+};
+
+describe("R02 the quest and the free pick (DEC-913)", () => {
+  it("a quest taken first ends the turn and the free pick is lost", () => {
+    let state = withQuest("~test-hp:hero-a=4/12", 3);
+    expect(labels(state)[0]).toBe("Quest");
+    state = press(state, "Quest");
+    expect(ensureQuests(playOf(state)).progress.herald).toBeDefined();
+    state = press(state, "Leave");
+    // Leaving a quest part way is a retreat: the turn ends and no free pick follows.
+    expect(turnHasEnded(playOf(state), groupId(state))).toBe(true);
+    expect(freePickPending(playOf(state), groupId(state))).toBe(false);
+    expect(ensurePicks(playOf(state)).freePickDay?.[groupId(state)]).toBeUndefined();
+    expect(movesOf(state)).toBe(0);
+  });
+
+  it("a won quest taken first leaves no free pick and no moves", () => {
+    let state = withQuest("~test-hp:hero-a=4/12", 3);
+    state = press(state, "Quest");
+    state = press(state, "Ask for pay");
+    expect(ensureQuests(playOf(state)).done).toEqual(["herald"]);
+    expect(turnHasEnded(playOf(state), groupId(state))).toBe(true);
+    expect(freePickPending(playOf(state), groupId(state))).toBe(false);
+    expect(movesOf(state)).toBe(0);
+  });
+
+  it("a quest taken second is the free pick: it needs no move, then the turn ends", () => {
+    let state = withQuest("~test-hp:hero-a=4/12", 1);
+    state = rest(state, 1);
+    expect(movesOf(state)).toBe(0);
+    expect(freePickPending(playOf(state), groupId(state))).toBe(true);
+    // The last move is spent, but the free pick keeps the Quest row open at 0 moves.
+    expect(option(state, "Quest").enabled).toBe(true);
+    expect(option(state, "Quest").detail).toMatch(/^0 moves/);
+    state = press(state, "Quest");
+    expect(model(state).step).toBe("quest");
+    expect(freePickPending(playOf(state), groupId(state))).toBe(false);
+    expect(ensurePicks(playOf(state)).freePickDay?.[groupId(state)]).toBe(playOf(state).dayNumber);
+    state = press(state, "Ask for pay");
+    expect(ensureQuests(playOf(state)).done).toEqual(["herald"]);
+    expect(turnHasEnded(playOf(state), groupId(state))).toBe(true);
+    expect(movesOf(state)).toBe(0);
+  });
+
+  it("Uncertain held: the pick ends the turn first and there is no free pick", () => {
+    // EV-07 above (citadel Rally) is the Uncertain fixture; here it is a Rest at a village.
+    let state = inside("village", `${FORT}~test-named:hero-a=uncertain~test-hp:hero-a=4/12`, 3);
+    state = rest(state, 1);
+    expect(turnHasEnded(playOf(state), groupId(state))).toBe(true);
+    expect(freePickPending(playOf(state), groupId(state))).toBe(false);
+    expect(movesOf(state)).toBe(0);
   });
 });

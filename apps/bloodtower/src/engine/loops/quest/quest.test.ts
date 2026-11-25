@@ -18,6 +18,31 @@ const ok = <T extends { ok: boolean }>(r: T): Extract<T, { ok: true }> => {
   return r as Extract<T, { ok: true }>;
 };
 
+describe("a won quest pays the group, not each hero (BE-03, DEC-827, R06)", () => {
+  const heroSets: string[][] = [["h1"], ["h1", "h2"], ["h1", "h2", "h3"], ["h1", "h2", "h3", "h4"]];
+
+  for (const heroes of heroSets) {
+    it(`pays the base 10 gold once to a group of ${heroes.length}`, () => {
+      const { play, groupId } = questPlay(heroes, 7);
+      ok(beginQuest(play, groupId, "herald"));
+      // "Take the job" has no gold effect of its own, so the purse change is the base payout alone.
+      ok(chooseOption(play, groupId, "herald", "job"));
+      ok(pickHero(play, groupId, "herald", "h1", "seed"));
+      expect(ensureQuests(play).done).toContain("herald");
+      expect(ensurePicks(play).purse[groupId]).toBe(7 + 10);
+    });
+  }
+
+  it("pays the base once for the quest, not again when the same quest is entered", () => {
+    const { play, groupId } = questPlay(["h1", "h2"], 0);
+    ok(beginQuest(play, groupId, "herald"));
+    ok(chooseOption(play, groupId, "herald", "job"));
+    ok(pickHero(play, groupId, "herald", "h1", "seed"));
+    expect(beginQuest(play, groupId, "herald")).toEqual({ ok: false, reason: "already-done" });
+    expect(ensurePicks(play).purse[groupId]).toBe(10);
+  });
+});
+
 describe("quest survival", () => {
   it("EV-09: Continue keeps a done quest and its item", () => {
     const { play, groupId } = questPlay(["h1", "h2"]);
@@ -69,7 +94,8 @@ describe("quest survival", () => {
       expect(result.view.questId).toBe("herald");
       ok(chooseOption(play, groupId, "herald", "pay"));
       expect(handleQuestPick(groupId)).toEqual({ ok: false, reason: "unknown-quest" });
-      expect(ensurePicks(play).purse[groupId]).toBe(15);
+      // The option's 10 gold, then the base 10 for the group (DEC-827).
+      expect(ensurePicks(play).purse[groupId]).toBe(20);
     } finally {
       bindPlayState(null);
     }

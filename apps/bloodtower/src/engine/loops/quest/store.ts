@@ -17,9 +17,10 @@ export type QuestDef = {
   scene: PlainScene;
 };
 
+/** `questGold` is paid once to the group's purse, whatever its size (DEC-827, BE-03). */
 export type QuestTuning = { tollGold: number; tollHitPoints: number; questGold: number };
 
-export const BASE_QUEST_TUNING: QuestTuning = { tollGold: 10, tollHitPoints: 2, questGold: 5 };
+export const BASE_QUEST_TUNING: QuestTuning = { tollGold: 10, tollHitPoints: 2, questGold: 10 };
 
 export type QuestStore = {
   tuning: QuestTuning;

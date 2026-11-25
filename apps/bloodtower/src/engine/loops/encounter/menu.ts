@@ -17,6 +17,7 @@ import {
   type PickKind,
   pickPrice,
   purseKnown,
+  questMovesNeeded,
 } from "./picks.ts";
 
 /*
@@ -212,7 +213,7 @@ const menuOptions = (play: PlayState, local: BuildingLocal): BuildingOption[] | 
         promptId: buildPromptId(local.groupId, serial, "pick", "quest"),
         actionId: "build",
         label: COPY.quest,
-        detail: plural(1, "move"),
+        detail: plural(questMovesNeeded(play, local.groupId), "move"),
         enabled: !entry.disabled,
         ...(entry.disabled ? { reason: "No moves left." } : {}),
       });

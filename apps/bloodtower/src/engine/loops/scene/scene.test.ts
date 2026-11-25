@@ -105,7 +105,7 @@ describe("plain scenes", () => {
     ok(chooseOption(rich.play, rich.groupId, "t", "a"));
     expect(ensureQuests(rich.play).log).toEqual(["gold:-10", "flag:paid"]);
     expect(ensureQuests(rich.play).flags).toContain("paid");
-    expect(ensurePicks(rich.play).purse[rich.groupId]).toBe(2 + 5);
+    expect(ensurePicks(rich.play).purse[rich.groupId]).toBe(2 + 10);
   });
 
   it("EV-06: a done quest pays quest gold to present heroes only and counts", () => {
