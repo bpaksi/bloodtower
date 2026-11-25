@@ -19,19 +19,20 @@ export const seatOnContinue = (resumed: ShellState, live: ShellState): ShellStat
     if (holder != null && !next.devices.has(holder)) next.holdings[heroId] = null;
   }
 
-  const wasDisconnectPause = next.stage === "paused" && next.pause?.cause === "disconnect";
-  // A save quit from a drop pause: if every seated hero is held now, play goes on (DEC-953).
+  const beforePause = next.pause?.cause ?? null;
+  const wasDisconnectPause = next.stage === "paused" && beforePause === "disconnect";
+  // A save quit from a drop pause: if every seated hero is held now, play (or piece check) goes on (DEC-953).
   if (wasDisconnectPause && next.play && allSeatedHeld(next)) {
     next.pause = null;
     next.stage = "playing";
-    next.screen = "play";
+    next.screen = next.pieceCheck ? "piece-check" : "play";
   }
   pauseIfNeeded(next);
 
-  // The offers follow a change of the disconnect pause: Quit only while it is open, the play
+  // The offers follow a change of the pause: Quit (and tower buttons) while paused, the play
   // buttons once it is not. The effects returned are dropped: a view refresh, and loop effects
   // only outside a pause; the host refreshes the views itself after the press.
-  if ((next.pause?.cause === "disconnect") !== wasDisconnectPause) {
+  if ((next.pause?.cause ?? null) !== beforePause) {
     refreshOffersAfterRestore(next);
   }
   return next;

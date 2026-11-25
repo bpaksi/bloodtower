@@ -9,6 +9,7 @@ import { createEventStore } from "../../server/events/store.ts";
 import { createHostLogger, type HostLogger } from "../../server/log/hostLog.ts";
 import {
   enterWithoutTowerKeepSound,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
@@ -189,6 +190,7 @@ test("EV-05: the tuning read at Begin survives Continue, whatever the file says 
     // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
     // The saved game never linked a tower, so the re-pick does not open a tower pause.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await finishPieceCheck(pad.page);
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await quitGame(pad.page);
     const kept = chapterPlanSaved(databasePath);

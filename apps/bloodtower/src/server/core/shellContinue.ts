@@ -1,4 +1,9 @@
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
+import {
+  ensurePieceCheckOffers,
+  PIECE_CHECK_PROMPT_PREFIX,
+} from "../../engine/loops/session/pieceCheck.ts";
+import { goOnWithout } from "../../engine/loops/session/reconnect.ts";
 import type { ShellState } from "../../engine/loops/session/state.ts";
 import { SHELL_ENGINE_VERSION } from "../../engine/loops/session/state.ts";
 import { stepShell } from "../../engine/loops/session/stepShell.ts";
@@ -52,8 +57,89 @@ const endsSittingReplay = (event: ShellEvent): boolean =>
 
 const applyShellEvents = (start: ShellState, events: readonly ShellEvent[]): ShellState => {
   let state = start;
-  for (const event of events) {
-    if (endsSittingReplay(event)) break;
+  for (let i = 0; i < events.length; i += 1) {
+    const event = events[i];
+    if (!event) continue;
+    if (endsSittingReplay(event)) {
+      // If a later Continue started a piece check in this same game log (C2-11), reset transient
+      // sitting state (pause, abandoned piece check) and keep replaying into the next sitting.
+      // If this quit/done is terminal and abandoned an active piece check, clear that check so
+      // a subsequent restart or Continue returns to play and starts a fresh piece check.
+      const resumedLater = events.slice(i + 1).some((later) => later.kind === "piece-check-start");
+      if (resumedLater) {
+        state = {
+          ...state,
+          pieceCheck: null,
+          pause: null,
+          reconnect: null,
+          screen: "play",
+          stage: "playing",
+        };
+        continue;
+      }
+      if (state.pieceCheck !== null) {
+        state = {
+          ...state,
+          pieceCheck: null,
+          pause: null,
+          reconnect: null,
+          screen: "play",
+          stage: "playing",
+        };
+      }
+      break;
+    }
+    if (
+      event.kind === "press" &&
+      event.promptId === "continue-saved-game" &&
+      event.actionId === "continue"
+    ) {
+      // If an explicit piece-check-start follows Continue (e.g. Play-without-Tower recovery),
+      // let that event apply the tower/pause transition cleanly. Otherwise, if Continue resumed
+      // a mid-check tower-lost pause with the tower ready (the next press is a piece-check step
+      // rather than a pause-* resolution), clear the saved pause so later confirmations replay.
+      if (
+        events[i + 1]?.kind !== "piece-check-start" &&
+        state.pause?.cause === "tower-lost" &&
+        state.pieceCheck !== null
+      ) {
+        const nextPress = events.slice(i + 1).find((later) => later.kind === "press");
+        if (nextPress?.promptId.startsWith(PIECE_CHECK_PROMPT_PREFIX)) {
+          state = {
+            ...state,
+            pause: null,
+            stage: "playing",
+            screen: "piece-check",
+          };
+          ensurePieceCheckOffers(state);
+        }
+      }
+      continue;
+    }
+    if (
+      event.kind === "press" &&
+      event.promptId === "play-without-tower" &&
+      event.actionId === "play-without-tower" &&
+      state.enter === null &&
+      state.pause?.cause === "tower-lost"
+    ) {
+      state = {
+        ...state,
+        ...(state.pieceCheck
+          ? {
+              pieceCheck: {
+                ...state.pieceCheck,
+                steps: [...state.pieceCheck.steps],
+                confirmed: [...state.pieceCheck.confirmed],
+                skipped: [...state.pieceCheck.skipped],
+              },
+            }
+          : {}),
+      };
+      goOnWithout(state);
+      if (state.screen === "piece-check") ensurePieceCheckOffers(state);
+      continue;
+    }
     state = stepShell(state, event).state;
   }
   return state;
@@ -111,6 +197,18 @@ export const continueShellFromCheckpoint = (
 
   const pending = shellEventsAfter(store, input.gameId, checkpoint.afterEventSeq);
   state = applyShellEvents(state, pending);
+  if (state.pieceCheck) {
+    // An in-flight drum rotate never survives a restart: never deadlock step 5 or auto-resend.
+    if (state.pieceCheck.drumsTurning) {
+      state = {
+        ...state,
+        pieceCheck: { ...state.pieceCheck, drumsTurning: false, drumsTurned: false },
+      };
+    }
+    if (state.screen === "piece-check") {
+      ensurePieceCheckOffers(state);
+    }
+  }
   return { state, versionChangedLogged };
 };
 

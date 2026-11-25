@@ -140,6 +140,13 @@ const realGame = async (seed: string, options: { tower?: boolean } = {}): Promis
         }
       }
     }
+    for (let guard = 0; guard < 20 && again.session.state().screen === "piece-check"; guard += 1) {
+      const open = again.session.projectDevice(again.pad).actions.filter((a) => a.open);
+      const next =
+        open.find((a) => a.actionId === "turn-drums") ?? open.find((a) => a.actionId === "confirm");
+      if (!next) break;
+      await again.act(next.promptId, next.actionId);
+    }
     return again;
   };
   const game = await boot();

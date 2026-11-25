@@ -44,6 +44,8 @@ export type QuestStore = {
 
 const stores = new WeakMap<PlayState, QuestStore>();
 
+export const tryQuests = (play: PlayState): QuestStore | null => stores.get(play) ?? null;
+
 export const ensureQuests = (play: PlayState): QuestStore => {
   const existing = stores.get(play);
   if (existing) return existing;
@@ -165,6 +167,35 @@ export const chapterProgress = (
 
 export const heroItems = (play: PlayState, heroId: string): string[] =>
   ensureQuests(play).items[heroId] ?? [];
+
+/**
+ * Open quest tokens on the physical board (PT-08, DEC-920, C2-11).
+ * Read-only: uses `tryQuests` and never writes quest state (EV-23).
+ * A done quest is excluded; before chapter 1 tokens exist, returns empty.
+ */
+export const openQuestTokens = (
+  play: PlayState,
+): { questId: string; spaceId: string; spaceName: string; kingdom: "N" | "E" | "S" | "W" }[] => {
+  const store = tryQuests(play);
+  if (!store) return [];
+  const out: {
+    questId: string;
+    spaceId: string;
+    spaceName: string;
+    kingdom: "N" | "E" | "S" | "W";
+  }[] = [];
+  for (const [spaceId, questId] of Object.entries(store.bySpace)) {
+    if (store.done.includes(questId)) continue;
+    const space = play.content.board.spaceById.get(spaceId);
+    out.push({
+      questId,
+      spaceId,
+      spaceName: space?.name ?? spaceId,
+      kingdom: space?.kingdom ?? "N",
+    });
+  }
+  return out;
+};
 
 /** Saved with the autosave; Continue restores it whole (DEC-151). */
 export const snapshotQuests = (play: PlayState): string => JSON.stringify(ensureQuests(play));

@@ -214,6 +214,13 @@ describe("a tower lost mid-game", () => {
         await act2("hero-hold", "take", { heroId });
       }
     }
+    for (let guard = 0; guard < 20 && second.session.state().screen === "piece-check"; guard += 1) {
+      const open = openActions(second.session, pad2);
+      const next =
+        open.find((a) => a.actionId === "turn-drums") ?? open.find((a) => a.actionId === "confirm");
+      if (!next) break;
+      await act2(next.promptId, next.actionId);
+    }
     const resumed = second.session.state();
     expect(resumed.screen).toBe("play");
     expect(resumed.towerWithout).toBe(true);
@@ -241,6 +248,12 @@ describe("a tower lost mid-game", () => {
     const sentAtChoice = first.tower.sent().length;
 
     await act("play-without-tower", "play-without-tower");
+    for (let guard = 0; guard < 20 && first.session.state().screen === "piece-check"; guard += 1) {
+      const open = openActions(first.session, pad);
+      const next = open.find((a) => a.actionId === "confirm");
+      if (!next) break;
+      await act(next.promptId, next.actionId);
+    }
     const resumed = first.session.state();
     expect(resumed.screen).toBe("play");
     expect(resumed.pause).toBeNull();

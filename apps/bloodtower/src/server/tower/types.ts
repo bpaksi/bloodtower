@@ -7,6 +7,9 @@ export interface TowerSent {
   volume?: number;
   /** For `sequence`: the light sequence id of the `lighting.sequence` command (CU/15). */
   sequence?: string;
+  /** For `rotate-drum`: drum index (0 top, 1 middle, 2 bottom) and target side (0..3) (C2-11). */
+  drumIndex?: number;
+  position?: number;
 }
 
 /** How one tower sound ended. `written` means the write completed; no sound end is awaited. */

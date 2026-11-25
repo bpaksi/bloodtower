@@ -54,6 +54,34 @@ export const bloodtowerTowerFromMock = (mock: MockTower): BloodtowerTower => ({
       }
       return "ok";
     }
+    if (capabilityId === "mechanics.rotate-drum") {
+      const { drumIndex, position } = params;
+      if (
+        typeof drumIndex !== "number" ||
+        !Number.isInteger(drumIndex) ||
+        drumIndex < 0 ||
+        drumIndex > 2 ||
+        typeof position !== "number" ||
+        !Number.isInteger(position) ||
+        position < 0 ||
+        position > 3
+      ) {
+        log.error(
+          "tower-command-failed",
+          "Tower command mechanics.rotate-drum had an invalid drumIndex or position.",
+        );
+        return "failed";
+      }
+      const taken = await mock.rotateDrum(drumIndex, position);
+      if (taken === "failed") {
+        log.error(
+          "tower-command-failed",
+          `Tower command mechanics.rotate-drum failed for drum ${drumIndex} to position ${position}.`,
+        );
+        return "failed";
+      }
+      return "ok";
+    }
     if (capabilityId === "tower.connect" || capabilityId === "tower.calibrate") {
       const taken = capabilityId === "tower.connect" ? mock.connect() : mock.calibrate();
       if (taken === "failed") {

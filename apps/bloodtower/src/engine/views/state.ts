@@ -1,5 +1,5 @@
 import type { ViewScreen } from "../../protocols/v2/common.ts";
-import type { GearView, HintView } from "../../protocols/v2/views.ts";
+import type { GearView, HintView, PieceCheckView } from "../../protocols/v2/views.ts";
 import type { CompassSlot } from "../loops/chapter/board.ts";
 import type { HeroCardData } from "../loops/session/pack.ts";
 import type { ChapterBeatView } from "./chapter.ts";
@@ -245,6 +245,8 @@ export type TableBand = {
   building?: BuildingPanelView | null;
   /** The chapter's card, stamp, close, Reveal or Set the table, only while it shows (C3/15). */
   chapterBeat?: ChapterBeatView | null;
+  /** Count of piece-check steps skipped and still unconfirmed (MEC-018, C2-11). */
+  unconfirmedPieces?: number;
   health: "unavailable";
   purse: "unavailable";
   actingGroup: string | null;
@@ -303,6 +305,8 @@ export type ViewState = {
   gear?: GearView;
   /** The starting-purse step's board panel. Story board only; null elsewhere. */
   chance?: ChanceView | null;
+  /** Continue's piece check step (C2-11). Present on board and devices only during piece-check. */
+  pieceCheck?: PieceCheckView | null;
 };
 
 export type Audience = { kind: "board" } | { kind: "device"; deviceId: string };

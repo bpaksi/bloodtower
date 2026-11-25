@@ -2,6 +2,7 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 import {
   enterWithoutTower,
   enterWithTower,
+  finishPieceCheck,
   finishTonight,
   holdHeroesFromTest,
   installSessionSocketHook,
@@ -1005,6 +1006,7 @@ const resumeSavedGame = async (page: Page, options: { goOnWithoutTower?: boolean
     await page.locator('button[data-pause-ask="go-on-without"]').click({ timeout: 20_000 });
     await page.locator('button[data-action-id="go-on-without"]').click();
   }
+  await finishPieceCheck(page);
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
 };
 

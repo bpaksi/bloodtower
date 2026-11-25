@@ -32,6 +32,16 @@ export interface MockTower extends TowerPort {
    * `{ type: "sequence", sequence, soundIndex? }` once per dispatch; no raw bytes.
    */
   lightSequence: (sequence: string, soundIndex?: number) => Promise<"written" | "failed">;
+  /**
+   * `mechanics.rotate-drum` (DEC-716, C2-11). Recorded as `{ type: "rotate-drum", drumIndex, position }`
+   * once per dispatch; no raw bytes.
+   */
+  rotateDrum: (drumIndex: number, position: number) => Promise<"written" | "failed">;
+  /**
+   * Fails a future `rotateDrum` call once. `atAttempt` is 1-based from now (default 1 = the very
+   * next rotate; 2 = succeed the first rotate, fail the second, EV-06).
+   */
+  failNextRotate: (atAttempt?: number) => void;
   /** Drops the link while keeping prior calibration readings (tower-lost pause). */
   loseConnection: () => void;
   onSnapshotChange: (listener: () => void) => () => void;
@@ -50,6 +60,7 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   let failIdle = false;
   let failConnect = false;
   let failCalibrate = false;
+  let failRotateCountdown = 0;
   let idleAttempts = 0;
   const snapshotListeners = new Set<() => void>();
   const notifySnapshot = () => {
@@ -139,6 +150,24 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
         ...(soundIndex === undefined ? {} : { soundIndex }),
       });
       return "written";
+    },
+    rotateDrum: async (drumIndex, position) => {
+      if (
+        snapshot.connection !== "connected" ||
+        snapshot.calibrated.state !== "known" ||
+        !snapshot.calibrated.calibrated
+      ) {
+        return "failed";
+      }
+      sent.push({ type: "rotate-drum", drumIndex, position });
+      if (failRotateCountdown > 0) {
+        failRotateCountdown -= 1;
+        if (failRotateCountdown === 0) return "failed";
+      }
+      return "written";
+    },
+    failNextRotate: (atAttempt = 1) => {
+      failRotateCountdown = Math.max(1, Math.trunc(atAttempt));
     },
     failNextIdle: () => {
       failIdle = true;

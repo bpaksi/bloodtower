@@ -1,7 +1,13 @@
 import type { KingdomId } from "../chapter/board.ts";
-import { nextPlayRng, playState } from "../chapter/playState.ts";
+import { nextPlayRng, type PlayState, playState } from "../chapter/playState.ts";
 import { recordOffer } from "../session/shellRef.ts";
-import { ensureClock, isFallen, recordBuildingDrop, recordHeldSkull } from "./clock.ts";
+import {
+  captureClock,
+  ensureClock,
+  isFallen,
+  recordBuildingDrop,
+  recordHeldSkull,
+} from "./clock.ts";
 
 /** Target id in skull-record prompts when the skull stayed inside the tower (DEC-064). */
 export const SKULL_STAYED_INSIDE_TARGET = "inside";
@@ -121,4 +127,45 @@ export type SkullRecord = {
   kingdom: KingdomId;
   spaceId: string;
   building: string | null;
+};
+
+/**
+ * Count of skulls recorded as "inside" and still trapped in the tower (DEC-717, C2-11).
+ * Read-only: uses `captureClock` so it never creates or mutates the day clock.
+ */
+export const trappedSkullCount = (play: PlayState): number => {
+  const clock = captureClock(play);
+  if (!clock) return 0;
+  return Math.max(0, clock.held);
+};
+
+/**
+ * Buildings with saved skulls on them (DEC-710, C2-11). Read-only: never mutates the day clock.
+ */
+export const savedBuildingSkulls = (
+  play: PlayState,
+): { spaceId: string; name: string; kingdom: KingdomId; skulls: number; fallen: boolean }[] => {
+  const clock = captureClock(play);
+  if (!clock) return [];
+  const rows: {
+    spaceId: string;
+    name: string;
+    kingdom: KingdomId;
+    skulls: number;
+    fallen: boolean;
+  }[] = [];
+  for (const space of play.content.board.spaces) {
+    if (!space.building) continue;
+    const count = clock.skulls[space.id] ?? 0;
+    if (count > 0) {
+      rows.push({
+        spaceId: space.id,
+        name: space.name,
+        kingdom: space.kingdom,
+        skulls: count,
+        fallen: count >= 4,
+      });
+    }
+  }
+  return rows;
 };

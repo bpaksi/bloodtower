@@ -495,3 +495,40 @@ export const playToDayRoll = async (pad: Page) => {
   }
   await expect(day.first()).toBeVisible({ timeout: 20_000 });
 };
+
+/**
+ * C2-11: Continue runs the piece check between the tower block (and any hero re-pick) and the
+ * resumed chapter. Clicks Done (turning drums first when offered) on each step until play resumes.
+ * Safe to call when the save stopped before play (no piece check runs).
+ */
+export const finishPieceCheck = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await expect
+    .poll(() => main.getAttribute("data-screen"), { timeout: 20_000 })
+    .toMatch(/^(piece-check|play)$/);
+  for (let guard = 0; guard < 12; guard += 1) {
+    const screen = await main.getAttribute("data-screen");
+    if (screen !== "piece-check") return;
+    const step = await main.getAttribute("data-piece-check-step");
+    const turn = main.locator('button[data-action-id="turn-drums"]');
+    if ((await turn.count()) > 0 && (await turn.isEnabled())) {
+      await turn.click();
+      await expect(main.locator('button[data-action-id="confirm"]')).toBeEnabled({
+        timeout: 20_000,
+      });
+    }
+    const confirm = main.locator('button[data-action-id="confirm"]');
+    await expect(confirm).toBeEnabled({ timeout: 20_000 });
+    await confirm.click();
+    await expect
+      .poll(
+        async () => {
+          const nextScreen = await main.getAttribute("data-screen");
+          const nextStep = await main.getAttribute("data-piece-check-step");
+          return nextScreen !== "piece-check" || nextStep !== step;
+        },
+        { timeout: 20_000 },
+      )
+      .toBe(true);
+  }
+};

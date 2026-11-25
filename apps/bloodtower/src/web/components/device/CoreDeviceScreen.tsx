@@ -1,6 +1,6 @@
 "use client";
 
-import type { DeviceView, GearView, OfferedAction } from "bloodtower-protocols";
+import type { DeviceView, GearView, OfferedAction, PieceCheckView } from "bloodtower-protocols";
 import { Fragment, useState } from "react";
 
 import { VOLUME_LINE } from "../../lib/volumeTest.ts";
@@ -32,6 +32,7 @@ const SCREEN_TITLE: Record<string, string> = {
   "claim-heroes": "Party Join",
   setup: "Board setup",
   begin: "Begin",
+  "piece-check": "Piece check",
   play: "The move",
   pause: "Paused",
   session: "Session",
@@ -51,6 +52,7 @@ const STEP_CONTEXT: Record<string, string> = {
   "claim-heroes": "Party Join",
   setup: "Setup",
   begin: "Begin",
+  "piece-check": "Piece check",
   play: "Play",
   pause: "Paused",
   session: "Session",
@@ -538,6 +540,119 @@ function TowerMark() {
 }
 
 /**
+ * Continue's piece check on the iPad (C2-11, SCR-011, mockup.html):
+ * Steps 1-4, 4a, 6: Done (primary) and Skip (secondary).
+ * Step 5 (drums): Turn the drums (primary), then Done and Skip side by side (Done disabled until pressed).
+ */
+function PieceCheckDevice({
+  pieceCheck,
+  actions,
+  live,
+  onAct,
+}: {
+  pieceCheck: PieceCheckView;
+  actions: OfferedAction[];
+  live: boolean;
+  onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
+}) {
+  const find = (actionId: string) => actions.find((action) => action.actionId === actionId);
+  const done = find("confirm");
+  const skip = find("skip");
+  const turn = find("turn-drums");
+
+  if (pieceCheck.stepId === "drums") {
+    return (
+      <div className="mt-2" data-piece-check-device="drums">
+        <TowerMark />
+        <h2 className="bt-title" data-step-instruction="">
+          {pieceCheck.title}
+        </h2>
+        <div className="mt-5 flex flex-col gap-3">
+          {turn ? (
+            <button
+              type="button"
+              className="bt-primary"
+              data-prompt-id={turn.promptId}
+              data-action-id={turn.actionId}
+              data-action={turn.actionId}
+              disabled={!live || !turn.open}
+              onClick={() => onAct(turn.promptId, turn.actionId)}
+            >
+              {turn.label}
+            </button>
+          ) : null}
+        </div>
+        <div className="mt-5 flex gap-3">
+          {done ? (
+            <button
+              type="button"
+              className="bt-secondary"
+              data-prompt-id={done.promptId}
+              data-action-id={done.actionId}
+              data-action={done.actionId}
+              disabled={!live || !done.open}
+              onClick={() => onAct(done.promptId, done.actionId)}
+            >
+              {done.label}
+            </button>
+          ) : null}
+          {skip ? (
+            <button
+              type="button"
+              className="bt-secondary"
+              data-prompt-id={skip.promptId}
+              data-action-id={skip.actionId}
+              data-action={skip.actionId}
+              disabled={!live || !skip.open}
+              onClick={() => onAct(skip.promptId, skip.actionId)}
+            >
+              {skip.label}
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2" data-piece-check-device={pieceCheck.stepId}>
+      <TowerMark />
+      <p className="bt-caption" data-step-instruction="">
+        {pieceCheck.line}
+      </p>
+      <div className="mt-5 flex flex-col gap-3">
+        {done ? (
+          <button
+            type="button"
+            className="bt-primary"
+            data-prompt-id={done.promptId}
+            data-action-id={done.actionId}
+            data-action={done.actionId}
+            disabled={!live || !done.open}
+            onClick={() => onAct(done.promptId, done.actionId)}
+          >
+            {done.label}
+          </button>
+        ) : null}
+        {skip ? (
+          <button
+            type="button"
+            className="bt-secondary"
+            data-prompt-id={skip.promptId}
+            data-action-id={skip.actionId}
+            data-action={skip.actionId}
+            disabled={!live || !skip.open}
+            onClick={() => onAct(skip.promptId, skip.actionId)}
+          >
+            {skip.label}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/**
  * A tower lost mid-game (DEC-301, mockup "Paused, tower lost"): Reconnect, Go on without, Quit.
  * Go on without and Quit each ask first; the question is this iPad's, nothing is sent until Yes.
  */
@@ -994,11 +1109,15 @@ export function CoreDeviceScreen({
   const towerLostPause =
     view.screen === "pause" && actions.some((action) => action.actionId === "reconnect");
 
+  const pieceCheck = view.screen === "piece-check" ? (view.pieceCheck ?? null) : null;
+
   return (
     <main
       className="bt-device"
       data-screen={view.screen}
       data-setup-step={setupStep}
+      data-piece-check-step={pieceCheck?.stepId ?? undefined}
+      data-piece-check-number={pieceCheck?.stepNumber ?? undefined}
       data-chapter-stage={beat?.stage ?? undefined}
       data-paused={view.gear?.paused ? "true" : "false"}
       data-volume={view.gear?.volume ?? undefined}
@@ -1015,6 +1134,13 @@ export function CoreDeviceScreen({
           <GearDevicePanel gear={panel} live={live} onAct={onAct} />
         ) : towerLostPause ? (
           <TowerLostPause view={view} live={live} onAct={onAct} />
+        ) : pieceCheck ? (
+          <PieceCheckDevice
+            pieceCheck={pieceCheck}
+            actions={view.actions}
+            live={live}
+            onAct={onAct}
+          />
         ) : beat ? (
           beat.table ? (
             <SetTheTableDevice
