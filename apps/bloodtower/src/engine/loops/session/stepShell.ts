@@ -645,7 +645,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     // The fun rating on a game's stats; it changes nothing else (SCR-019).
     if (state.screen === "session" && state.statsGame !== null && e.settingId === RATING_SETTING) {
       const next = { ...state, eventSeq: eventSeq + 1 };
-      rateOpenGame(next, e.optionId, effects);
+      rateOpenGame(next, e.deviceId, e.optionId, effects);
       effects.push({ kind: "view-refresh", v: 1 });
       return withEffects(next, effects);
     }

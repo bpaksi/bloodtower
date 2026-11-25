@@ -35,6 +35,7 @@ import type {
   ViewState,
   VirtuePanelView,
 } from "../../views/state.ts";
+import { type GameStatsInput, gameStatsLines } from "../../views/stats.ts";
 import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
 import { ensureClock, heroCount, heroSheet, isFallen } from "../day/clock.ts";
 import { type DayLocal, eventChoicePromptId, parseEventChoicePrompt } from "../day/loop.ts";
@@ -100,7 +101,7 @@ import {
 } from "./pieceCheck.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
 import { soundActions, soundStepOnBoard, VOLUME_LINE } from "./sound.ts";
-import type { HintHold, ShellState } from "./state.ts";
+import type { HintHold, ShellState, TonightGame } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
 /** Matches protocol v2 setup screens (private lines on these only). */
@@ -988,7 +989,17 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
  * Public lines the Story board paints. The screen line stays last so an iPad's
  * `shows` text stays that line. Join is added later and must keep the total at 8.
  */
-const sessionLevels = (state: ShellState): LoopLevel[] => {
+/**
+ * The ratings in seat order, one per iPad that held a hero when the game ended (Q-C3-21). An iPad
+ * that rated without holding a hero comes last, so no rating is dropped.
+ */
+const seatRatings = (game: TonightGame): (number | null)[] => {
+  const seats = [...new Set(Object.values(game.holdings))];
+  const spare = Object.keys(game.ratings).filter((deviceId) => !seats.includes(deviceId));
+  return [...seats, ...spare].map((deviceId) => game.ratings[deviceId] ?? null);
+};
+
+const sessionLevels = (state: ShellState, stats: GameStatsInput | null): LoopLevel[] => {
   const levels: LoopLevel[] = [];
   if (state.confirm) {
     const asked = {
@@ -1008,7 +1019,11 @@ const sessionLevels = (state: ShellState): LoopLevel[] => {
     levels.push({
       id: "game-stats",
       label: `Game ${state.statsGame}`,
-      shows: statsLines(open, title ?? open.storyId).join("\n"),
+      // A finished game shows its stored stats (C3/17); a quit game keeps the C2 read-out.
+      shows: (stats
+        ? gameStatsLines(stats, seatRatings(open))
+        : statsLines(open, title ?? open.storyId)
+      ).join("\n"),
     });
     // The last iPad leaving still brings the join QR (DEC-712).
     if (state.devices.size === 0)
@@ -1032,10 +1047,14 @@ const sessionLevels = (state: ShellState): LoopLevel[] => {
   return levels;
 };
 
-const startupLevels = (state: ShellState, story: ShellStory | undefined): LoopLevel[] => {
+const startupLevels = (
+  state: ShellState,
+  story: ShellStory | undefined,
+  stats: GameStatsInput | null,
+): LoopLevel[] => {
   if (state.screen === "play" || state.screen === "pause") return [];
   const leading: LoopLevel[] = [];
-  if (state.screen === "session") leading.push(...sessionLevels(state));
+  if (state.screen === "session") leading.push(...sessionLevels(state, stats));
   if (state.screen === "pick-story") {
     for (const entry of state.stories.slice(0, 5)) {
       const door = doorLevel(entry, entry.card.id === state.focusStoryId);
@@ -1093,6 +1112,8 @@ const helpScreenFor = (state: ShellState): string => {
   ) {
     return "day-on-the-board";
   }
+  // A game's stats, from tonight's games or straight after the outcome (C3/17, EV-10).
+  if (state.screen === "session" && state.statsGame !== null && !state.confirm) return "game-stats";
   const mapped: Record<string, string> = {
     splash: "waiting",
     "pick-story": "pick-story",
@@ -1272,7 +1293,14 @@ export const captureHintHold = (state: ShellState): HintHold => {
   };
 };
 
-export const projectShellView = (state: ShellState): ViewState => {
+/**
+ * `stats` is the open finished game's stored stats, read by the host from the event log (C3/17,
+ * DEC-627). The engine never reads the log, so without it the stats screen shows the C2 read-out.
+ */
+export const projectShellView = (
+  state: ShellState,
+  stats: GameStatsInput | null = null,
+): ViewState => {
   const story = chosenOrBound(state);
   const screen = state.screen;
   const title = story?.card.title ?? "Story";
@@ -1310,7 +1338,14 @@ export const projectShellView = (state: ShellState): ViewState => {
           {
             id: RATING_SETTING,
             label: RATING_LABEL,
-            optionId: ratedGame.rating === null ? RATING_UNSET : String(ratedGame.rating),
+            // Each iPad sees its own rating pressed (Q-C3-21); the view's own value is "not rated".
+            optionId: RATING_UNSET,
+            byDevice: Object.fromEntries(
+              Object.entries(ratedGame.ratings).map(([deviceId, rating]) => [
+                deviceId,
+                String(rating),
+              ]),
+            ),
             options: RATING_OPTIONS.map((rating) => ({ id: rating, label: rating })),
           },
         ]
@@ -1328,7 +1363,7 @@ export const projectShellView = (state: ShellState): ViewState => {
 
   return {
     screen,
-    levels: [...startupLevels(state, story), screenLevel],
+    levels: [...startupLevels(state, story, stats), screenLevel],
     heroes,
     actions,
     ...(settings && settings.length > 0 ? { settings } : {}),

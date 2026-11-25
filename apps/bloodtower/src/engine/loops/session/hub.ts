@@ -336,7 +336,7 @@ export const recordGame = (
     moves: started ? state.tally.moves : null,
     buildings: started ? state.tally.buildings : null,
     skulls: started ? state.tally.skulls : null,
-    rating: existing?.rating ?? null,
+    ratings: existing?.ratings ?? {},
   };
   state.games = existing
     ? state.games.map((row) => (row.gameId === gameId ? game : row))
@@ -356,9 +356,13 @@ export const statsLines = (game: TonightGame, storyTitle: string): string[] => [
   `Skull drops recorded: ${count(game.skulls)}`,
 ];
 
-/** The fun rating on the open stats screen. Anything outside 1 to 5 is an error, not a silent skip. */
+/**
+ * One iPad's fun rating on the open stats screen; its own rating only (Q-C3-21). Anything outside
+ * 1 to 5 is an error, not a silent skip.
+ */
 export const rateOpenGame = (
   state: ShellState,
+  deviceId: string,
   optionId: string,
   effects: Array<EngineEffect | ShellEffect>,
 ): void => {
@@ -375,7 +379,9 @@ export const rateOpenGame = (
     });
     return;
   }
-  state.games = state.games.map((row) => (row === game ? { ...row, rating } : row));
+  state.games = state.games.map((row) =>
+    row === game ? { ...row, ratings: { ...row.ratings, [deviceId]: rating } } : row,
+  );
 };
 
 /** A game setting's value for the record: the chosen option, else the default, else unknown. */

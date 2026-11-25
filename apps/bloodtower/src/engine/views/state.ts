@@ -269,6 +269,8 @@ export type ViewSetting = {
   id: string;
   label: string;
   optionId: string;
+  /** A setting each iPad holds its own value of (the fun rating): device id → option id. */
+  byDevice?: Record<string, string>;
   options: { id: string; label: string }[];
 };
 

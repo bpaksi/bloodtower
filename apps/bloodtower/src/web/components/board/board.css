@@ -2634,6 +2634,33 @@
   color: var(--bt-iron-gall);
 }
 
+/* The key moments of a finished game (C3/17): a short list between the gold and the length. */
+.bt-stat-moments dd {
+  margin: 0;
+}
+
+.bt-stat-moments {
+  display: grid;
+  grid-template-columns: minmax(10rem, auto) 1fr;
+  gap: 0.25rem 1.2rem;
+  align-items: baseline;
+}
+
+.bt-stat-moments dt {
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-label);
+  letter-spacing: 0.1em;
+  color: var(--bt-vellum-shadow);
+}
+
+.bt-stat-moments ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--bt-size-body);
+  color: var(--bt-iron-gall);
+}
+
 .bt-session-rows .bt-session-label {
   margin-top: 1rem;
   font-family: var(--bt-font-label);

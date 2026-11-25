@@ -117,7 +117,8 @@ const upgradeGame = (row: SerializedShellState, game: Partial<TonightGame>): Ton
   moves: game.moves ?? null,
   buildings: game.buildings ?? null,
   skulls: game.skulls ?? null,
-  rating: game.rating ?? null,
+  // A checkpoint from before C3/17 has one rating with no iPad to credit it to: it is not kept.
+  ratings: game.ratings ?? {},
 });
 
 export const deserializeShellState = ({

@@ -27,8 +27,10 @@ import {
 import { towerReady } from "../../engine/loops/session/tower.ts";
 import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
+import type { GameStatsInput } from "../../engine/views/stats.ts";
 import type { BoardView, DeviceView, ErrorCode, PackedLine } from "../../protocols/v2/index.ts";
 import { AUTO_ADVANCE_MS } from "../../protocols/v2/views.ts";
+import { projectGameStats } from "../events/gameStats.ts";
 import { type PressKind, parseHostPayload } from "../events/kinds.ts";
 import type { EventStore } from "../events/store.ts";
 import type { HostLogger } from "../log/hostLog.ts";
@@ -270,11 +272,35 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const marker = state.sessionEnded
       ? "ended"
       : state.enter === null && state.towerChoice !== "undecided"
-        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => `${game.outcome}:${game.rating ?? "-"}`).join("")}-${isOnOutcome(state.loops.stack) ? "outcome" : state.screen === "session" ? "session" : "game"}-${state.focusStoryId}`
+        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => `${game.outcome}:${JSON.stringify(game.ratings)}`).join("")}-${isOnOutcome(state.loops.stack) ? "outcome" : state.screen === "session" ? "session" : "game"}-${state.focusStoryId}`
         : "";
     if (marker === "" || marker === savedMarker) return;
     writeStateCheckpoint();
     savedMarker = marker;
+  };
+
+  /**
+   * The stored stats of the finished game open on the stats screen (C3/17, DEC-627), read from the
+   * event log: the record, its key moments, and the best and average under its key. A quit game
+   * keeps the C2 read-out. When the log cannot be read the error is logged and the C2 read-out
+   * shows, so the screen is never blank.
+   */
+  const openGameStats = (): GameStatsInput | null => {
+    if (state.screen !== "session" || state.confirm || state.statsGame === null) return null;
+    const game = state.games[state.statsGame - 1];
+    if (!game || game.outcome === "quit") return null;
+    try {
+      const stats = projectGameStats(options.store, game.gameId);
+      if (!stats || stats.outcome === "quit") return null;
+      return { ...stats, outcome: stats.outcome };
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
+      options.log.error(
+        "game-stats",
+        detail.trim() === "" ? "The game's stats could not be read." : detail,
+      );
+      return null;
+    }
   };
 
   const effectsCtx = () => ({
@@ -918,7 +944,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       enqueue({ kind: "press", v: 1, deviceId, promptId, actionId }, deviceId);
     },
     projectBoard: (join) => {
-      const view = projectShellView(state);
+      const view = projectShellView(state, openGameStats());
       const board = project(view, { kind: "board" });
       return {
         ...board,

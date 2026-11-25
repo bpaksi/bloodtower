@@ -103,8 +103,8 @@ export type TonightGame = {
   moves: number | null;
   buildings: number | null;
   skulls: number | null;
-  /** The optional 1 to 5 fun rating; never blocks anything. */
-  rating: number | null;
+  /** The optional 1 to 5 fun rating, one per iPad (Q-C3-21); never blocks anything. */
+  ratings: Record<string, number>;
 };
 
 /** What the session screen is asking "Are you sure?" about (DEC-709, DEC-713). */
