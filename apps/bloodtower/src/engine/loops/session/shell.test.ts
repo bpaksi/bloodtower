@@ -1201,3 +1201,63 @@ describe("CU/16 the disconnect pause has the Pick rows (DEC-953)", () => {
     expect(state.screen).toBe("play");
   });
 });
+
+describe("R08 Quit from a nested loop (LC-06, DEC-218, MEC-071)", () => {
+  /** The play state with a quest half done and a group inside its building, as a battle-time quit sees it. */
+  const nestedPlay = () => {
+    const state = reachPlay(false);
+    const play = state.play;
+    if (!play) throw new Error("no play state");
+    const group = play.groups[0];
+    if (!group) throw new Error("no group");
+    const turn: GroupTurnLocal = {
+      groupId: group.id,
+      movesLeft: 2,
+      awaitingPress: false,
+      encounterPending: true,
+      landedOnBuildingWithNoMoves: false,
+    };
+    state.loops = {
+      ...state.loops,
+      stack: [
+        ...state.loops.stack,
+        { loopId: "group-turn", phase: "body", local: turn, finishing: false },
+        {
+          loopId: "encounter",
+          phase: "body",
+          local: { groupId: group.id, movesLeft: 2, serial: 0, step: { kind: "menu" } },
+          finishing: false,
+        },
+      ],
+    } as typeof state.loops;
+    return state;
+  };
+
+  it("one quit record, the autosave kept, no defeat and no outcome scene", () => {
+    const playing = nestedPlay();
+    const dayBefore = playing.play?.dayNumber;
+    const quit = stepShell(playing, press("ipad-0", "menu-quit", "quit-story"));
+    // The game returns to the session screen: the nested loops are gone, the game frame remains.
+    expect(quit.state.screen).toBe("session");
+    expect(quit.state.stage).not.toBe("playing");
+    expect(
+      quit.state.loops.stack.some((f) => f.loopId === "group-turn" || f.loopId === "encounter"),
+    ).toBe(false);
+    // One record, and it says quit: never lost, never an outcome scene.
+    const records = quit.effects.filter((effect) => effect.kind === "game-record");
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ outcome: "quit" });
+    expect(quit.state.games.map((game) => game.outcome)).toEqual(["quit"]);
+    // The save stays: the autosave is written, the play state is kept for Continue.
+    expect(quit.effects.some((effect) => effect.kind === "autosave-write")).toBe(true);
+    expect(quit.state.autosave).not.toBeNull();
+    expect(quit.state.play?.dayNumber).toBe(dayBefore);
+  });
+
+  it("a second quit press writes no second record", () => {
+    const first = stepShell(nestedPlay(), press("ipad-0", "menu-quit", "quit-story"));
+    const second = stepShell(first.state, press("ipad-0", "menu-quit", "quit-story"));
+    expect(second.effects.filter((effect) => effect.kind === "game-record")).toHaveLength(0);
+    expect(second.state.games.map((game) => game.outcome)).toEqual(["quit"]);
+  });
+});

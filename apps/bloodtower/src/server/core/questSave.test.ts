@@ -144,7 +144,7 @@ describe("a save and a quest pick (F1/02)", () => {
     const play = playOf(restored);
     expect(ensureQuests(play).done).toEqual(["herald"]);
     expect(ensureClock(play).questsWon).toBe(1);
-    expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(13);
+    expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(18);
     // C3/14: a Continue on the rewards step shows it again; the effects above ran once.
     expect(model(restored).step).toBe("result");
     expect(turnHasEnded(play, enc(restored).groupId)).toBe(true);
@@ -153,7 +153,7 @@ describe("a save and a quest pick (F1/02)", () => {
     // Both closing steps end on the host's wait-end; then the same menu as before C3/14, same gold.
     const closed = endWait(endWait(restored));
     expect(model(closed).options.map((o) => o.label)).toEqual(["Rest", "Cleanse", "Leave"]);
-    expect(heroSheet(ensureClock(playOf(closed)), "hero-a").gold).toBe(13);
+    expect(heroSheet(ensureClock(playOf(closed)), "hero-a").gold).toBe(18);
     expect(ensureQuests(playOf(closed)).done).toEqual(["herald"]);
 
     bindShellState(restored);
@@ -161,7 +161,7 @@ describe("a save and a quest pick (F1/02)", () => {
     expect(replay.refusal).toBe("That press is for a step the building has moved past.");
     expect(ensureQuests(play).done).toEqual(["herald"]);
     expect(ensureClock(play).questsWon).toBe(1);
-    expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(13);
+    expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(18);
   });
 
   it("C3/14 EV-15: a save and reload on the end hook shows it again and the quest is paid once", () => {
@@ -178,12 +178,12 @@ describe("a save and a quest pick (F1/02)", () => {
     expect(ensureQuests(play).log.length).toBe(log);
     expect(ensureQuests(play).done).toEqual(["herald"]);
     expect(ensureClock(play).questsWon).toBe(1);
-    expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(13);
+    expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(18);
 
     const closed = endWait(restored);
     expect(model(closed).step).toBe("menu");
     expect(ensureClock(playOf(closed)).questsWon).toBe(1);
-    expect(heroSheet(ensureClock(playOf(closed)), "hero-a").gold).toBe(13);
+    expect(heroSheet(ensureClock(playOf(closed)), "hero-a").gold).toBe(18);
     expect(ensureQuests(playOf(closed)).log.length).toBe(log);
   });
 });

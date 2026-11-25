@@ -340,12 +340,10 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
         .locator('[data-building-option][data-prompt-id$="--qhero--hero-b"]')
         .click();
 
-      // EV-04, EV-08: the rewards, quest gold for each present hero, one step done; no Next.
+      // EV-04, EV-08: the rewards, the base 10 for the group once (DEC-827), one step done; no Next.
       await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
       await expect(board.locator("[data-quest-track]")).toHaveAttribute("data-track-done", "1");
-      await expect(board.locator('[data-badge="quest-gold"]')).toHaveText(
-        Array(4).fill("quest +5"),
-      );
+      await expect(board.locator('[data-badge="quest-gold"]')).toHaveText(["quest +10"]);
       await expect(board.locator("[data-quest-rewards-line]")).toContainText("Tomas's Map");
       await expect(lines(board).first()).toContainText("Tomas hands you a map");
       await expect(board.locator("[data-quest-tick]")).toHaveText("Moves on by itself.");
@@ -559,7 +557,9 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
     }
   });
 
-  test("EV-04: with 2 heroes present, only they get quest gold", async ({ browser }, testInfo) => {
+  test("EV-04: a pair gets the group's quest gold once, not a share each", async ({
+    browser,
+  }, testInfo) => {
     test.setTimeout(300_000);
     // A party of two: the quest's present heroes are exactly hero A and hero B; no one else is at the table.
     const party = ["hero-a", "hero-b"] as const;
@@ -569,8 +569,8 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       await openQuest(game);
       await optionById(pad, "ask-pay-first").click();
       await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
-      await expect(board.locator('[data-badge="quest-gold"]')).toHaveText(["quest +5", "quest +5"]);
-      await expect(board.locator('[data-badge="quest-gold"]')).toHaveCount(party.length);
+      await expect(board.locator('[data-badge="quest-gold"]')).toHaveText(["quest +10"]);
+      await expect(board.locator('[data-badge="quest-gold"]')).toHaveCount(1);
     } finally {
       await closeAll(game);
     }
@@ -677,7 +677,7 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       await expect(phase(game.board, "end")).toBeVisible({ timeout: 20_000 });
       await quit(game);
     });
-    // The end: 10 gold shared and 5 quest gold each is 30 in all, paid once across every restart.
+    // The end: 10 gold shared and the base 10 for the group is 20 in all, paid once across every restart.
     const last = await resume();
     try {
       await expect(phase(last.board, "end")).toBeVisible({ timeout: 20_000 });
@@ -691,7 +691,7 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
           .locator("[data-building-option]")
           .filter({ hasText: /^Quest/ }),
       ).toHaveCount(0);
-      expect(await gearGold(last.pad, last.board)).toBe(30);
+      expect(await gearGold(last.pad, last.board)).toBe(20);
       // The host's event log: the option pressed once, each closing step ended once.
       const log = hostEvents(databasePath);
       expect(
@@ -745,7 +745,7 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible({
         timeout: 20_000,
       });
-      expect(await gearGold(pad, board)).toBe(30);
+      expect(await gearGold(pad, board)).toBe(20);
     } finally {
       await closeAll(game);
     }
@@ -795,14 +795,14 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       await closeAll(second);
     }
 
-    // Sitting 3: Continue shows the menu. 10 shared + 5 quest gold each is 30, paid once.
+    // Sitting 3: Continue shows the menu. 10 shared + the base 10 for the group is 20, paid once.
     const third = await resume();
     try {
       await expect(deviceMain(third.pad).locator('[data-building="menu"]')).toBeVisible({
         timeout: 20_000,
       });
       await expect(scene(third.board)).toHaveCount(0);
-      expect(await gearGold(third.pad, third.board)).toBe(30);
+      expect(await gearGold(third.pad, third.board)).toBe(20);
     } finally {
       await closeAll(third);
     }

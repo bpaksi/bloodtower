@@ -141,9 +141,10 @@ describe("C3/14 the quest scene on the building panel", () => {
     expect(rewards?.quest).toMatchObject({
       phase: "rewards",
       track: { done: 1, total: 1 },
-      rewards: { gold: 10, questGold: 5, items: [], presentHeroes: 2, tollShort: false },
+      // One payout badge for the group: the base pays the group 10 once (DEC-827).
+      rewards: { gold: 10, questGold: 10, items: [], presentHeroes: 1, tollShort: false },
     });
-    // 10 gold shared, 5 quest gold each (DEC-700, DEC-944).
+    // 10 gold and the base 10 for the group, shared between its two heroes (DEC-827, DEC-944).
     expect(gold(state, "hero-a")).toBe(10);
     expect(gold(state, "hero-b")).toBe(10);
     // The two heroes of the other group are absent: nothing for them.

@@ -345,7 +345,8 @@ const questRewards = (
     gold: effects.reduce((sum, e) => (e.kind === "gold" && e.amount > 0 ? sum + e.amount : sum), 0),
     questGold: store.tuning.questGold,
     items: effects.flatMap((e) => (e.kind === "item" ? [e.item] : [])),
-    presentHeroes: groupById(play, local.groupId)?.heroIds.length ?? 0,
+    // DEC-827: the base pays the group once, so the board shows one payout badge, not one a hero.
+    presentHeroes: (groupById(play, local.groupId)?.heroIds.length ?? 0) > 0 ? 1 : 0,
     tollShort,
   };
 };
