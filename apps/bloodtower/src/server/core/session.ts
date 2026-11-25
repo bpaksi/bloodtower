@@ -279,6 +279,9 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     savedMarker = marker;
   };
 
+  /** Games whose stats read already failed and was logged. */
+  const statsReadFailed = new Set<string>();
+
   /**
    * The stored stats of the finished game open on the stats screen (C3/17, DEC-627), read from the
    * event log: the record, its key moments, and the best and average under its key. A quit game
@@ -294,11 +297,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (!stats || stats.outcome === "quit") return null;
       return { ...stats, outcome: stats.outcome };
     } catch (error: unknown) {
-      const detail = error instanceof Error ? error.message : String(error);
-      options.log.error(
-        "game-stats",
-        detail.trim() === "" ? "The game's stats could not be read." : detail,
-      );
+      // The board is projected on every change: say it once per game, not once per frame.
+      if (!statsReadFailed.has(game.gameId)) {
+        statsReadFailed.add(game.gameId);
+        const detail = error instanceof Error ? error.message : String(error);
+        options.log.error(
+          "game-stats",
+          detail.trim() === "" ? "The game's stats could not be read." : detail,
+        );
+      }
       return null;
     }
   };

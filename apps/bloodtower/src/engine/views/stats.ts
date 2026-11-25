@@ -6,6 +6,11 @@
  * board's way back to rows, so the two ends cannot drift.
  */
 
+/** What one level's `shows` may hold (`levelSchema` in the v2 protocol). */
+export const STATS_SHOWS_MAX = 500;
+
+const moreLine = (count: number): string => `• and ${count} more`;
+
 /** A value the game never knew reads "unavailable", never zero. */
 export const STATS_UNAVAILABLE = "unavailable";
 
@@ -113,21 +118,33 @@ export const gameStatsLines = (
     `Corruptions: ${count(stats.corruptionsTaken)}`,
     `Gold: ${count(stats.goldLeft)}`,
   ];
-  if (stats.keyMoments.length > 0) {
-    lines.push(
-      STATS_COPY.momentsTitle,
-      ...stats.keyMoments.map((moment) => `${MOMENT_MARK}${momentLine(moment)}`),
-    );
-  }
-  lines.push(
+  const tail = [
     `${LENGTH_LABEL}: ${minutesText(stats.activeMs)} (${bestText(stats.best)} · average ${minutesText(stats.averageMs)})`,
-  );
+  ];
   if (ratings.some((rating) => rating !== null)) {
-    lines.push(
+    tail.push(
       `${STATS_COPY.ratingLabel}: ${ratings.map((rating) => (rating === null ? STATS_COPY.noRating : rating)).join(" · ")}`,
     );
   }
-  return lines;
+  if (stats.keyMoments.length > 0) {
+    lines.push(STATS_COPY.momentsTitle);
+    // All the lines travel in one level's `shows`, which the protocol caps. The moments that do
+    // not fit are not dropped quietly: the last line says how many were left out.
+    let used = [...lines, ...tail].join("\n").length;
+    const moments = stats.keyMoments.map((moment) => `${MOMENT_MARK}${momentLine(moment)}`);
+    for (const [index, line] of moments.entries()) {
+      const hidden = moments.length - index - 1;
+      // Room for the "and N more" line, sized for the largest N so it always fits.
+      const reserve = hidden > 0 ? 1 + moreLine(moments.length).length : 0;
+      if (used + 1 + line.length + reserve > STATS_SHOWS_MAX) {
+        lines.push(moreLine(moments.length - index));
+        break;
+      }
+      lines.push(line);
+      used += 1 + line.length;
+    }
+  }
+  return [...lines, ...tail];
 };
 
 export type ParsedStats = {

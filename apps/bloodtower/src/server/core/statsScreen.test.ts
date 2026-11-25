@@ -13,6 +13,7 @@ import { ensureQuests } from "../../engine/loops/quest/store.ts";
 import { TEST_STORY } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
 import { OPENING_MOMENTS, openingPromptId } from "../../protocols/opening.ts";
+import { boardViewPayloadSchema } from "../../protocols/v2/index.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore } from "../db/store.ts";
 import { projectGameRecords } from "../events/gameStats.ts";
@@ -257,6 +258,46 @@ describe("the game stats screen reads the stored record (C3/17)", () => {
       "• Day 1: Chapter won.",
       "Length: 50 min (best 40 min · average 45 min)",
     ]);
+  });
+
+  it("a game with many long-named key moments still fits the board's frame, and says how many it left out", async () => {
+    const { boot, store, clock } = harness();
+    const session = await boot();
+    await playGame(session, clock, "win", 50);
+    const gameId = session.state().games[0]?.gameId ?? "";
+    const long = (tag: string) => `${tag}${"x".repeat(80 - tag.length)}`;
+    for (let index = 0; index < 20; index += 1) {
+      store.append({
+        gameId,
+        kind: "key-moment",
+        payload: {
+          v: 1,
+          moment: index % 2 === 0 ? "item-gained" : "quest-done",
+          day: index + 1,
+          hero: long("hero"),
+          item: long("item"),
+          quest: long("quest"),
+        },
+        atMonoMs: 0,
+        atWall: "2026-10-01T00:00:00.000Z",
+        deviceId: null,
+        seed: "seed",
+        packVersion: "0.1.0",
+        engineVersion: "test",
+      });
+    }
+    const board = session.projectBoard({
+      code: "000000",
+      url: "http://127.0.0.1/join",
+      reachable: true,
+    });
+    expect(boardViewPayloadSchema.safeParse(board).success).toBe(true);
+    const lines = boardStats(session) ?? [];
+    const shown = lines.filter((line) => line.startsWith("• Day")).length;
+    const more = lines.find((line) => line.startsWith("• and "));
+    // The game's own chapter-won moment and the 20 seeded ones are all accounted for.
+    expect(shown).toBeGreaterThan(0);
+    expect(more).toBe(`• and ${21 - shown} more`);
   });
 
   it("EV-14: the first win under the key says Best: this game, with no best minutes", async () => {

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { type GameStatsInput, gameStatsLines, parseStatsLines, STATS_COPY } from "./stats.ts";
+import {
+  type GameStatsInput,
+  gameStatsLines,
+  parseStatsLines,
+  STATS_COPY,
+  STATS_SHOWS_MAX,
+} from "./stats.ts";
 
 const MIN = 60_000;
 
@@ -104,6 +110,35 @@ describe("C3/17 the game stats lines", () => {
     expect(gameStatsLines(LOSS, [null, null]).at(-1)).toBe(
       "Length: 42 min (best 40 min · average 45 min)",
     );
+  });
+
+  it("keeps the lines inside one level's limit with many long moments, and counts the ones left out", () => {
+    const name = "n".repeat(80);
+    const keyMoments = Array.from({ length: 25 }, (_, index) => ({
+      moment: "item-gained" as const,
+      day: index + 1,
+      hero: name,
+      item: name,
+    }));
+    const lines = gameStatsLines({ ...LOSS, keyMoments }, [4, 2, 5, 1]);
+    expect(lines.join("\n").length).toBeLessThanOrEqual(STATS_SHOWS_MAX);
+    const shown = lines.filter((line) => line.startsWith("• Day")).length;
+    expect(shown).toBeGreaterThan(0);
+    expect(shown).toBeLessThan(25);
+    expect(lines.find((line) => line.startsWith("• and "))).toBe(`• and ${25 - shown} more`);
+    // The rows after the moments are still there.
+    expect(lines.at(-1)).toBe("How was tonight?: 4 · 2 · 5 · 1");
+    expect(parseStatsLines(lines.join("\n")).moments.at(-1)).toBe(`and ${25 - shown} more`);
+  });
+
+  it("says nothing about more when every moment fits", () => {
+    const keyMoments = Array.from({ length: 6 }, (_, index) => ({
+      moment: "chapter-won" as const,
+      day: index + 1,
+    }));
+    const lines = gameStatsLines({ ...LOSS, keyMoments }, []);
+    expect(lines.filter((line) => line.startsWith("• Day"))).toHaveLength(6);
+    expect(lines.some((line) => line.includes(" more"))).toBe(false);
   });
 
   it("rounds the minutes and never reads a short game as zero minutes", () => {

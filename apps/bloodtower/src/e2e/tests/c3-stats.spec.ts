@@ -6,6 +6,7 @@ import { openDatabase } from "../../server/db/client.ts";
 import { createEventStore } from "../../server/events/store.ts";
 import {
   enterWithoutTower,
+  enterWithTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   passChapterCard,
@@ -144,7 +145,7 @@ type Table = {
 const openTable = async (
   browser: Browser,
   testInfo: TestInfo,
-  options: { c3?: boolean; seed?: string; seeded?: Seed[] } = {},
+  options: { c3?: boolean; tower?: boolean; seed?: string; seeded?: Seed[] } = {},
 ): Promise<Table> => {
   const packsDir = options.c3 ? c3Packs() : undefined;
   const seeded = options.seeded ? seededDatabase(options.seeded) : null;
@@ -165,7 +166,8 @@ const openTable = async (
   await installSessionSocketHook(pad);
   await installSendCounter(pad);
   await pad.goto(`/join?code=${host.host.joinCode}`);
-  await enterWithoutTower(pad);
+  if (options.tower) await enterWithTower(pad);
+  else await enterWithoutTower(pad);
   await clickAct(pad, "continue", "continue-pick-story-test");
   const size = pad.locator('button[data-setting="party-size"][data-option="n-1"]');
   await size.click();
@@ -452,6 +454,7 @@ test.describe("C3/17 game stats screen (SCR-019)", { tag: "@ipad-only" }, () => 
   }, testInfo) => {
     test.setTimeout(240_000);
     const first = await openTable(browser, testInfo, {
+      tower: true,
       seed: LOSS_SEED,
       seeded: [{ outcome: "won", activeMs: 40 * MIN }],
     });
@@ -467,6 +470,13 @@ test.describe("C3/17 game stats screen (SCR-019)", { tag: "@ipad-only" }, () => 
       expect(length).toMatch(/best 40 min/);
       await first.pad.locator('[data-action="menu"]').click();
       await expect(first.pad.locator("[data-menu]")).toBeVisible();
+      // A gear panel (Volume) open when the host stops (EV-12).
+      const volume = first.pad.locator('[data-menu] button[data-gear-item="volume"]');
+      await expect(volume).toBeEnabled();
+      await volume.click();
+      await expect(first.pad.locator('[data-gear-panel="volume"]')).toBeVisible({
+        timeout: 20_000,
+      });
     } finally {
       // The log is the database, so it outlives the host: do not remove it with the table.
       await first.pad.context().close();
@@ -496,6 +506,7 @@ test.describe("C3/17 game stats screen (SCR-019)", { tag: "@ipad-only" }, () => 
       // EV-12: the Menu is closed, the game is not paused, the toolbar is back.
       await expect(pad.locator("[data-menu]")).toHaveCount(0);
       await expect(pad.locator("[data-panel], [data-gear-panel]")).toHaveCount(0);
+      await expect(board.locator("[data-panel]")).toHaveCount(0);
       await expect(deviceMain(pad)).toHaveAttribute("data-paused", "false");
       await expectToolbar(pad);
       expect((await readMenu(pad)).length).toBeGreaterThan(3);
