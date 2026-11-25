@@ -1003,4 +1003,228 @@ describe("C2-11 Continue piece check (server + tower + survival)", () => {
     expect(second.session.state().pause).toBeNull();
     expect(second.session.state().pieceCheck).toBeNull();
   });
+
+  it("restart after finishing Play-without-Tower Continue from a mid-check tower-lost crash restores pick-story and CU/16 hero re-pick", async () => {
+    const { boot } = harness();
+    const first = await boot();
+    const {
+      pad: oldPad,
+      act,
+      gameId,
+    } = await playAndQuitWithSeed(first.session, "~test-drums:2,0,0");
+
+    // Mid-check on skulls, tower drops -> tower-lost pause -> host crashes.
+    await act("continue-saved-game", "continue");
+    await act(pieceCheckPromptId("hero-minis"), "confirm");
+    expect(board(first.session).pieceCheck?.stepId).toBe("skulls");
+
+    first.tower.loseConnection();
+    first.session.syncTowerSnapshot();
+    await first.session.whenIdle();
+    expect(first.session.state().screen).toBe("pause");
+    expect(first.session.state().pause?.cause).toBe("tower-lost");
+
+    const roster = first.session.roster().devices;
+    const savedDevice = roster[0];
+    if (!savedDevice) throw new Error("Expected saved device.");
+
+    // Second host: Enter -> Play without Tower -> Continue -> confirm skulls into play
+    // (before any play-move checkpoint is written).
+    const second = await boot();
+    second.session.restoreDevices(
+      roster.map((d) => ({ deviceId: d.id, token: d.token, formFactor: d.formFactor })),
+    );
+    second.session.rememberAutosave({ gameId, packId: "test", day: 1 });
+    const rejoined = second.session.rejoin(savedDevice.token);
+    await second.session.whenIdle();
+    if (!rejoined.ok) throw new Error("rejoin refused");
+    const act2 = actWith(second.session, rejoined.deviceId);
+    await act2("base-board-done", "board-set-up");
+    await act2("play-without-tower", "play-without-tower");
+    await act2("continue-saved-game", "continue");
+    expect(second.session.state().screen).toBe("piece-check");
+    expect(second.session.state().pieceCheck?.steps).toEqual(["hero-minis", "skulls"]);
+
+    await act2(pieceCheckPromptId("skulls"), "confirm");
+    expect(second.session.state().screen).toBe("play");
+    expect(second.session.state().pieceCheck).toBeNull();
+
+    // Third host restarts before any play-move checkpoint: must NOT boot directly into "play"
+    // with empty devices and dead pre-restart holdings.
+    const third = await boot();
+    third.session.rememberAutosave({ gameId, packId: "test", day: 1 });
+    expect(await third.session.resumeSession()).toBe(true);
+    expect(third.session.state().screen).toBe("pick-story");
+    expect(third.session.state().towerChoice).toBe("without");
+    expect(third.session.state().pieceCheck).toBeNull();
+
+    // A brand-new iPad joins and presses Continue: seatOnContinue clears dead holdings and opens
+    // CU/16 disconnect re-pick, then runs a non-tower piece check and seats all heroes on newPad.
+    const newPad = await joinPad(third.session);
+    expect(newPad).not.toBe(oldPad);
+    const act3 = actWith(third.session, newPad);
+    await act3("continue-saved-game", "continue");
+    expect(third.session.state().screen).toBe("pause");
+    expect(third.session.state().pause?.cause).toBe("disconnect");
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      expect(third.session.state().holdings[heroId] ?? null).toBeNull();
+    }
+
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      await act3("hero-hold", "take", { heroId });
+    }
+    expect(third.session.state().screen).toBe("piece-check");
+    expect(third.session.state().towerWithout).toBe(true);
+    expect(third.session.state().towerLinked).toBe(false);
+    expect(third.session.state().pieceCheck?.steps).toEqual(["hero-minis", "skulls"]);
+
+    await act3(pieceCheckPromptId("hero-minis"), "confirm");
+    await act3(pieceCheckPromptId("skulls"), "confirm");
+    expect(third.session.state().screen).toBe("play");
+    expect(third.session.state().pause).toBeNull();
+    expect(third.session.channelsFor(newPad).sort()).toEqual([
+      "ipad:hero-a",
+      "ipad:hero-b",
+      "ipad:hero-c",
+      "ipad:hero-d",
+    ]);
+    const firstGroupId = third.session.state().play?.groups[0]?.id;
+    if (!firstGroupId) throw new Error("Expected group.");
+    const choicePrompt = eventChoicePromptId(firstGroupId, "pay-off");
+    expect(
+      eventPressDeviceRefusal(third.session.state(), newPad, choicePrompt, "choose"),
+    ).toBeNull();
+    expect(
+      eventPressDeviceRefusal(third.session.state(), oldPad, choicePrompt, "choose"),
+    ).not.toBeNull();
+  });
+
+  it("disconnected tower-snapshot between Play-without-Tower Continue and next step confirm survives host restart", async () => {
+    const { boot } = harness();
+    const first = await boot();
+    const space = PROVING_GROUNDS_PLAY.board.spaces[1];
+    if (!space) throw new Error("Expected space.");
+    const { act, gameId } = await playAndQuitWithSeed(
+      first.session,
+      `~test-foes:oreks@${space.id}~test-drums:2,0,0`,
+    );
+
+    // Mid-check on skulls (with foes and drums still ahead), tower drops -> tower-lost pause.
+    await act("continue-saved-game", "continue");
+    await act(pieceCheckPromptId("hero-minis"), "confirm");
+    expect(board(first.session).pieceCheck?.stepId).toBe("skulls");
+
+    first.tower.loseConnection();
+    first.session.syncTowerSnapshot();
+    await first.session.whenIdle();
+    expect(first.session.state().screen).toBe("pause");
+    expect(first.session.state().pause?.cause).toBe("tower-lost");
+
+    const roster = first.session.roster().devices;
+    const savedDevice = roster[0];
+    if (!savedDevice) throw new Error("Expected saved device.");
+
+    // Second host: Enter -> Play without Tower -> Continue -> disconnected tower-snapshot -> confirm skulls.
+    const second = await boot();
+    second.session.restoreDevices(
+      roster.map((d) => ({ deviceId: d.id, token: d.token, formFactor: d.formFactor })),
+    );
+    second.session.rememberAutosave({ gameId, packId: "test", day: 1 });
+    const rejoined = second.session.rejoin(savedDevice.token);
+    await second.session.whenIdle();
+    if (!rejoined.ok) throw new Error("rejoin refused");
+    const act2 = actWith(second.session, rejoined.deviceId);
+    await act2("base-board-done", "board-set-up");
+    await act2("play-without-tower", "play-without-tower");
+    await act2("continue-saved-game", "continue");
+    expect(second.session.state().screen).toBe("piece-check");
+    expect(second.session.state().pieceCheck?.steps).toEqual(["hero-minis", "skulls", "foes"]);
+
+    // Disconnected tower-snapshot arrives between Continue and confirming skulls.
+    second.session.syncTowerSnapshot();
+    await second.session.whenIdle();
+    expect(second.session.state().screen).toBe("piece-check");
+    expect(second.session.state().pause).toBeNull();
+
+    await act2(pieceCheckPromptId("skulls"), "confirm");
+    expect(second.session.state().screen).toBe("piece-check");
+    expect(board(second.session).pieceCheck?.stepId).toBe("foes");
+
+    // Host restarts: replay must NOT re-open tower-lost or drop the skulls confirmation.
+    const third = await boot();
+    third.session.restoreDevices(
+      roster.map((d) => ({ deviceId: d.id, token: d.token, formFactor: d.formFactor })),
+    );
+    third.session.rememberAutosave({ gameId, packId: "test", day: 1 });
+    expect(await third.session.resumeSession()).toBe(true);
+    expect(third.session.state().screen).toBe("piece-check");
+    expect(third.session.state().pause).toBeNull();
+    expect(third.session.state().towerLinked).toBe(false);
+    expect(third.session.state().towerWithout).toBe(true);
+    expect(third.session.state().towerChoice).toBe("without");
+    expect(board(third.session).pieceCheck?.stepId).toBe("foes");
+    expect(third.session.state().pieceCheck?.steps).toEqual(["hero-minis", "skulls", "foes"]);
+    expect(third.session.state().pieceCheck?.confirmed).toEqual(["hero-minis", "skulls"]);
+
+    const rejoined3 = third.session.rejoin(savedDevice.token);
+    await third.session.whenIdle();
+    if (!rejoined3.ok) throw new Error("rejoin refused");
+    const act3 = actWith(third.session, rejoined3.deviceId);
+    await act3(pieceCheckPromptId("foes"), "confirm");
+    expect(third.session.state().screen).toBe("play");
+    expect(third.session.state().pause).toBeNull();
+    expect(third.session.state().pieceCheck).toBeNull();
+  });
+
+  it("resumeSession falls through to pick-story when dropping tower steps finishes a mid-check save", async () => {
+    const { boot } = harness();
+    const first = await boot();
+    const {
+      pad: oldPad,
+      act,
+      gameId,
+    } = await playAndQuitWithSeed(first.session, "~test-drums:2,0,0");
+
+    // Confirm all non-tower steps so piece check sits on drums, then crash mid-check.
+    await act("continue-saved-game", "continue");
+    await act(pieceCheckPromptId("hero-minis"), "confirm");
+    await act(pieceCheckPromptId("skulls"), "confirm");
+    expect(board(first.session).pieceCheck?.stepId).toBe("drums");
+
+    // Simulate a subsequent session checkpoint with towerChoice: "without" (e.g. an older log
+    // before playWithout was persisted on the game) while the game log still sits on drums.
+    const second = await boot();
+    const pad2 = await joinPad(second.session);
+    const act2 = actWith(second.session, pad2);
+    await act2("base-board-done", "board-set-up");
+    await act2("play-without-tower", "play-without-tower");
+    expect(second.session.state().screen).toBe("pick-story");
+    expect(second.session.state().towerChoice).toBe("without");
+
+    // Host restarts: dropping drums would finish midCheck into "play", so resumeSession must
+    // fall through to pick-story instead of booting directly into "play" with dead holdings.
+    const third = await boot();
+    third.session.rememberAutosave({ gameId, packId: "test", day: 1 });
+    expect(await third.session.resumeSession()).toBe(true);
+    expect(third.session.state().screen).toBe("pick-story");
+    expect(third.session.state().towerChoice).toBe("without");
+
+    const newPad = await joinPad(third.session);
+    expect(newPad).not.toBe(oldPad);
+    const act3 = actWith(third.session, newPad);
+    await act3("continue-saved-game", "continue");
+    expect(third.session.state().screen).toBe("pause");
+    expect(third.session.state().pause?.cause).toBe("disconnect");
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      await act3("hero-hold", "take", { heroId });
+    }
+    expect(third.session.state().screen).toBe("play");
+    expect(third.session.state().towerWithout).toBe(true);
+    expect(third.session.channelsFor(newPad).sort()).toEqual([
+      "ipad:hero-a",
+      "ipad:hero-b",
+      "ipad:hero-c",
+      "ipad:hero-d",
+    ]);
+  });
 });

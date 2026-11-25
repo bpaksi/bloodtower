@@ -257,8 +257,10 @@ const advancePieceCheck = (state: ShellState): boolean => {
   if (check.index >= check.steps.length) {
     state.unconfirmedPieces = [...check.skipped];
     state.pieceCheck = null;
-    state.screen = "play";
-    state.stage = "playing";
+    if (!state.pause) {
+      state.screen = "play";
+      state.stage = "playing";
+    }
     resetPlayPromptsAfterPieceCheck(state);
     return true;
   }
@@ -393,8 +395,10 @@ export const dropTowerStepsFromPieceCheck = (state: ShellState): boolean => {
   if (check.index >= check.steps.length) {
     state.unconfirmedPieces = [...check.skipped];
     state.pieceCheck = null;
-    state.screen = "play";
-    state.stage = "playing";
+    if (!state.pause) {
+      state.screen = "play";
+      state.stage = "playing";
+    }
     resetPlayPromptsAfterPieceCheck(state);
     return true;
   }

@@ -563,4 +563,82 @@ describe("piece check from a save (C2-11)", () => {
     expect(withTower.towerWithout).toBe(false);
     expect(withTower.towerChoice).toBe("connect");
   });
+
+  it("piece-check-start with towerInPlay false transitions an existing mid-check tower-lost pause cleanly", () => {
+    const saved = makeSavedShell({ drums: { top: 2, middle: 0, bottom: 0 } });
+    saved.holdings = {
+      "hero-a": "ipad-1",
+      "hero-b": "ipad-1",
+      "hero-c": "ipad-1",
+      "hero-d": "ipad-1",
+    };
+    saved.devices = new Set(["ipad-1"]);
+    saved.tower = TOWER_READY;
+    let cur = stepShell(saved, { kind: "piece-check-start", v: 1, towerInPlay: true }).state;
+    cur = stepShell(cur, {
+      kind: "press",
+      v: 1,
+      deviceId: "ipad-1",
+      promptId: pieceCheckPromptId("hero-minis"),
+      actionId: "confirm",
+    }).state;
+    cur = stepShell(cur, {
+      kind: "tower-snapshot",
+      v: 1,
+      tower: TOWER_DISCONNECTED,
+    }).state;
+    expect(cur.screen).toBe("pause");
+    expect(cur.pause).toEqual({ cause: "tower-lost", returnTo: "piece-check" });
+
+    // Dropping tower steps while skulls still remains clears tower-lost and keeps skulls open.
+    const onSkulls = stepShell(cur, {
+      kind: "piece-check-start",
+      v: 1,
+      towerInPlay: false,
+    }).state;
+    expect(onSkulls.screen).toBe("piece-check");
+    expect(onSkulls.pause).toBeNull();
+    expect(onSkulls.towerLinked).toBe(false);
+    expect(onSkulls.towerWithout).toBe(true);
+    expect(onSkulls.towerChoice).toBe("without");
+    expect(onSkulls.pieceCheck?.steps).toEqual(["hero-minis", "skulls"]);
+    expect(onSkulls.pieceCheck?.index).toBe(1);
+    expect(onSkulls.pieceCheck?.towerInPlay).toBe(false);
+
+    // If only tower steps remained (paused on drums), it finishes cleanly into play.
+    let onDrums = stepShell(saved, { kind: "piece-check-start", v: 1, towerInPlay: true }).state;
+    onDrums = stepShell(onDrums, {
+      kind: "press",
+      v: 1,
+      deviceId: "ipad-1",
+      promptId: pieceCheckPromptId("hero-minis"),
+      actionId: "confirm",
+    }).state;
+    onDrums = stepShell(onDrums, {
+      kind: "press",
+      v: 1,
+      deviceId: "ipad-1",
+      promptId: pieceCheckPromptId("skulls"),
+      actionId: "confirm",
+    }).state;
+    onDrums = stepShell(onDrums, {
+      kind: "tower-snapshot",
+      v: 1,
+      tower: TOWER_DISCONNECTED,
+    }).state;
+    expect(onDrums.screen).toBe("pause");
+    expect(onDrums.pieceCheck?.steps[onDrums.pieceCheck.index]).toBe("drums");
+
+    const finished = stepShell(onDrums, {
+      kind: "piece-check-start",
+      v: 1,
+      towerInPlay: false,
+    }).state;
+    expect(finished.screen).toBe("play");
+    expect(finished.pause).toBeNull();
+    expect(finished.pieceCheck).toBeNull();
+    expect(finished.towerLinked).toBe(false);
+    expect(finished.towerWithout).toBe(true);
+    expect(finished.towerChoice).toBe("without");
+  });
 });

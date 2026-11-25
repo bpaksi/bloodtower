@@ -63,6 +63,7 @@ import {
   applyPieceCheckTurnDrums,
   buildPieceCheck,
   type DrumSideIndex,
+  dropTowerStepsFromPieceCheck,
   ensurePieceCheckOffers,
   PIECE_CHECK_CONFIRM_ACTION,
   PIECE_CHECK_SKIP_ACTION,
@@ -487,9 +488,13 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
           next.towerWithout = false;
           next.towerChoice = "connect";
         } else {
-          if (next.towerLinked) next.towerWithout = true;
+          if (next.towerLinked || next.pause?.cause === "tower-lost") next.towerWithout = true;
           next.towerLinked = false;
           next.towerChoice = "without";
+          if (next.pause?.cause === "tower-lost") {
+            next.pause = null;
+            next.reconnect = null;
+          }
         }
         if (!next.pause) {
           next.screen = "piece-check";
@@ -497,6 +502,25 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
         } else if (next.pause.cause === "tower-lost") {
           next.pause = { ...next.pause, returnTo: "piece-check" };
         }
+      }
+    } else if (!e.towerInPlay) {
+      const hadTower =
+        next.towerLinked ||
+        next.towerWithout ||
+        next.pause?.cause === "tower-lost" ||
+        next.pieceCheck.towerInPlay;
+      next.pieceCheck = {
+        ...next.pieceCheck,
+        steps: [...next.pieceCheck.steps],
+        confirmed: [...next.pieceCheck.confirmed],
+        skipped: [...next.pieceCheck.skipped],
+      };
+      if (hadTower) {
+        goOnWithout(next);
+      } else {
+        next.towerLinked = false;
+        next.towerChoice = "without";
+        dropTowerStepsFromPieceCheck(next);
       }
     }
     bindShellState(next);

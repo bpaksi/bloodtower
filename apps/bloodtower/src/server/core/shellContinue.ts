@@ -94,10 +94,15 @@ const applyShellEvents = (start: ShellState, events: readonly ShellEvent[]): She
       event.promptId === "continue-saved-game" &&
       event.actionId === "continue"
     ) {
-      // If Continue resumed a mid-check tower-lost pause with the tower ready (the next press
-      // is a piece-check step rather than a pause-* resolution), clear the saved pause so later
-      // step confirmations in the log replay cleanly.
-      if (state.pause?.cause === "tower-lost" && state.pieceCheck !== null) {
+      // If an explicit piece-check-start follows Continue (e.g. Play-without-Tower recovery),
+      // let that event apply the tower/pause transition cleanly. Otherwise, if Continue resumed
+      // a mid-check tower-lost pause with the tower ready (the next press is a piece-check step
+      // rather than a pause-* resolution), clear the saved pause so later confirmations replay.
+      if (
+        events[i + 1]?.kind !== "piece-check-start" &&
+        state.pause?.cause === "tower-lost" &&
+        state.pieceCheck !== null
+      ) {
         const nextPress = events.slice(i + 1).find((later) => later.kind === "press");
         if (nextPress?.promptId.startsWith(PIECE_CHECK_PROMPT_PREFIX)) {
           state = {
