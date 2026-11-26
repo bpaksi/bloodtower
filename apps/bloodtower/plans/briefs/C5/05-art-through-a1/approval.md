@@ -67,3 +67,16 @@ Change note 2026-11-26 (group 2): AI drafts added for the foes (inventory §3 is
 Change note 2026-11-26 (group 3): AI drafts added for the Tomb sections, traps and Tower maps (inventory §3 issue 4), all `draft` and unticked, 1920×2160 (8:9), declared in `packs/test/pack.yaml`: painting.keep-crypt~left-corridor, ~left-wall, ~ahead-corridor, ~ahead-wall, ~right-corridor, ~right-wall, painting.trap-pit, painting.trap-falling-rocks, painting.tower-basement-map, painting.tower-main-map, painting.tower-top-map. Their rows above (27–38) were already on the checklist; nothing is ticked.
 
 Change note 2026-11-26 (group 4): `packs/test/assets/place-bazaar.jpg` recropped from 864×1152 to 16:9 at 1920×1080 (DEC-347), still `draft`; its row above (line 13) stays unticked.
+
+Change note 2026-11-26 (group 5): AI drafts added for the base pack hero portraits (inventory §3 issue 8), all `draft` and unticked, 2048×2048, declared in `packs/base/pack.yaml:95-100` with files in `packs/base/assets/`. They are base pack assets, outside the Ruined Keep `index.json` that EV-04 checks, so their rows sit in their own list below.
+
+## Base pack hero portraits (Bob)
+
+Not part of EV-04 (base pack, not `packs/test`). Nothing is final until Bob ticks it here.
+
+- [ ] portrait.hero-a — fighter — approved by Bob
+- [ ] portrait.hero-b — healer — approved by Bob
+- [ ] portrait.hero-c — magic-user — approved by Bob
+- [ ] portrait.hero-d — scout — approved by Bob
+- [ ] portrait.hero-e — ranger — approved by Bob
+- [ ] portrait.hero-f — bard — approved by Bob

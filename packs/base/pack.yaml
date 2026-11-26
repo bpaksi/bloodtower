@@ -92,9 +92,9 @@ board:
   spaces: []
 
 assets:
-  - {id: portrait.hero-a, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-b, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-c, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-d, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-e, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-f, type: portrait, target: ipad, status: placeholder}
+  - {id: portrait.hero-a, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-a.webp}
+  - {id: portrait.hero-b, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-b.webp}
+  - {id: portrait.hero-c, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-c.webp}
+  - {id: portrait.hero-d, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-d.webp}
+  - {id: portrait.hero-e, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-e.webp}
+  - {id: portrait.hero-f, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-f.webp}
