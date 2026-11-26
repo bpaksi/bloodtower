@@ -14,7 +14,7 @@ heroes:
     magic: 1
     wits: 2
     ability: Shield Wall, Weapon Master
-    portrait: por.hero-a
+    portrait: portrait.hero-a
     voice: vo.hero-a
   - id: hero-b
     name: Hero B
@@ -24,7 +24,7 @@ heroes:
     magic: 3
     wits: 3
     ability: Lightning, Mend
-    portrait: por.hero-b
+    portrait: portrait.hero-b
     voice: vo.hero-b
   - id: hero-c
     name: Hero C
@@ -34,7 +34,7 @@ heroes:
     magic: 5
     wits: 3
     ability: Magic Missile, Fireball
-    portrait: por.hero-c
+    portrait: portrait.hero-c
     voice: vo.hero-c
   - id: hero-d
     name: Hero D
@@ -44,7 +44,7 @@ heroes:
     magic: 1
     wits: 3
     ability: Shadow, Slip Past
-    portrait: por.hero-d
+    portrait: portrait.hero-d
     voice: vo.hero-d
   - id: hero-e
     name: Hero E
@@ -54,7 +54,7 @@ heroes:
     magic: 1
     wits: 5
     ability: Beast Hunter, Pathfinder
-    portrait: por.hero-e
+    portrait: portrait.hero-e
     voice: vo.hero-e
   - id: hero-f
     name: Hero F
@@ -64,7 +64,7 @@ heroes:
     magic: 3
     wits: 5
     ability: Silver Tongue, Rally
-    portrait: por.hero-f
+    portrait: portrait.hero-f
     voice: vo.hero-f
 
 building_types:
@@ -92,15 +92,9 @@ board:
   spaces: []
 
 assets:
-  - {id: por.hero-a, type: portrait, target: ipad, status: placeholder}
-  - {id: por.hero-b, type: portrait, target: ipad, status: placeholder}
-  - {id: por.hero-c, type: portrait, target: ipad, status: placeholder}
-  - {id: por.hero-d, type: portrait, target: ipad, status: placeholder}
-  - {id: por.hero-e, type: portrait, target: ipad, status: placeholder}
-  - {id: por.hero-f, type: portrait, target: ipad, status: placeholder}
-  - {id: vo.hero-a, type: line, target: ipad, status: placeholder}
-  - {id: vo.hero-b, type: line, target: ipad, status: placeholder}
-  - {id: vo.hero-c, type: line, target: ipad, status: placeholder}
-  - {id: vo.hero-d, type: line, target: ipad, status: placeholder}
-  - {id: vo.hero-e, type: line, target: ipad, status: placeholder}
-  - {id: vo.hero-f, type: line, target: ipad, status: placeholder}
+  - {id: portrait.hero-a, type: portrait, target: ipad, status: placeholder}
+  - {id: portrait.hero-b, type: portrait, target: ipad, status: placeholder}
+  - {id: portrait.hero-c, type: portrait, target: ipad, status: placeholder}
+  - {id: portrait.hero-d, type: portrait, target: ipad, status: placeholder}
+  - {id: portrait.hero-e, type: portrait, target: ipad, status: placeholder}
+  - {id: portrait.hero-f, type: portrait, target: ipad, status: placeholder}

@@ -32,8 +32,8 @@ A placeholder that has no file is marked "(no file)".
 
 | Pack | Total | Final | Draft | Placeholder | Missing file | Not declared |
 |---|---|---|---|---|---|---|
-| packs/base | 15 | 0 | 0 | 12 (no file) | 3 | 0 |
-| packs/test (The Ruined Keep) | 50 | 4 | 0 | 13 (no file) | 32 | 1 |
+| packs/base | 9 | 0 | 0 | 6 (no file) | 3 | 0 |
+| packs/test (The Ruined Keep) | 50 | 0 | 4 | 13 (no file) | 32 | 1 |
 | packs/dracula: pictures | 112 | 0 | 0 | 0 | 5 | 107 |
 | packs/dracula: voice lines (D-06 manifest) | 255 | 0 | 0 | 0 | 255 | 0 |
 | UI (app-level) | 15 file rows (64 files) + 2 code-only rows | 1 row (Keeper avatar, 14 files) | 0 | 0 | 0 | 14 rows |
@@ -51,8 +51,8 @@ Not counted above:
 
 | asset id | type | used by | state | blocked on |
 |---|---|---|---|---|
-| `por.hero-a` … `por.hero-f` (6) | portrait | Claim Heroes, the hunter roll and iPad cards (`PortraitCard.tsx`; `pack.yaml:17,27,37,47,57,67`) | placeholder (no file) (`pack.yaml:95-100`) | final text (hero names are still "Hero A"–"Hero F") and Bob's art hold |
-| `vo.hero-a` … `vo.hero-f` (6) | voice line | hero voice (`pack.yaml:18,28,38,48,58,68`) | placeholder (no file) (`pack.yaml:101-106`) | final text (no text or speaker exists) |
+| `portrait.hero-a` … `portrait.hero-f` (6) | portrait | Claim Heroes, the hunter roll and iPad cards (`PortraitCard.tsx`; `pack.yaml:17,27,37,47,57,67`) | placeholder (no file) (`pack.yaml:95-100`) | final text (hero names are still "Hero A"–"Hero F") and Bob's art hold |
+| ~~`vo.hero-a` … `vo.hero-f` (6)~~ | voice line | retired from 1.0. **Ruled 2026-11-26 (Bob):** heroes are not voiced; only the Loremaster is (DEC-099). The asset entries are removed; each hero keeps its `voice:` id (`pack.yaml:18,28,38,48,58,68`) because the schema still requires it | retired (not counted) | nothing |
 | `snd.listen-nothing` | effect | Tomb listen, no room (C5-05:108; engine default, DEC-618) | missing file | Bob's art hold |
 | `snd.listen-trap` | effect | Tomb listen, trap (C5-05:109) | missing file | Bob's art hold |
 | `snd.listen-battle` | effect | Tomb listen, battle (C5-05:110) | missing file | Bob's art hold |
@@ -63,10 +63,10 @@ The 43 ids from `approval.md:12-54`, then the assets that code needs.
 
 | asset id | type | used by | state | blocked on |
 |---|---|---|---|---|
-| `place.village` | place | Building menu and place caption (`placeCaption.ts:7`) | final (`pack.yaml:198`, `assets/place-village.jpg`) | Bob's art hold (approval line 12 not ticked) |
-| `place.bazaar` | place | Building menu and place caption (`placeCaption.ts:8`) | final (`pack.yaml:199`, `assets/place-bazaar.jpg`) | Bob's art hold (approval line 13 not ticked) |
-| `place.citadel` | place | Building menu and place caption (`placeCaption.ts:9`) | final (`pack.yaml:200`, `assets/place-citadel.jpg`) | Bob's art hold (approval line 14 not ticked) |
-| `place.sanctuary` | place | Building menu and place caption (`placeCaption.ts:10`) | final (`pack.yaml:201`, `assets/place-sanctuary.jpg`) | Bob's art hold (approval line 15 not ticked) |
+| `place.village` | place | Building menu and place caption (`placeCaption.ts:7`) | draft (`pack.yaml:198`, `assets/place-village.jpg`) | Bob's art hold (approval line 12 not ticked; A1 step 6 import, DEC-388) |
+| `place.bazaar` | place | Building menu and place caption (`placeCaption.ts:8`) | draft (`pack.yaml:199`, `assets/place-bazaar.jpg`) | Bob's art hold (approval line 13 not ticked; A1 step 6 import, DEC-388, recropped to 16:9 at 1920×1080 on import (DEC-347)) |
+| `place.citadel` | place | Building menu and place caption (`placeCaption.ts:9`) | draft (`pack.yaml:200`, `assets/place-citadel.jpg`) | Bob's art hold (approval line 14 not ticked; A1 step 6 import, DEC-388) |
+| `place.sanctuary` | place | Building menu and place caption (`placeCaption.ts:10`) | draft (`pack.yaml:201`, `assets/place-sanctuary.jpg`) | Bob's art hold (approval line 15 not ticked; A1 step 6 import, DEC-388) |
 | `painting.ch1-the-roads` | painting | Chapter 1 card (C5-05:23) | missing file | Bob's art hold |
 | `painting.ch2-the-keep` | painting | Chapter 2 card (C5-05:24) | missing file | Bob's art hold |
 | `painting.ch3-the-tower` | painting | Chapter 3 card (C5-05:25) | missing file | Bob's art hold |
@@ -274,7 +274,7 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 
 ## 2. Voice lines whose text isn't final (Loremaster first)
 
-- **packs/base, `vo.hero-a` … `vo.hero-f` (6):** declared as `line` placeholders (`packs/base/pack.yaml:101-106`), with no text and no speaker. This needs a story ruling: does a hero speak at all? (C5-05:13 says only the Loremaster is voiced in 1.0.)
+- ~~**packs/base, `vo.hero-a` … `vo.hero-f` (6)**~~ **Ruled 2026-11-26 (Bob):** no hero voices in 1.0; only the Loremaster is voiced (DEC-099, DEC-349). The six `line` entries are removed from `packs/base/pack.yaml`, so nothing goes to Loremaster here.
 - **packs/test (Ruined Keep): no voice line text is unfinished.** All 13 Loremaster lines were accepted by Bob on 2026-11-06 (`research/stories/ruined-keep/script.md:9`), and all 13 are now `line` placeholders in `packs/test/pack.yaml:204-218` (no files yet). Eight `[COPY: …]` strings are still open, because script.md has no accepted words for them:
   - the tagline (line 8)
   - the chapter 2 and chapter 3 start narration (lines 79 and 93)
@@ -291,7 +291,7 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
   - Deferred: group 7, Long, 17 lines (manifest:290).
   - To retire: the 346 old-plot lines in `packs/dracula/script.yaml` (D-06:254).
 
-**Count of non-final voice lines: 261** (6 base + 255 Dracula). That excludes the 17 deferred Long lines, the 3 lines not yet written, and the 346 old lines to retire.
+**Count of non-final voice lines: 255** (all Dracula; the 6 base hero lines were retired 2026-11-26). That excludes the 17 deferred Long lines, the 3 lines not yet written, and the 346 old lines to retire.
 
 ---
 
@@ -302,10 +302,10 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 3. **Ruined Keep foes.** Ids: `foe.level-1`…`4`, `foe.warden~phase-1`…`3`, `foe.keep-garrison`. kind:art. Touches: `packs/test/assets/`, `index.json`, `pack.yaml`.
 4. **Ruined Keep Tomb, traps and Tower maps.** Ids: `painting.keep-crypt~{left,ahead,right}-{corridor,wall}` (6), `painting.trap-pit`, `painting.trap-falling-rocks`, `painting.tower-{basement,main,top}-map`. kind:art. Touches: `packs/test/assets/`, `index.json`, `pack.yaml`, and `apps/bloodtower/src/assets/needs/build.ts`, which needs an 8:9 profile (C5-05:196).
 5. **Ruined Keep Loremaster voice (13 lines).** Ids: the 13 `line` placeholders at `packs/test/pack.yaml:204-218`. They wait for Bob to lift the art hold. kind:art. Touches: `packs/test/assets/`, `index.json`, `pack.yaml`.
-6. **Ruined Keep place stills: Bob's approval and the declared status.** Ids: `place.{village,bazaar,citadel,sanctuary}`. kind:art. Touches: `packs/test/pack.yaml:198-201`, `approval.md:12-15`. Note that `place-bazaar.jpg` is portrait 864×1152 (C5-05:204).
+6. **Ruined Keep place stills: import through A1 step 6 and Bob's ticks.** Ids: `place.{village,bazaar,citadel,sanctuary}`. Now declared `draft` (ruled 2026-11-26, Bob, DEC-388). `place-bazaar.jpg` is recropped to 16:9 at 1920×1080 on import (DEC-347). kind:art. Touches: `packs/test/pack.yaml:198-201`, `approval.md:12-15`.
 7. **Ruined Keep ambience.** Ids: `startup-ambient.m4a`, `night1-ambient.m4a`, `night2-ambient.m4a`, `pg-music.m4a`, or else drop them from `tracks.ts`. kind:art. Touches: `packs/test/audio/` (new), `apps/bloodtower/src/web/lib/audio/tracks.ts:33-40`.
-8. **Base pack hero portraits.** Ids: `por.hero-a`…`f`. kind:art. Touches: `packs/base/assets/` (new), `packs/base/pack.yaml:95-100`.
-9. **Base pack hero voice lines: rule on them or retire them.** Ids: `vo.hero-a`…`f`. kind:story. Touches: `packs/base/pack.yaml:18-68,101-106`.
+8. **Base pack hero portraits.** Ids: `portrait.hero-a`…`f`. kind:art. Touches: `packs/base/assets/` (new), `packs/base/pack.yaml:95-100`.
+9. ~~**Base pack hero voice lines: rule on them or retire them.**~~ Done: ruled 2026-11-26 (Bob), retired from 1.0 (DEC-099). Left over: the hero schema's required `voice` field (`apps/bloodtower/src/protocols/pack-v2/base.ts`), a code change for a later PR.
 10. **Base pack listen sounds.** Ids: `snd.listen-nothing`, `snd.listen-trap`, `snd.listen-battle`. kind:art. Touches: `packs/base/assets/` (new), `packs/base/pack.yaml`.
 11. **Dracula script: finish the drafts.** Ids: D-06 manifest groups 1–6 (255 lines), `n5-flooded-room` lines, `traitor.marta-unmasked~vo-01`, and the 44 over-long captions. Then rewrite `packs/dracula/script.yaml` and retire its old ids. kind:story. Touches: `research/game-design/specs/dracula/script/`, `D-06-vo-manifest.md`, `packs/dracula/script.yaml`, `packs/dracula/cast.yaml`.
 12. **Dracula pictures: declare and approve the 106 rendered files.** Ids: every D-06 id that has a file (section 1). kind:art. Touches: `packs/dracula/pack.yaml` (an `assets:` block, or `assets/index.json`), `packs/dracula/assets/`.
@@ -324,8 +324,8 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 
 ## 4. Where sources disagree
 
-1. **Ruined Keep places: "final" vs not approved.**
-   - `packs/test/pack.yaml:198-201` declares all four `place.*` as `status: final`.
+1. **Ruined Keep places: "final" vs not approved.** **Ruled 2026-11-26 (Bob):** they are drafts that come in through A1 step 6, each ticked by Bob (DEC-388, approval.md). `packs/test/pack.yaml:198-201` now declares them `draft`.
+   - Before: `packs/test/pack.yaml:198-201` declared all four `place.*` as `status: final`.
    - `approval.md:12-15` leaves them unticked.
    - `C5-05-ruined-keep-art.md:204` says A1 step 6 imports them "as drafts for Bob's approval".
 2. **The checklist's index doesn't exist.**
@@ -350,7 +350,7 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 8. **Dracula cover.**
    - `packs/dracula/pack.yaml:6` still points at the old `assets/cover.png`.
    - D-06:44 says the oil `painting.cover` and `glow.cover` (both present as `.webp`) replace that sepia file (DEC-893).
-9. **Lenka's face.** D-06:37-40 (DEC-892, Gamewright under delegation) shows her face from chapter 1 and says "This replaces Bob's Oct 16 hidden-until-reveal lock". Both `portrait.lenka` and `portrait.lenka~revealed` files exist. Bob hasn't been asked to confirm this in the repo.
+9. **Lenka's face.** D-06:37-40 (DEC-892, Gamewright under delegation) shows her face from chapter 1 and says "This replaces Bob's Oct 16 hidden-until-reveal lock". Both `portrait.lenka` and `portrait.lenka~revealed` files exist. **Ruled 2026-11-26 (Bob):** DEC-892 is confirmed. Her face shows, hooded, from chapter 1, and the reveal changes it (DEC-852).
 10. **The Dracula pack contents are out of date.**
     - `packs/dracula/script.yaml` has 346 old-plot lines.
     - D-06-vo-manifest has 255 new DRAFT lines, and D-06:254 says to retire the old ids.
@@ -362,4 +362,4 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
     - `public/ipad/b-engraved-ipad-move-map.jpg` (tests only)
     - the root `assets/app-icon/*`, which the web app never links
     - `packs/dracula/assets/cover.png`, once the cover swap in item 8 lands
-13. **Ruined Keep place sizes.** C5-05:204 notes that `place-bazaar.jpg` is portrait 864×1152 while the other three are 1280×720. D-06:26 proposes 1920×1080 for places.
+13. **Ruined Keep place sizes.** C5-05:204 notes that `place-bazaar.jpg` is portrait 864×1152 while the other three are 1280×720. D-06:26 proposes 1920×1080 for places. **Ruled 2026-11-26 (Bob):** the Bazaar is recropped to 16:9 at 1920×1080 on import, A1 step 6 (DEC-347). The image file isn't changed here.
