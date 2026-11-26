@@ -79,9 +79,10 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 | `tomb.keep-crypt~left-wall`, `~ahead-wall`, `~right-wall` | That section closed by a solid wall (DEC-584) |
 
 - **Size, CONFIRMED (Wright screen check 2026-11-10):** each section 1920×2160 (8:9, the view half at 4K, DEC-583), master PNG, shipped WebP. Left, ahead and right join edge to edge at 5760×2160 with **no overlap**; the blend is painted into each section's edges, so any corridor/wall mix joins without a seam (DEC-585).
+- **Joins, views and light (Gamewright rulings 20–21, 2026-11-26; DEC-583–585, TB-01):** every section's outer edges carry the same painted half of one square stone pier, so each joint, of any corridor/wall mix, closes into one whole pier, with no doubled niches. The three views differ at the end wall: left a low round arch beside a sarcophagus, ahead a tall pointed arch with steps and rusted mail on a hook, right a ragged broken hole; each wall seals that same opening (bricked arch, filled arch, rubble). No wall torches: the only light is the party's, falling from the viewer.
 - **Traps.** 1.0 has two traps, one painting each (DEC-606), which take over the view half while the group takes the loss (DEC-592). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×2160 (8:9), filling the view half (DEC-592); a single picture, not a tomb-section frame and not joined to the sections.
   - `trap.pit` (ADOPTED `painting.trap-pit`): the floor gives way under one hero. Source: “The floor gives way. Choose one hero to take the fall and lose 4 hit points.”
-  - `trap.falling-rocks` (ADOPTED `painting.trap-falling-rocks`): stones crashing from the vault onto the group. Source: “Stones crash from the ceiling. Every hero loses 2 hit points.”
+  - `trap.falling-rocks` (ADOPTED `painting.trap-falling-rocks`): stones crashing from the vault onto the group. Source: “Stones crash from the ceiling. Every hero loses 2 hit points.” The final shows no countable party (Gamewright ruling 23, 2026-11-26; DEC-606): the redo shows only the stones, a dropped shield and a fallen torch, so it fits any party size. `painting.trap-pit` keeps its generic falling hero.
 
 **Acceptance checks**
 
@@ -96,6 +97,7 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 `map.tower-basement`, `map.tower-main`, `map.tower-top` (ADOPTED `painting.tower-{basement,main,top}-map`, §6.1): the Tower's three levels (DEC-364, DEC-566), each with distinct art (DEC-364). The board reuses the Tomb's two halves (Q-C5-01): the level's room map left, the room view right; DEC-566 says “One picture: the level's room map.”
 
 - **PROPOSED content:** one painted backdrop per level for the map half, a top-down plan in aged ink on dark parchment that the engine draws rooms on: basement (rough-hewn, damp), main (great hall stone), top (open battlements, sky). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×2160 (8:9, the map half at 4K); static, no drift.
+- **Plan view and grid (Gamewright ruling 22, 2026-11-26; game-look §4a):** all three are top-down plans. The top is the open battlement ring, merlons and the stair head, with no trapdoor. The main hall's floor carries no flagstone grid, only a soft wash, so the engine's rooms read over it.
 - **Acceptance:** distinct per level at TV distance; engine-drawn rooms, the glowing current room and labels stay legible over it (game-look §4a); IDs pass A1-15 under the §6.1 renames.
 
 ## 5. Sounds and Loremaster lines

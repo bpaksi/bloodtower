@@ -74,6 +74,8 @@ Change note 2026-11-26 (redo group 1, Gamewright rulings of 2026-11-26): all sti
 
 Change note 2026-11-26 (redo group 2, Gamewright rulings 5 and 15–19): all eight foes redone, still `draft` and unticked (lines 19–26). Group foes show 2–3 whole figures in the middle 960 px (foe.level-1…4, foe.keep-garrison). The Warden is old, bald and grey-bearded in all three phases, with head and sword inside the central 90%, and the Tower's call is a cold grey-white light with no green or blue. Level 4's Tower follows the 1981 silhouette. Levels 1 and 2 show the crest scratched off, with no readable mark.
 
+Change note 2026-11-26 (redo group 3, Gamewright rulings 20–23): redone, still `draft` and unticked: the six painting.keep-crypt~* sections (lines 27–32), painting.trap-falling-rocks (line 35), painting.tower-main-map and painting.tower-top-map (lines 37–38). Each crypt section's edges carry the same half pier, so every joint of the 8 combinations closes into one whole pier with no doubling; left, ahead and right each show a different end wall, and each wall seals its own opening. No wall torches; light is the party's only. The top map is a top-down plan with no trapdoor; the main map's floor grid is softened to a plain wash. The rockfall shows no people. painting.trap-pit and painting.tower-basement-map are unchanged.
+
 ## Base pack hero portraits (Bob)
 
 Not part of EV-04 (base pack, not `packs/test`). Nothing is final until Bob ticks it here.
