@@ -20,7 +20,7 @@ Status words: `decided` is a card with status decided. "Bob, date" is a ruling r
 - Finish 1.0 before any 1.1 design or planning (Bob, 2026-11-12, via Warden).
 - The 2026-11-12 6:47 AM ET build stop holds.
 - Copy tables: Loremaster fills them before any 1.0 screen builds; no waiver of the brief-gate rule (Warden, 2026-11-12).
-- Art hold: no paid art or voice renders until Bob lifts it; Bob ticks every art final (C5-05, DEC-384).
+- Art hold, lifted for drafts (Bob, 2026-11-26): AI may make and render 1.0 art, voice and sound as drafts (status `draft`). Nothing becomes final until Bob ticks it in approval.md (C5-05, DEC-384). Dracula (1.2) stays on hold.
 
 ## C. 1.0 game locks (C2 to C5)
 
