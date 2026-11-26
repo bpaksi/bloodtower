@@ -53,7 +53,7 @@ chapters:
         - kind: narrate
           target: storyboard
           lines:
-            - {speaker: narrator, text: "[COPY: opening, the heroes gather at the Arisilon citadel and take to the roads]"}
+            - {speaker: narrator, text: "The roads out of Greyford are closed. Raiders have taken every cart for a month, and the lord's men are not coming."}
     end:
       when:
         type: flag
@@ -62,7 +62,7 @@ chapters:
         - kind: narrate
           target: storyboard
           lines:
-            - {speaker: narrator, text: "[COPY: chapter 1 closes, the roads are clear]"}
+            - {speaker: narrator, text: "The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years."}
     quests:
       - {id: herald, scene: herald, place: {space: N-egans-end, type: village}}
       - {id: ambush, scene: ambush, place: {space: N-muted-forest, type: wild}}
@@ -97,7 +97,8 @@ chapters:
         - kind: narrate
           target: storyboard
           lines:
-            - {speaker: narrator, text: "[COPY: The Warden falls, the last choice in the Tower]"}
+            - {speaker: narrator, text: "The Warden falls. Beneath the keep lies the shard he swore to guard."}
+            - {speaker: narrator, text: "Shatter it for good, or swear his oath and guard it in his place."}
     quests:
       - {id: lock, scene: lock, place: {space: S-howling-desert, type: wild}}
       - {id: last-stand, scene: last-stand, place: {space: W-the-grass-sea, type: wild}}
@@ -129,7 +130,7 @@ scenes:
   - id: shrine
     options:
       - id: pray-at-the-altar
-        label: "[COPY: Pray at the altar]"
+        label: "Pray at the altar"
         effects:
           - {kind: item, item: oath-blade}
       - id: leave-the-shrine
@@ -139,19 +140,19 @@ scenes:
   - id: lock
     options:
       - id: turn-the-signet
-        label: "[COPY: Turn the Signet]"
+        label: "Turn the Signet"
         needs_item: signet
         effects:
           - {kind: flag, flag: lock-opened}
       - id: force-it
-        label: "[COPY: Force it]"
+        label: "Force it"
         effects:
           - {kind: battle}
   # The foe is the random level-3 foe the engine draws (DEC-647); a battle effect names none.
   - id: last-stand
     options:
       - id: hold-the-gate
-        label: "[COPY: Hold the gate]"
+        label: "Hold the line"
         effects:
           - {kind: battle}
       - id: rally-the-guard
@@ -161,11 +162,11 @@ scenes:
   - id: tower-end
     options:
       - id: break-the-seal
-        label: "[COPY: Break what is sealed under the keep]"
+        label: "Shatter the shard"
         effects:
           - {kind: flag, flag: ending-break}
       - id: swear-the-oath
-        label: "[COPY: Swear The Warden's oath and guard it]"
+        label: "Swear the oath"
         effects:
           - {kind: flag, flag: ending-oath}
 
@@ -184,14 +185,14 @@ endings:
   win:
     - id: win-break
       when: {type: flag, flag: ending-break}
-      text: "[COPY: win, the heroes break what is sealed]"
+      text: "The shard shatters. The Tower's call goes quiet, and the roads are yours."
     - id: win-oath
       when: {type: flag, flag: ending-oath}
-      text: "[COPY: win, the heroes swear The Warden's oath]"
+      text: "You swear his oath and take up his watch. The Tower called to him once. It will call to you."
   loss:
-    - {way: corruption, text: "[COPY: loss, corruption overcomes the heroes]"}
-    - {way: skulls, text: "[COPY: loss, the skulls fill the tower]"}
-    - {way: buildings, text: "[COPY: loss, the buildings fall]"}
+    - {way: corruption, text: "One of you hears the Tower call, and goes to it. Without them, the hunt is over."}
+    - {way: skulls, text: "The last skull falls. The Tower's shadow covers the land, and the roads are his for good."}
+    - {way: buildings, text: "Four strongholds have fallen. There is nowhere left to hold, and his raiders own the land."}
 
 assets:
   - {id: place.village, type: still, target: storyboard, status: final, path: assets/place-village.jpg}
@@ -201,3 +202,17 @@ assets:
   # Demo line (A1 step 8b-1, D48). Provenance: checklist id vo.loremaster.seal-break-1 -> this id.
   # Voice is provisional (Charon). No file yet: it stays unavailable (caption only) until packed.
   - {id: "seal-break.01~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep."}
+  # The other C5-05 Loremaster lines (C5-05-ruined-keep-art.md §6.3, §6.4), text from
+  # research/stories/ruined-keep/script.md (accepted 2026-11-06). No files yet: caption only until packed.
+  - {id: "chapter-card.01~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "Hear the herald in Greyford. Then open the forest road."}
+  - {id: "chapter-card.02~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "Go down into the barrow under the old keep. Find the shrine on the road beside it."}
+  - {id: "chapter-card.03~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb."}
+  - {id: "chapter-win.01~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years."}
+  - {id: "chapter-win.03~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The gate is open and the last stand held. The Warden's door is open, for now."}
+  - {id: "seal-break.02~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The Keep gives up its dead, and a second seal cracks. The Tower waits."}
+  - {id: "seal-break.03~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The last stand holds, and the third seal breaks. Only the Warden remains."}
+  - {id: "finale-win.shattered~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The shard shatters. The Tower's call goes quiet, and the roads are yours."}
+  - {id: "finale-win.oath~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "You swear his oath and take up his watch. The Tower called to him once. It will call to you."}
+  - {id: "finale-loss.skulls~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The last skull falls. The Tower's shadow covers the land, and the roads are his for good."}
+  - {id: "finale-loss.corruption~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "One of you hears the Tower call, and goes to it. Without them, the hunt is over."}
+  - {id: "finale-loss.fallen-buildings~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "Four strongholds have fallen. There is nowhere left to hold, and his raiders own the land."}

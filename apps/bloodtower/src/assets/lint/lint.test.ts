@@ -402,11 +402,23 @@ describe("A1-03a pack:lint wiring", () => {
     "place.citadel",
     "place.sanctuary",
     "seal-break.01~vo-01",
+    "chapter-card.01~vo-01",
+    "chapter-card.02~vo-01",
+    "chapter-card.03~vo-01",
+    "chapter-win.01~vo-01",
+    "chapter-win.03~vo-01",
+    "seal-break.02~vo-01",
+    "seal-break.03~vo-01",
+    "finale-win.shattered~vo-01",
+    "finale-win.oath~vo-01",
+    "finale-loss.skulls~vo-01",
+    "finale-loss.corruption~vo-01",
+    "finale-loss.fallen-buildings~vo-01",
   ];
   const writeIndex = async (story: string, status: "draft" | "final", drop?: string) => {
     const assets: Record<string, ReturnType<typeof entry>> = {};
     for (const id of refs) {
-      const kind = id.startsWith("seal-break") ? "line" : (id.split(".")[0] as string);
+      const kind = id.includes("~vo-") ? "line" : (id.split(".")[0] as string);
       assets[id] =
         kind === "line"
           ? entry("line", {

@@ -184,7 +184,7 @@ describe("A1-8b-2 EV-01: the controlled demo entry plays the packed line once wi
 
   it("logs an error and plays nothing when the bound pack has no such line", async () => {
     const { boot, lines } = harness(packsWith({}));
-    const { session } = await boot("seal-break.02~vo-01");
+    const { session } = await boot("seal-break.04~vo-01");
     const pad = await joinPad(session);
     await demo(session, pad, "play");
     expect(board(session).packedLine ?? null).toBeNull();
