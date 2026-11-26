@@ -700,11 +700,16 @@ describe("The Ruined Keep pack (C3-03)", () => {
       "pack.yaml.chapters.2.end.effects.0.lines.0.text", // the-tower end / last choice, part 1
       "pack.yaml.chapters.2.end.effects.0.lines.1.text", // the-tower end / last choice, part 2
       "pack.yaml.scenes.2.options.0.label", // shrine / pray-at-the-altar
+      "pack.yaml.scenes.2.options.1.label", // shrine / leave-the-shrine
       "pack.yaml.scenes.3.options.0.label", // lock / turn-the-signet
       "pack.yaml.scenes.3.options.1.label", // lock / force-it
       "pack.yaml.scenes.4.options.0.label", // last-stand / hold-the-gate
+      "pack.yaml.scenes.4.options.1.label", // last-stand / rally-the-guard
       "pack.yaml.scenes.5.options.0.label", // tower-end / break-the-seal
       "pack.yaml.scenes.5.options.1.label", // tower-end / swear-the-oath
+      "pack.yaml.items.0.label", // tomas-map
+      "pack.yaml.items.1.label", // signet
+      "pack.yaml.items.2.label", // oath-blade
       "pack.yaml.endings.win.0.text", // win-break
       "pack.yaml.endings.win.1.text", // win-oath
       "pack.yaml.endings.loss.0.text", // corruption

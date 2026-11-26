@@ -133,8 +133,10 @@ scenes:
         label: "Pray at the altar"
         effects:
           - {kind: item, item: oath-blade}
+      # DEC-837: finishes the quest (this flag). Heal-every-present-hero-to-full is not
+      # encoded: scene effects are only gold, item, flag or battle.
       - id: leave-the-shrine
-        label: "[COPY: Leave the shrine]"
+        label: "Rest at the altar"
         effects:
           - {kind: flag, flag: shrine-left}
   - id: lock
@@ -155,8 +157,11 @@ scenes:
         label: "Hold the line"
         effects:
           - {kind: battle}
+      # DEC-838: leave at no cost; the quest stays open. Not encoded: the engine finishes
+      # the quest after any option's effects, and there is no leave effect. This flag still
+      # completes the quest.
       - id: rally-the-guard
-        label: "[COPY: Rally the guard]"
+        label: "Fall back"
         effects:
           - {kind: flag, flag: last-stand-rallied}
   - id: tower-end
@@ -171,14 +176,19 @@ scenes:
           - {kind: flag, flag: ending-oath}
 
 items:
+  # DEC-461: spend for +5 Wild in a quest or Tower room battle round. The item schema has
+  # no effect field, so only the label is placed.
   - id: tomas-map
-    label: "[COPY: Tomas's Map]"
+    label: "Tomas's Map"
     from: {quest: herald, option: take-the-job}
+  # DEC-674: a story item with no engine effect; Turn the Signet needs it (already wired).
   - id: signet
-    label: "[COPY: The Warden's Signet]"
+    label: "The Warden's Signet"
     from: {quest: barrow}
+  # DEC-673: +3 Wild against The Warden. The item schema has no effect field, so only the
+  # label is placed.
   - id: oath-blade
-    label: "[COPY: The Warden's oath-blade]"
+    label: "The oath-blade"
     from: {quest: shrine, option: pray-at-the-altar}
 
 endings:
