@@ -53,8 +53,10 @@ Machines and agents follow Foundry plan v2 (`bpaksi/foundry`, `docs/plan-foundry
 Bloodtower detail (lite CI allowlist, verifier/adversary, plan gates, and brief/eval conventions): [docs/sdlc.md](docs/sdlc.md).
 
 **Asset check** (plan-run runs it when it reconciles; read-only, no commands):
-- Search `packs/*/pack.yaml` with the Grep tool for `status: placeholder`. Each match is a pack asset still to make, and its `type:` says which kind: pictures (`portrait`, `place`, `painting` and the like) and voiced lines (`line`, `vo.*`) are `kind:art` for Illusionist; a line with no final text yet is `kind:story` for Loremaster first.
-- Read the "Missing Illusionist assets" table in `apps/bloodtower/plans/visuals-prompts.md`. Each row not yet delivered is a `kind:art` follow-up for its swap point.
-- Group the issues by pack and asset type (for example "Base pack hero portraits"), not one per asset.
+- Read `docs/assets/inventory.md`, the asset inventory. Every row whose state isn't `final` is an asset still to make or to declare. Its section 3 suggests how to group them into issues.
+- Also search `packs/*/pack.yaml` with the Grep tool for `status: placeholder`, which catches any placeholder added since the inventory was written.
+- For each group, check whether an open `kind:art` or `kind:story` issue already covers it. File only the groups no issue covers, by pack and asset type (for example "Base pack hero portraits"), not one issue per asset. Pictures and voiced lines are `kind:art` for Illusionist; a line with no final text is `kind:story` for Loremaster first.
+- Rows blocked on Bob's art hold get `plan:hitl`. Dracula waits for 1.2 (DEC-812), so its rows don't go into the 1.0 plan.
+- Keep the inventory true: a PR that adds, makes or approves an asset updates its row in the same PR. If a PR finds the inventory wrong, it says so under Follow-ups.
 - Don't run `pnpm assets:needs`, `assets:render` or `assets:pack` to check: they need an asset-studio work folder and write job files.
 <!-- forgekit:local:end -->
