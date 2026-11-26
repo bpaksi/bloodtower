@@ -215,6 +215,18 @@ assets:
   - {id: "foe.warden~phase-2", type: still, target: storyboard, status: draft, path: "assets/foe.warden~phase-2.webp"}
   - {id: "foe.warden~phase-3", type: still, target: storyboard, status: draft, path: "assets/foe.warden~phase-3.webp"}
   - {id: foe.keep-garrison, type: still, target: storyboard, status: draft, path: assets/foe.keep-garrison.webp}
+  # Tomb sections, traps and Tower maps, group 3 (inventory §3 issue 4): AI drafts, 2026-11-26, 1920x2160 (8:9); Bob ticks finals in approval.md.
+  - {id: "painting.keep-crypt~left-corridor", type: still, target: storyboard, status: draft, path: "assets/painting.keep-crypt~left-corridor.webp"}
+  - {id: "painting.keep-crypt~left-wall", type: still, target: storyboard, status: draft, path: "assets/painting.keep-crypt~left-wall.webp"}
+  - {id: "painting.keep-crypt~ahead-corridor", type: still, target: storyboard, status: draft, path: "assets/painting.keep-crypt~ahead-corridor.webp"}
+  - {id: "painting.keep-crypt~ahead-wall", type: still, target: storyboard, status: draft, path: "assets/painting.keep-crypt~ahead-wall.webp"}
+  - {id: "painting.keep-crypt~right-corridor", type: still, target: storyboard, status: draft, path: "assets/painting.keep-crypt~right-corridor.webp"}
+  - {id: "painting.keep-crypt~right-wall", type: still, target: storyboard, status: draft, path: "assets/painting.keep-crypt~right-wall.webp"}
+  - {id: painting.trap-pit, type: still, target: storyboard, status: draft, path: assets/painting.trap-pit.webp}
+  - {id: painting.trap-falling-rocks, type: still, target: storyboard, status: draft, path: assets/painting.trap-falling-rocks.webp}
+  - {id: painting.tower-basement-map, type: still, target: storyboard, status: draft, path: assets/painting.tower-basement-map.webp}
+  - {id: painting.tower-main-map, type: still, target: storyboard, status: draft, path: assets/painting.tower-main-map.webp}
+  - {id: painting.tower-top-map, type: still, target: storyboard, status: draft, path: assets/painting.tower-top-map.webp}
   # Demo line (A1 step 8b-1, D48). Provenance: checklist id vo.loremaster.seal-break-1 -> this id.
   # Voice is provisional (Charon). No file yet: it stays unavailable (caption only) until packed.
   - {id: "seal-break.01~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep."}
