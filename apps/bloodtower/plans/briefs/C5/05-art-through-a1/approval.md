@@ -65,3 +65,5 @@ Change note 2026-11-26: AI drafts added for the story paintings (inventory §3 i
 Change note 2026-11-26 (group 2): AI drafts added for the foes (inventory §3 issue 3), all `draft` and unticked, 1920×1080, declared in `packs/test/pack.yaml`: foe.level-1, foe.level-2, foe.level-3, foe.level-4, foe.warden~phase-1, foe.warden~phase-2, foe.warden~phase-3, foe.keep-garrison. Their rows above (19–26) were already on the checklist; nothing is ticked.
 
 Change note 2026-11-26 (group 3): AI drafts added for the Tomb sections, traps and Tower maps (inventory §3 issue 4), all `draft` and unticked, 1920×2160 (8:9), declared in `packs/test/pack.yaml`: painting.keep-crypt~left-corridor, ~left-wall, ~ahead-corridor, ~ahead-wall, ~right-corridor, ~right-wall, painting.trap-pit, painting.trap-falling-rocks, painting.tower-basement-map, painting.tower-main-map, painting.tower-top-map. Their rows above (27–38) were already on the checklist; nothing is ticked.
+
+Change note 2026-11-26 (group 4): `packs/test/assets/place-bazaar.jpg` recropped from 864×1152 to 16:9 at 1920×1080 (DEC-347), still `draft`; its row above (line 13) stays unticked.
