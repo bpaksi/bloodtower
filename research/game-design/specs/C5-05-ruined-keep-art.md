@@ -41,6 +41,8 @@ All five chapter/scene paintings and both endings: kind `painting`; **3840×2160
 
 Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at the centre (DEC-329), stills with only the hit shake and spell flash (DEC-347, DEC-562). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×1080, 16:9 (DEC-347: no drift, so 1080p suffices). Subject inside the central 90% so the hit shake never shows an edge. In Tomb and Tower battles the battle screen takes over the 8:9 view half (DEC-592), so the painting is fitted into it, not shown 1:1: keep the foe's head and body inside the central 8:9 column (the middle 960 px of 1920) so a fit-to-height crop still reads. Master PNG, shipped WebP.
 
+**Group framing (Gamewright ruling 15, 2026-11-26; DEC-592):** a group foe shows 2–3 whole figures inside the middle 960 px; flankers past it may be cropped. Level 4's Tower uses the physical 1981 silhouette (ruling 19, as `painting.ch3-the-tower`).
+
 **Foe levels.** One painting per foe level, swapping C4's placeholders (Q-C4-15). Each is a Beginning-state painting; the other four foe states fall back to it (DEC-332). Levels rise one step a chapter (DEC-185; `packs/base/tuning.yaml` chapter_1: 1).
 
 | Asset id | PROPOSED subject |
@@ -52,7 +54,7 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 
 **The Barrow's guardian (§6.6, ADOPTED):** `foe.keep-garrison`, the keep's dead garrison rising in rusted mail, shields bearing the Warden's crest (script; DEC-608, DEC-662). Shown only inside the Tomb, so the crest may show.
 
-**The Warden's phases.** Three paintings, one per phase (Q-C5-02); a phase change at two thirds and one third of his wounds (DEC-567), shown with a shake and sound when no tower is connected (Q-C5-08). He is the keep's fallen last lord, a ruined knight (DEC-661), “in what is left of his armour” (script, boss-screen opening). Same figure, face and armour in all three. `foe.warden~phase-1` is also his one Portrait under DEC-661 (§6.5 (d)); no `portrait.warden`.
+**The Warden's phases.** Three paintings, one per phase (Q-C5-02); a phase change at two thirds and one third of his wounds (DEC-567), shown with a shake and sound when no tower is connected (Q-C5-08). He is the keep's fallen last lord, a ruined knight (DEC-661), “in what is left of his armour” (script, boss-screen opening). Same figure, face and armour in all three. **Look (ADOPTED, Gamewright ruling 18, 2026-11-26; DEC-661, FO-03):** old, bald and grey-bearded in all three phases. **The Tower's call (ruling 17; game-look §2):** a cold grey-white light, never green or blue-green; verdigris stays for holy and ward effects. **Framing (ruling 16):** his head and sword stay inside the central 90% in every phase. `foe.warden~phase-1` is also his one Portrait under DEC-661 (§6.5 (d)); no `portrait.warden`.
 
 | Asset id | PROPOSED subject |
 |---|---|

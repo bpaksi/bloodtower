@@ -72,6 +72,8 @@ Change note 2026-11-26 (group 5): AI drafts added for the base pack hero portrai
 
 Change note 2026-11-26 (redo group 1, Gamewright rulings of 2026-11-26): all still `draft` and unticked. Bob lifted the C5-05 §7 no-repaint hold: place.village, place.bazaar, place.citadel and place.sanctuary are repainted in oil at 1920×1080 (lines 12–15; the Bazaar keeps both lantern tops whole). `packs/test/pack.yaml` `cover:` now points at `assets/painting.cover.webp`, so the A1 job builds painting.cover and glow.cover from it rather than from `cover.png` (ruling 9). painting.cover is redone as `cover.png` upscaled 3× to 3840×2160 (CV-02 fallback, ruling 10), and glow.cover lights only the six window panes, with no lanterns (ruling 11). painting.ch1-the-roads, painting.ch3-the-tower and painting.finale-win are redone (rulings 12–14). The rows painting.cover and glow.cover stay files set by `cover:`, not `assets[]` rows, because a row would duplicate them (A1-8).
 
+Change note 2026-11-26 (redo group 2, Gamewright rulings 5 and 15–19): all eight foes redone, still `draft` and unticked (lines 19–26). Group foes show 2–3 whole figures in the middle 960 px (foe.level-1…4, foe.keep-garrison). The Warden is old, bald and grey-bearded in all three phases, with head and sword inside the central 90%, and the Tower's call is a cold grey-white light with no green or blue. Level 4's Tower follows the 1981 silhouette. Levels 1 and 2 show the crest scratched off, with no readable mark.
+
 ## Base pack hero portraits (Bob)
 
 Not part of EV-04 (base pack, not `packs/test`). Nothing is final until Bob ticks it here.
