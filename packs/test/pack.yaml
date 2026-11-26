@@ -199,6 +199,13 @@ assets:
   - {id: place.bazaar, type: still, target: storyboard, status: draft, path: assets/place-bazaar.jpg}
   - {id: place.citadel, type: still, target: storyboard, status: draft, path: assets/place-citadel.jpg}
   - {id: place.sanctuary, type: still, target: storyboard, status: draft, path: assets/place-sanctuary.jpg}
+  # Story paintings, group 1 (inventory §3 issue 2): AI drafts, 2026-11-26, 1920x1080; Bob ticks finals in approval.md.
+  - {id: painting.ch1-the-roads, type: still, target: storyboard, status: draft, path: assets/painting.ch1-the-roads.webp}
+  - {id: painting.ch2-the-keep, type: still, target: storyboard, status: draft, path: assets/painting.ch2-the-keep.webp}
+  - {id: painting.ch3-the-tower, type: still, target: storyboard, status: draft, path: assets/painting.ch3-the-tower.webp}
+  - {id: painting.keep-sealed-door, type: still, target: storyboard, status: draft, path: assets/painting.keep-sealed-door.webp}
+  - {id: painting.finale-win, type: still, target: storyboard, status: draft, path: assets/painting.finale-win.webp}
+  - {id: painting.finale-loss, type: still, target: storyboard, status: draft, path: assets/painting.finale-loss.webp}
   # Demo line (A1 step 8b-1, D48). Provenance: checklist id vo.loremaster.seal-break-1 -> this id.
   # Voice is provisional (Charon). No file yet: it stays unavailable (caption only) until packed.
   - {id: "seal-break.01~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep."}

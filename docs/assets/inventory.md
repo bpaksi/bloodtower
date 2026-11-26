@@ -33,7 +33,7 @@ A placeholder that has no file is marked "(no file)".
 | Pack | Total | Final | Draft | Placeholder | Missing file | Not declared |
 |---|---|---|---|---|---|---|
 | packs/base | 9 | 0 | 0 | 6 (no file) | 3 | 0 |
-| packs/test (The Ruined Keep) | 50 | 0 | 4 | 13 (no file) | 32 | 1 |
+| packs/test (The Ruined Keep) | 50 | 0 | 10 | 13 (no file) | 25 | 2 |
 | packs/dracula: pictures | 112 | 0 | 0 | 0 | 5 | 107 |
 | packs/dracula: voice lines (D-06 manifest) | 255 | 0 | 0 | 0 | 255 | 0 |
 | UI (app-level) | 15 file rows (64 files) + 2 code-only rows | 1 row (Keeper avatar, 14 files) | 0 | 0 | 0 | 14 rows |
@@ -67,9 +67,9 @@ The 43 ids from `approval.md:12-54`, then the assets that code needs.
 | `place.bazaar` | place | Building menu and place caption (`placeCaption.ts:8`) | draft (`pack.yaml:199`, `assets/place-bazaar.jpg`) | Bob's art hold (approval line 13 not ticked; A1 step 6 import, DEC-388, recropped to 16:9 at 1920×1080 on import (DEC-347)) |
 | `place.citadel` | place | Building menu and place caption (`placeCaption.ts:9`) | draft (`pack.yaml:200`, `assets/place-citadel.jpg`) | Bob's art hold (approval line 14 not ticked; A1 step 6 import, DEC-388) |
 | `place.sanctuary` | place | Building menu and place caption (`placeCaption.ts:10`) | draft (`pack.yaml:201`, `assets/place-sanctuary.jpg`) | Bob's art hold (approval line 15 not ticked; A1 step 6 import, DEC-388) |
-| `painting.ch1-the-roads` | painting | Chapter 1 card (C5-05:23) | missing file | Bob's art hold |
-| `painting.ch2-the-keep` | painting | Chapter 2 card (C5-05:24) | missing file | Bob's art hold |
-| `painting.ch3-the-tower` | painting | Chapter 3 card (C5-05:25) | missing file | Bob's art hold |
+| `painting.ch1-the-roads` | painting | Chapter 1 card (C5-05:23) | draft (`pack.yaml:203`, `assets/painting.ch1-the-roads.webp`, AI draft 1920×1080, 2026-11-26) | Bob's tick in approval.md |
+| `painting.ch2-the-keep` | painting | Chapter 2 card (C5-05:24) | draft (`pack.yaml:204`, `assets/painting.ch2-the-keep.webp`, AI draft 1920×1080, 2026-11-26) | Bob's tick in approval.md |
+| `painting.ch3-the-tower` | painting | Chapter 3 card (C5-05:25) | draft (`pack.yaml:205`, `assets/painting.ch3-the-tower.webp`, AI draft 1920×1080, 2026-11-26) | Bob's tick in approval.md |
 | `foe.level-1` | foe | Chapter 1 battles, The Ambush (C5-05:47) | missing file | Bob's art hold |
 | `foe.level-2` | foe | Chapter 2 battles (C5-05:48) | missing file | Bob's art hold |
 | `foe.level-3` | foe | The Last Stand, Tower guards (C5-05:49) | missing file | Bob's art hold |
@@ -84,29 +84,29 @@ The 43 ids from `approval.md:12-54`, then the assets that code needs.
 | `painting.keep-crypt~ahead-wall` | painting | Tomb view half (C5-05:76) | missing file | Bob's art hold |
 | `painting.keep-crypt~right-corridor` | painting | Tomb view half (C5-05:75) | missing file | Bob's art hold |
 | `painting.keep-crypt~right-wall` | painting | Tomb view half (C5-05:76) | missing file | Bob's art hold |
-| `painting.keep-sealed-door` | painting | The Lock scene (C5-05:26) | missing file | Bob's art hold |
+| `painting.keep-sealed-door` | painting | The Lock scene (C5-05:26) | draft (`pack.yaml:206`, `assets/painting.keep-sealed-door.webp`, AI draft 1920×1080, 2026-11-26) | Bob's tick in approval.md |
 | `painting.trap-pit` | painting | Tomb trap, pit (C5-05:80) | missing file | Bob's art hold |
 | `painting.trap-falling-rocks` | painting | Tomb trap, rocks (C5-05:81) | missing file | Bob's art hold |
 | `painting.tower-basement-map` | painting | Tower level map half (C5-05:93) | missing file | Bob's art hold |
 | `painting.tower-main-map` | painting | Tower level map half (C5-05:93) | missing file | Bob's art hold |
 | `painting.tower-top-map` | painting | Tower level map half (C5-05:93) | missing file | Bob's art hold |
-| `painting.finale-win` | painting | Win scene, both endings (C5-05:27) | missing file | Bob's art hold |
-| `painting.finale-loss` | painting | Loss scene, all three causes (C5-05:28) | missing file | Bob's art hold |
-| `chapter-card.01~vo-01` | voice line | Chapter 1 card (C5-05:156; script.md:37) | placeholder (no file) (`pack.yaml:207`) | Bob's art hold |
-| `chapter-card.02~vo-01` | voice line | Chapter 2 card (C5-05:157; script.md:83) | placeholder (no file) (`pack.yaml:208`) | Bob's art hold |
-| `chapter-card.03~vo-01` | voice line | Chapter 3 card (C5-05:158; script.md:129) | placeholder (no file) (`pack.yaml:209`) | Bob's art hold |
-| `chapter-win.01~vo-01` | voice line | Chapter 1 win (C5-05:159; script.md:70) | placeholder (no file) (`pack.yaml:210`) | Bob's art hold |
-| `chapter-win.03~vo-01` | voice line | Chapter 3 win (C5-05:162; script.md:160) | placeholder (no file) (`pack.yaml:211`) | Bob's art hold |
-| `seal-break.01~vo-01` | voice line | Seal break, ch 1; demo line (`demoLine.ts`) (C5-05:160) | placeholder (no file) (`pack.yaml:204`) | Bob's art hold |
-| `seal-break.02~vo-01` | voice line | Seal break, ch 2 (C5-05:161; script.md:117) | placeholder (no file) (`pack.yaml:212`) | Bob's art hold |
-| `seal-break.03~vo-01` | voice line | Seal break, ch 3 (C5-05:163; script.md:161) | placeholder (no file) (`pack.yaml:213`) | Bob's art hold |
-| `finale-win.shattered~vo-01` | voice line | Win, the seal shattered (C5-05:164; script.md:183) | placeholder (no file) (`pack.yaml:214`) | Bob's art hold |
-| `finale-win.oath~vo-01` | voice line | Win, the oath (C5-05:165; script.md:184) | placeholder (no file) (`pack.yaml:215`) | Bob's art hold |
-| `finale-loss.skulls~vo-01` | voice line | Loss, skulls (C5-05:174; script.md:186) | placeholder (no file) (`pack.yaml:216`) | Bob's art hold |
-| `finale-loss.corruption~vo-01` | voice line | Loss, corruption (C5-05:175; script.md:187) | placeholder (no file) (`pack.yaml:217`) | Bob's art hold |
-| `finale-loss.fallen-buildings~vo-01` | voice line | Loss, fallen buildings (C5-05:176; script.md:188) | placeholder (no file) (`pack.yaml:218`) | Bob's art hold |
-| `painting.cover` | painting | Pick Story card and the demo line backdrop (`demoLine.ts:17`; `needs/build.ts:191-195`) | not declared (`assets/cover.png`, via `pack.yaml:5` `cover:`) | Bob's art hold (approval line 54 not ticked) |
-| `glow.cover` | effect | Cover glow mask on Pick Story and the demo line (`demoLine.ts:18`; `needs/build.ts:191`) | missing file | Bob's art hold |
+| `painting.finale-win` | painting | Win scene, both endings (C5-05:27) | draft (`pack.yaml:207`, `assets/painting.finale-win.webp`, AI draft 1920×1080, 2026-11-26) | Bob's tick in approval.md |
+| `painting.finale-loss` | painting | Loss scene, all three causes (C5-05:28) | draft (`pack.yaml:208`, `assets/painting.finale-loss.webp`, AI draft 1920×1080, 2026-11-26) | Bob's tick in approval.md |
+| `chapter-card.01~vo-01` | voice line | Chapter 1 card (C5-05:156; script.md:37) | placeholder (no file) (`pack.yaml:214`) | Bob's art hold |
+| `chapter-card.02~vo-01` | voice line | Chapter 2 card (C5-05:157; script.md:83) | placeholder (no file) (`pack.yaml:215`) | Bob's art hold |
+| `chapter-card.03~vo-01` | voice line | Chapter 3 card (C5-05:158; script.md:129) | placeholder (no file) (`pack.yaml:216`) | Bob's art hold |
+| `chapter-win.01~vo-01` | voice line | Chapter 1 win (C5-05:159; script.md:70) | placeholder (no file) (`pack.yaml:217`) | Bob's art hold |
+| `chapter-win.03~vo-01` | voice line | Chapter 3 win (C5-05:162; script.md:160) | placeholder (no file) (`pack.yaml:218`) | Bob's art hold |
+| `seal-break.01~vo-01` | voice line | Seal break, ch 1; demo line (`demoLine.ts`) (C5-05:160) | placeholder (no file) (`pack.yaml:211`) | Bob's art hold |
+| `seal-break.02~vo-01` | voice line | Seal break, ch 2 (C5-05:161; script.md:117) | placeholder (no file) (`pack.yaml:219`) | Bob's art hold |
+| `seal-break.03~vo-01` | voice line | Seal break, ch 3 (C5-05:163; script.md:161) | placeholder (no file) (`pack.yaml:220`) | Bob's art hold |
+| `finale-win.shattered~vo-01` | voice line | Win, the seal shattered (C5-05:164; script.md:183) | placeholder (no file) (`pack.yaml:221`) | Bob's art hold |
+| `finale-win.oath~vo-01` | voice line | Win, the oath (C5-05:165; script.md:184) | placeholder (no file) (`pack.yaml:222`) | Bob's art hold |
+| `finale-loss.skulls~vo-01` | voice line | Loss, skulls (C5-05:174; script.md:186) | placeholder (no file) (`pack.yaml:223`) | Bob's art hold |
+| `finale-loss.corruption~vo-01` | voice line | Loss, corruption (C5-05:175; script.md:187) | placeholder (no file) (`pack.yaml:224`) | Bob's art hold |
+| `finale-loss.fallen-buildings~vo-01` | voice line | Loss, fallen buildings (C5-05:176; script.md:188) | placeholder (no file) (`pack.yaml:225`) | Bob's art hold |
+| `painting.cover` | painting | Pick Story card and the demo line backdrop (`demoLine.ts:17`; `needs/build.ts:191-195`) | not declared (`assets/cover.png`, via `pack.yaml:5` `cover:`); AI draft repaint `assets/painting.cover.webp` (3840×2160, 2026-11-26) is a file only, since declaring it duplicates the `cover:` picture (A1-8) | Bob's tick (approval line 54) and a ruling on the `cover:` route |
+| `glow.cover` | effect | Cover glow mask on Pick Story and the demo line (`demoLine.ts:18`; `needs/build.ts:191`) | not declared; AI draft mask `assets/glow.cover.webp` (3840×2160 grayscale lossless WebP, traced from `painting.cover.webp`, 2026-11-26). Declaring it duplicates the cover's glow (A1-8) | Bob's tick (approval line 55) and the same `cover:` ruling |
 | `grey-stair-04.png` (no id) | painting | `OpeningMoment.tsx:18`, the `grey-stair.04` motion still | missing file | nothing: stale, since no pack has a `grey-stair` moment |
 | `grey-stair-04-glow.png` (no id) | effect | `OpeningMoment.tsx:19` | missing file | nothing: stale, as above |
 | `startup-ambient.m4a` | ambience | Startup mood (`tracks.ts:36`) | missing file | Bob's art hold |
@@ -275,7 +275,7 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 ## 2. Voice lines whose text isn't final (Loremaster first)
 
 - ~~**packs/base, `vo.hero-a` … `vo.hero-f` (6)**~~ **Ruled 2026-11-26 (Bob):** no hero voices in 1.0; only the Loremaster is voiced (DEC-099, DEC-349). The six `line` entries are removed from `packs/base/pack.yaml`, so nothing goes to Loremaster here.
-- **packs/test (Ruined Keep): no voice line text is unfinished.** All 13 Loremaster lines were accepted by Bob on 2026-11-06 (`research/stories/ruined-keep/script.md:9`), and all 13 are now `line` placeholders in `packs/test/pack.yaml:204-218` (no files yet). Eight `[COPY: …]` strings are still open, because script.md has no accepted words for them:
+- **packs/test (Ruined Keep): no voice line text is unfinished.** All 13 Loremaster lines were accepted by Bob on 2026-11-06 (`research/stories/ruined-keep/script.md:9`), and all 13 are now `line` placeholders in `packs/test/pack.yaml:211-225` (no files yet). Eight `[COPY: …]` strings are still open, because script.md has no accepted words for them:
   - the tagline (line 8)
   - the chapter 2 and chapter 3 start narration (lines 79 and 93)
   - the options `leave-the-shrine` and `rally-the-guard` (lines 137 and 159)
@@ -298,10 +298,10 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 ## 3. Suggested plan issues
 
 1. **Ruined Keep pack copy: the 8 placeholders left.** Ids: the `[COPY:]` strings still in `packs/test/pack.yaml` (the tagline, the chapter 2 and 3 start narration, the options `leave-the-shrine` and `rally-the-guard`, and the item labels `tomas-map`, `signet` and `oath-blade`). They need Loremaster's words and Bob's acceptance first. The other 14 placeholders and the 12 `line` entries were filled from script.md. kind:story. Touches: `research/stories/ruined-keep/script.md`, `packs/test/pack.yaml`.
-2. **Ruined Keep story paintings.** Ids: `painting.ch1-the-roads`, `painting.ch2-the-keep`, `painting.ch3-the-tower`, `painting.keep-sealed-door`, `painting.finale-win`, `painting.finale-loss`, `painting.cover` and `glow.cover`. kind:art. Touches: `packs/test/assets/`, `packs/test/assets/index.json` (new), `packs/test/pack.yaml`, `approval.md`.
+2. **Ruined Keep story paintings.** Ids: `painting.ch1-the-roads`, `painting.ch2-the-keep`, `painting.ch3-the-tower`, `painting.keep-sealed-door`, `painting.finale-win`, `painting.finale-loss`, `painting.cover` and `glow.cover`. kind:art. Touches: `packs/test/assets/`, `packs/test/assets/index.json` (new), `packs/test/pack.yaml`, `approval.md`. **Drafts made 2026-11-26** (art hold lifted for drafts, Bob, PR #643): the six scene paintings are declared `draft` (`pack.yaml:203-208`); `painting.cover` and `glow.cover` are files only (see their rows). Left: Bob's ticks, `index.json` (made by `assets:pack`, not run), and the 4K drift size if these slots drift.
 3. **Ruined Keep foes.** Ids: `foe.level-1`…`4`, `foe.warden~phase-1`…`3`, `foe.keep-garrison`. kind:art. Touches: `packs/test/assets/`, `index.json`, `pack.yaml`.
 4. **Ruined Keep Tomb, traps and Tower maps.** Ids: `painting.keep-crypt~{left,ahead,right}-{corridor,wall}` (6), `painting.trap-pit`, `painting.trap-falling-rocks`, `painting.tower-{basement,main,top}-map`. kind:art. Touches: `packs/test/assets/`, `index.json`, `pack.yaml`, and `apps/bloodtower/src/assets/needs/build.ts`, which needs an 8:9 profile (C5-05:196).
-5. **Ruined Keep Loremaster voice (13 lines).** Ids: the 13 `line` placeholders at `packs/test/pack.yaml:204-218`. They wait for Bob to lift the art hold. kind:art. Touches: `packs/test/assets/`, `index.json`, `pack.yaml`.
+5. **Ruined Keep Loremaster voice (13 lines).** Ids: the 13 `line` placeholders at `packs/test/pack.yaml:211-225`. They wait for Bob to lift the art hold. kind:art. Touches: `packs/test/assets/`, `index.json`, `pack.yaml`.
 6. **Ruined Keep place stills: import through A1 step 6 and Bob's ticks.** Ids: `place.{village,bazaar,citadel,sanctuary}`. Now declared `draft` (ruled 2026-11-26, Bob, DEC-388). `place-bazaar.jpg` is recropped to 16:9 at 1920×1080 on import (DEC-347). kind:art. Touches: `packs/test/pack.yaml:198-201`, `approval.md:12-15`.
 7. **Ruined Keep ambience.** Ids: `startup-ambient.m4a`, `night1-ambient.m4a`, `night2-ambient.m4a`, `pg-music.m4a`, or else drop them from `tracks.ts`. kind:art. Touches: `packs/test/audio/` (new), `apps/bloodtower/src/web/lib/audio/tracks.ts:33-40`.
 8. **Base pack hero portraits.** Ids: `portrait.hero-a`…`f`. kind:art. Touches: `packs/base/assets/` (new), `packs/base/pack.yaml:95-100`.
@@ -331,7 +331,7 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 2. **The checklist's index doesn't exist.**
    - `approval.md:10` and `eval.md:36,45` check against `packs/test/assets/index.json`, which isn't in the repo. No Dracula `index.json` exists either.
    - C5-05:10 and D-06:28 say shipped files go with an `index.json`.
-3. **Approval names 26 ids that pack.yaml doesn't declare.** `approval.md:16-40` lists 25 paintings and foes that `packs/test/pack.yaml` has no entry for. It declares the 4 places and all 13 Loremaster lines (`:198-218`). The cover is set only by `cover:` (`:5`), not as `painting.cover`.
+3. **Approval names 20 ids that pack.yaml doesn't declare** (26 before the 2026-11-26 drafts). `approval.md:16-40` lists 25 paintings and foes; `packs/test/pack.yaml` now declares 6 of them (`:203-208`, drafts) and has no entry for the other 19. It declares the 4 places, those 6 paintings and all 13 Loremaster lines (`:198-225`). The cover is set only by `cover:` (`:5`), not as `painting.cover`.
 4. **Pack placeholders that script.md doesn't cover.** `packs/test/pack.yaml` still has `[COPY: …]` at lines 8, 79, 93, 137, 159, 175, 178 and 181. Script.md has no accepted words for these slots. It also names different options for two of them: "Rest at the altar" (script.md:108) for the pack's `leave-the-shrine`, and "Fall back" (script.md:152) for its `rally-the-guard`. The pack's effects don't match the script's, so the text wasn't moved.
 5. **Code names files that no pack has.**
    - `apps/bloodtower/src/web/components/board/OpeningMoment.tsx:18-19` loads `/packs/test/assets/grey-stair-04.png` and `-glow.png`. Lines 177–178 key the Keeper and motion still on `grey-stair.03` and `.04`.

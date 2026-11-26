@@ -52,9 +52,12 @@ One line per asset id in `packs/test/assets/index.json`; EV-04 checks every id i
 - [ ] finale-loss.corruption~vo-01 — approved by Bob
 - [ ] finale-loss.fallen-buildings~vo-01 — approved by Bob
 - [ ] painting.cover — 16:9 Ruined Keep cover for 1.0 (Bob locked Nov 2 2026 via Warden)
+- [ ] glow.cover — approved by Bob
 
 Change note 2026-11-02: avatar.loremaster (portrait, anchor, mouth-A–H) removed — talking portrait deferred, not in 1.0 (Bob, Nov 1: Loremaster is audio + captions). Cover locked as painting.cover. Small tweak; no re-approval per Bob's Nov 1 rule.
 
 Change note 2026-11-10: checklist ids updated to the adopted ids (Warden ruling 2026-11-10 relayed via Wright; [C5-05-ruined-keep-art.md](../../../../../../research/game-design/specs/C5-05-ruined-keep-art.md) §6). Renamed: tomb.keep-crypt~* → painting.keep-crypt~*, trap.* → painting.trap-*, map.tower-* → painting.tower-*-map, vo.loremaster.* → line ids. Added: foe.keep-garrison, chapter-win.01~vo-01, chapter-win.03~vo-01; vo.loremaster.finale-loss split into three finale-loss.*~vo-01 lines. Removed for 1.1: snd.tomb-door, snd.tomb-guardian-reveal (DEC-609; DEC-768, CUE-017). Moved to packs/base as engine defaults, outside this checklist: snd.listen-nothing, snd.listen-trap, snd.listen-battle (were snd.listen_*; DEC-618). Mechanical follow-through; no approval wording or eval changed.
 
 Ruling 2026-11-26 (Bob): the four `place.*` stills are drafts. They come in through A1 step 6, and Bob ticks each line above (12–15) once it is imported; `packs/test/pack.yaml` declares them `draft` until then (DEC-388). `place-bazaar.jpg` (864×1152) is recropped to 16:9 at 1920×1080 on import (DEC-347).
+
+Change note 2026-11-26: AI drafts added for the story paintings (inventory §3 issue 2), all `draft` and unticked: painting.ch1-the-roads, painting.ch2-the-keep, painting.ch3-the-tower, painting.keep-sealed-door, painting.finale-win, painting.finale-loss (1920×1080, declared in `packs/test/pack.yaml`), and painting.cover with glow.cover (3840×2160, files only: `packs/test/assets/painting.cover.webp`, `glow.cover.webp`). Row added: glow.cover. The art hold is lifted for drafts only (Bob, 2026-11-26, PR #643); nothing is final until Bob ticks it here.

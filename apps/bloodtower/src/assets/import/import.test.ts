@@ -325,6 +325,22 @@ describe("IMP assets:import test", () => {
     for (const name of ["village", "bazaar", "citadel", "sanctuary"]) {
       writeFileSync(join(packDir, "assets", `place-${name}.jpg`), tiny);
     }
+    // The six story paintings pack.yaml declares as drafts (2026-11-26) need a source file too.
+    const webp = await sharp({
+      create: { width: 16, height: 9, channels: 3, background: "#442266" },
+    })
+      .webp()
+      .toBuffer();
+    for (const id of [
+      "painting.ch1-the-roads",
+      "painting.ch2-the-keep",
+      "painting.ch3-the-tower",
+      "painting.keep-sealed-door",
+      "painting.finale-win",
+      "painting.finale-loss",
+    ]) {
+      writeFileSync(join(packDir, "assets", `${id}.webp`), webp);
+    }
     const argv = ["test", "--work-folder", f.work, "--packs-dir", f.packs];
     const r = run(argv, f, FAKE, false);
     expect(r.out).toContain("matched 4, skipped 0, failed 0");
