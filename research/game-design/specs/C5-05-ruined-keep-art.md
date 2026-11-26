@@ -10,6 +10,7 @@ Design-only handoff by Gamewright, 2026-11-10 (ET), for Illusionist. It gives ev
 - **Pipeline (LOCKED):** AI drafts through A1, then Bob approves each final in the studio (Q-C5-06); masters and WAVs stay in the work folder; shipped files are content-hashed WebP and m4a with `index.json` (DEC-386, DEC-622). Old saves keep working because IDs are stable (DEC-202; C5-05 EV-05).
 - **Panning Paintings (LOCKED):** a story Painting that drifts is 16:9 at 3840×2160, 1.5× max zoom, key detail out of the bottom third (DEC-206, DEC-575). Base-game-style stills that do not move need only 1080p (DEC-347).
 - **Spoiler rule (from DEC-662, script):** no art shown before The Barrow may show the Warden's crest whole. Raiders' shields have the crest scratched off; the sworn guard wear it openly only in chapter 3.
+- **The Warden's crest (kept, Gamewright ruling 5, 2026-11-26; DEC-662, FO-02):** a tower on a shield. On The Lock's gate it sits on a round iron boss with the ring-sized hollow at its centre (`painting.keep-sealed-door`, `painting.ch3-the-tower`). Levels 1–2 show it scratched off, with no readable mark; the sworn guard, the Barrow's garrison and the Warden show it whole.
 - **Voice (LOCKED):** only the Loremaster's lines are voiced (Q-C5-07; DEC-349), audio plus captions, no Portrait (approval change note, Nov 2). Voice, format, loudness and duration rules are as for `seal-break.01~vo-01` in [A1-art-specs.md](A1-art-specs.md) §3: Charon, locked (Bob 2026-11-10, DEC-902); WAV master to m4a; about −18 LUFS (R3-UI-60, game-look §6); estimated over 20 s rejected (A1-P2 D6); caption ≤ 120 characters (DEC-576).
 
 ---
@@ -200,5 +201,7 @@ The listen sounds must not tell the room kind apart by loudness alone; a wrong h
 Citation fix: final approval of every asset is C5-05 **EV-04** (`eval.md`); `approval.md`'s “EV-05 checks every id is ticked” was corrected to EV-04 in this branch (docs-only).
 
 ## 7. No repaint
+
+**Superseded 2026-11-26:** Gamewright ruling 3 (oil wins, DEC-335, DEC-478) and Bob's go-ahead lifted this hold. All four places are repainted in oil at 1920×1080 as drafts, to match the story paintings; Bob ticks each in approval.md (lines 12–15) as before. The Bazaar's oil repaint keeps both lantern tops whole (ruling 24). The original text follows for the record.
 
 `place.village`, `place.bazaar`, `place.citadel` and `place.sanctuary` need **no repaint**: A1 step 6 imports the existing `packs/test/assets/place-*.jpg` as drafts for Bob's approval (A1-06b; A1-P2 inventory). Observed only: `place-bazaar.jpg` is 864×1152 (portrait), the other three 1280×720.

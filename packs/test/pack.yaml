@@ -2,7 +2,7 @@ format: 2
 kind: story
 pack_id: test
 title: The Ruined Keep
-cover: assets/cover.png
+cover: assets/painting.cover.webp
 version: 0.1.0
 engine_min: 0.1.0
 tagline: "[COPY: The Ruined Keep tagline]"

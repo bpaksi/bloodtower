@@ -70,6 +70,8 @@ Change note 2026-11-26 (group 4): `packs/test/assets/place-bazaar.jpg` recropped
 
 Change note 2026-11-26 (group 5): AI drafts added for the base pack hero portraits (inventory §3 issue 8), all `draft` and unticked, 2048×2048, declared in `packs/base/pack.yaml:95-100` with files in `packs/base/assets/`. They are base pack assets, outside the Ruined Keep `index.json` that EV-04 checks, so their rows sit in their own list below.
 
+Change note 2026-11-26 (redo group 1, Gamewright rulings of 2026-11-26): all still `draft` and unticked. Bob lifted the C5-05 §7 no-repaint hold: place.village, place.bazaar, place.citadel and place.sanctuary are repainted in oil at 1920×1080 (lines 12–15; the Bazaar keeps both lantern tops whole). `packs/test/pack.yaml` `cover:` now points at `assets/painting.cover.webp`, so the A1 job builds painting.cover and glow.cover from it rather than from `cover.png` (ruling 9). painting.cover is redone as `cover.png` upscaled 3× to 3840×2160 (CV-02 fallback, ruling 10), and glow.cover lights only the six window panes, with no lanterns (ruling 11). painting.ch1-the-roads, painting.ch3-the-tower and painting.finale-win are redone (rulings 12–14). The rows painting.cover and glow.cover stay files set by `cover:`, not `assets[]` rows, because a row would duplicate them (A1-8).
+
 ## Base pack hero portraits (Bob)
 
 Not part of EV-04 (base pack, not `packs/test`). Nothing is final until Bob ticks it here.

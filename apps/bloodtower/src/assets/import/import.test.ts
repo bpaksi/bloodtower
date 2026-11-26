@@ -325,13 +325,14 @@ describe("IMP assets:import test", () => {
     for (const name of ["village", "bazaar", "citadel", "sanctuary"]) {
       writeFileSync(join(packDir, "assets", `place-${name}.jpg`), tiny);
     }
-    // The story paintings, foes, Tomb sections, traps and Tower maps pack.yaml declares as drafts (2026-11-26) need a source file too.
+    // The story paintings, foes, Tomb sections, traps and Tower maps pack.yaml declares as drafts (2026-11-26), and the cover `cover:` now names (painting.cover.webp), need a source file too.
     const webp = await sharp({
       create: { width: 16, height: 9, channels: 3, background: "#442266" },
     })
       .webp()
       .toBuffer();
     for (const id of [
+      "painting.cover",
       "painting.ch1-the-roads",
       "painting.ch2-the-keep",
       "painting.ch3-the-tower",

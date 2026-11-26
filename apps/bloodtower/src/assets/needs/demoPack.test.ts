@@ -25,6 +25,7 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
     // Everything else in the manifest is still pinned to the baseline.
     const {
       title: oldTitle,
+      cover: oldCover,
       assets: oldAssets,
       tagline: oldTagline,
       chapters: _oldChapters,
@@ -32,6 +33,7 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
     } = before;
     const {
       title: newTitle,
+      cover: newCover,
       assets: newAssets,
       tagline: newTagline,
       chapters: _newChapters,
@@ -42,6 +44,9 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
     } = after;
     expect(oldTitle).toBe("Proving Grounds");
     expect(newTitle).toBe("The Ruined Keep");
+    // Gamewright ruling 9 (2026-11-26): `cover:` names the painting.cover file, not cover.png.
+    expect(oldCover).toBe("assets/cover.png");
+    expect(newCover).toBe("assets/painting.cover.webp");
     expect(oldTagline).toBe("AREA-077 day slice — Enter and Leave only.");
     expect(newTagline).toBe("[COPY: The Ruined Keep tagline]");
     expect(restAfter).toEqual(restBefore);
