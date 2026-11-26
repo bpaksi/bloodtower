@@ -690,6 +690,21 @@ describe("The Ruined Keep pack (C3-03)", () => {
       "pack.yaml.scenes.0.options.1.label", // herald / ask-pay-first
       "pack.yaml.scenes.1.options.0.label", // ambush / fight (hidden in C3)
       "pack.yaml.scenes.1.options.1.label", // ambush / pay-the-toll
+      "pack.yaml.chapters.0.start.effects.0.lines.0.text", // the-roads start / opening
+      "pack.yaml.chapters.0.end.effects.0.lines.0.text", // the-roads end / chapter 1 win
+      "pack.yaml.chapters.2.end.effects.0.lines.0.text", // the-tower end / last choice, part 1
+      "pack.yaml.chapters.2.end.effects.0.lines.1.text", // the-tower end / last choice, part 2
+      "pack.yaml.scenes.2.options.0.label", // shrine / pray-at-the-altar
+      "pack.yaml.scenes.3.options.0.label", // lock / turn-the-signet
+      "pack.yaml.scenes.3.options.1.label", // lock / force-it
+      "pack.yaml.scenes.4.options.0.label", // last-stand / hold-the-gate
+      "pack.yaml.scenes.5.options.0.label", // tower-end / break-the-seal
+      "pack.yaml.scenes.5.options.1.label", // tower-end / swear-the-oath
+      "pack.yaml.endings.win.0.text", // win-break
+      "pack.yaml.endings.win.1.text", // win-oath
+      "pack.yaml.endings.loss.0.text", // corruption
+      "pack.yaml.endings.loss.1.text", // skulls
+      "pack.yaml.endings.loss.2.text", // buildings
     ]);
     const strays: string[] = [];
     const walk = (node: unknown, path: string, key: string | undefined) => {

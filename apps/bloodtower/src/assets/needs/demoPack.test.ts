@@ -57,6 +57,102 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
         speaker: "narrator",
         text: LINE_TEXT,
       },
+      {
+        id: "chapter-card.01~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "Hear the herald in Greyford. Then open the forest road.",
+      },
+      {
+        id: "chapter-card.02~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "Go down into the barrow under the old keep. Find the shrine on the road beside it.",
+      },
+      {
+        id: "chapter-card.03~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb.",
+      },
+      {
+        id: "chapter-win.01~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years.",
+      },
+      {
+        id: "chapter-win.03~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "The gate is open and the last stand held. The Warden's door is open, for now.",
+      },
+      {
+        id: "seal-break.02~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "The Keep gives up its dead, and a second seal cracks. The Tower waits.",
+      },
+      {
+        id: "seal-break.03~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "The last stand holds, and the third seal breaks. Only the Warden remains.",
+      },
+      {
+        id: "finale-win.shattered~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "The shard shatters. The Tower's call goes quiet, and the roads are yours.",
+      },
+      {
+        id: "finale-win.oath~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "You swear his oath and take up his watch. The Tower called to him once. It will call to you.",
+      },
+      {
+        id: "finale-loss.skulls~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "The last skull falls. The Tower's shadow covers the land, and the roads are his for good.",
+      },
+      {
+        id: "finale-loss.corruption~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "One of you hears the Tower call, and goes to it. Without them, the hunt is over.",
+      },
+      {
+        id: "finale-loss.fallen-buildings~vo-01",
+        type: "line",
+        target: "storyboard",
+        status: "placeholder",
+        speaker: "narrator",
+        text: "Four strongholds have fallen. There is nowhere left to hold, and his raiders own the land.",
+      },
     ]);
   });
 
@@ -78,6 +174,16 @@ describe("A1-8b-1 Done when 2: assets:needs lists the demo ids", () => {
     const { job } = buildJob("test", { packsDir: REPO_PACKS });
     const rows = computeRows(job, workPathsFor(tempDir("wf"), "test"));
     expect(rows.map((r) => r.id)).toEqual([
+      "chapter-card.01~vo-01",
+      "chapter-card.02~vo-01",
+      "chapter-card.03~vo-01",
+      "chapter-win.01~vo-01",
+      "chapter-win.03~vo-01",
+      "finale-loss.corruption~vo-01",
+      "finale-loss.fallen-buildings~vo-01",
+      "finale-loss.skulls~vo-01",
+      "finale-win.oath~vo-01",
+      "finale-win.shattered~vo-01",
       "glow.cover",
       "painting.cover",
       "place.bazaar",
@@ -85,10 +191,74 @@ describe("A1-8b-1 Done when 2: assets:needs lists the demo ids", () => {
       "place.sanctuary",
       "place.village",
       LINE_ID,
+      "seal-break.02~vo-01",
+      "seal-break.03~vo-01",
     ]);
     expect(rows.find((r) => r.id === LINE_ID)?.kind).toBe("line");
     expect(rows.filter((r) => r.id.startsWith("glow.")).length).toBe(1);
-    expect(job.lines).toEqual([{ id: LINE_ID, speaker: "narrator", text: LINE_TEXT }]);
+    expect(job.lines).toEqual([
+      { id: LINE_ID, speaker: "narrator", text: LINE_TEXT },
+      {
+        id: "chapter-card.01~vo-01",
+        speaker: "narrator",
+        text: "Hear the herald in Greyford. Then open the forest road.",
+      },
+      {
+        id: "chapter-card.02~vo-01",
+        speaker: "narrator",
+        text: "Go down into the barrow under the old keep. Find the shrine on the road beside it.",
+      },
+      {
+        id: "chapter-card.03~vo-01",
+        speaker: "narrator",
+        text: "Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb.",
+      },
+      {
+        id: "chapter-win.01~vo-01",
+        speaker: "narrator",
+        text: "The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years.",
+      },
+      {
+        id: "chapter-win.03~vo-01",
+        speaker: "narrator",
+        text: "The gate is open and the last stand held. The Warden's door is open, for now.",
+      },
+      {
+        id: "seal-break.02~vo-01",
+        speaker: "narrator",
+        text: "The Keep gives up its dead, and a second seal cracks. The Tower waits.",
+      },
+      {
+        id: "seal-break.03~vo-01",
+        speaker: "narrator",
+        text: "The last stand holds, and the third seal breaks. Only the Warden remains.",
+      },
+      {
+        id: "finale-win.shattered~vo-01",
+        speaker: "narrator",
+        text: "The shard shatters. The Tower's call goes quiet, and the roads are yours.",
+      },
+      {
+        id: "finale-win.oath~vo-01",
+        speaker: "narrator",
+        text: "You swear his oath and take up his watch. The Tower called to him once. It will call to you.",
+      },
+      {
+        id: "finale-loss.skulls~vo-01",
+        speaker: "narrator",
+        text: "The last skull falls. The Tower's shadow covers the land, and the roads are his for good.",
+      },
+      {
+        id: "finale-loss.corruption~vo-01",
+        speaker: "narrator",
+        text: "One of you hears the Tower call, and goes to it. Without them, the hunt is over.",
+      },
+      {
+        id: "finale-loss.fallen-buildings~vo-01",
+        speaker: "narrator",
+        text: "Four strongholds have fallen. There is nowhere left to hold, and his raiders own the land.",
+      },
+    ]);
     // The provisional Charon voice, and no moods: audio and caption only (D48, D8).
     expect(job.cast).toEqual([
       {

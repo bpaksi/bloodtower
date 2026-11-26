@@ -151,13 +151,25 @@ describe("A1-02a: pack to job, work folder, needs list", () => {
     expect(text.code).toBe(0);
     expect(text.out).toBe(
       [
-        "glow.cover           glow      missing",
-        "painting.cover       painting  missing",
-        "place.bazaar         place     missing",
-        "place.citadel        place     missing",
-        "place.sanctuary      place     missing",
-        "place.village        place     missing",
-        "seal-break.01~vo-01  line      missing",
+        "chapter-card.01~vo-01               line      missing",
+        "chapter-card.02~vo-01               line      missing",
+        "chapter-card.03~vo-01               line      missing",
+        "chapter-win.01~vo-01                line      missing",
+        "chapter-win.03~vo-01                line      missing",
+        "finale-loss.corruption~vo-01        line      missing",
+        "finale-loss.fallen-buildings~vo-01  line      missing",
+        "finale-loss.skulls~vo-01            line      missing",
+        "finale-win.oath~vo-01               line      missing",
+        "finale-win.shattered~vo-01          line      missing",
+        "glow.cover                          glow      missing",
+        "painting.cover                      painting  missing",
+        "place.bazaar                        place     missing",
+        "place.citadel                       place     missing",
+        "place.sanctuary                     place     missing",
+        "place.village                       place     missing",
+        "seal-break.01~vo-01                 line      missing",
+        "seal-break.02~vo-01                 line      missing",
+        "seal-break.03~vo-01                 line      missing",
         "",
       ].join("\n"),
     );
@@ -165,9 +177,9 @@ describe("A1-02a: pack to job, work folder, needs list", () => {
     expect(job.story).toBe("test");
     const json = run(["test", "--json", "--work-folder", wf]);
     expect(JSON.parse(json.out)[0]).toEqual({
-      id: "glow.cover",
-      kind: "glow",
-      origin: "built",
+      id: "chapter-card.01~vo-01",
+      kind: "line",
+      origin: "job",
       status: "missing",
     });
   });
@@ -285,6 +297,16 @@ describe("A1-02b: cast, counts and ID sets", () => {
     const { job } = buildJob("test", { packsDir: REPO_PACKS });
     const rows = computeRows(job, workPathsFor(tempDir("wf"), "test")).map((r) => r.id);
     expect(rows).toEqual([
+      "chapter-card.01~vo-01",
+      "chapter-card.02~vo-01",
+      "chapter-card.03~vo-01",
+      "chapter-win.01~vo-01",
+      "chapter-win.03~vo-01",
+      "finale-loss.corruption~vo-01",
+      "finale-loss.fallen-buildings~vo-01",
+      "finale-loss.skulls~vo-01",
+      "finale-win.oath~vo-01",
+      "finale-win.shattered~vo-01",
       "glow.cover",
       "painting.cover",
       "place.bazaar",
@@ -292,10 +314,26 @@ describe("A1-02b: cast, counts and ID sets", () => {
       "place.sanctuary",
       "place.village",
       "seal-break.01~vo-01",
+      "seal-break.02~vo-01",
+      "seal-break.03~vo-01",
     ]);
     // The demo line row (D48) brings the built-in Loremaster, audio only.
     expect(job.cast.map((c) => [c.id, c.moods])).toEqual([["narrator", []]]);
-    expect(job.lines.map((l) => l.id)).toEqual(["seal-break.01~vo-01"]);
+    expect(job.lines.map((l) => l.id)).toEqual([
+      "seal-break.01~vo-01",
+      "chapter-card.01~vo-01",
+      "chapter-card.02~vo-01",
+      "chapter-card.03~vo-01",
+      "chapter-win.01~vo-01",
+      "chapter-win.03~vo-01",
+      "seal-break.02~vo-01",
+      "seal-break.03~vo-01",
+      "finale-win.shattered~vo-01",
+      "finale-win.oath~vo-01",
+      "finale-loss.skulls~vo-01",
+      "finale-loss.corruption~vo-01",
+      "finale-loss.fallen-buildings~vo-01",
+    ]);
   });
 
   it("pins the Dracula counts after eligibility filtering", () => {
