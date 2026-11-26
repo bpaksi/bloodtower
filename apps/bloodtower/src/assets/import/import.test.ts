@@ -325,7 +325,7 @@ describe("IMP assets:import test", () => {
     for (const name of ["village", "bazaar", "citadel", "sanctuary"]) {
       writeFileSync(join(packDir, "assets", `place-${name}.jpg`), tiny);
     }
-    // The six story paintings pack.yaml declares as drafts (2026-11-26) need a source file too.
+    // The six story paintings and eight foes pack.yaml declares as drafts (2026-11-26) need a source file too.
     const webp = await sharp({
       create: { width: 16, height: 9, channels: 3, background: "#442266" },
     })
@@ -338,6 +338,14 @@ describe("IMP assets:import test", () => {
       "painting.keep-sealed-door",
       "painting.finale-win",
       "painting.finale-loss",
+      "foe.level-1",
+      "foe.level-2",
+      "foe.level-3",
+      "foe.level-4",
+      "foe.warden~phase-1",
+      "foe.warden~phase-2",
+      "foe.warden~phase-3",
+      "foe.keep-garrison",
     ]) {
       writeFileSync(join(packDir, "assets", `${id}.webp`), webp);
     }

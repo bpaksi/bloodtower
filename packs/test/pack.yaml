@@ -206,6 +206,15 @@ assets:
   - {id: painting.keep-sealed-door, type: still, target: storyboard, status: draft, path: assets/painting.keep-sealed-door.webp}
   - {id: painting.finale-win, type: still, target: storyboard, status: draft, path: assets/painting.finale-win.webp}
   - {id: painting.finale-loss, type: still, target: storyboard, status: draft, path: assets/painting.finale-loss.webp}
+  # Foes, group 2 (inventory §3 issue 3): AI drafts, 2026-11-26, 1920x1080; Bob ticks finals in approval.md.
+  - {id: foe.level-1, type: still, target: storyboard, status: draft, path: assets/foe.level-1.webp}
+  - {id: foe.level-2, type: still, target: storyboard, status: draft, path: assets/foe.level-2.webp}
+  - {id: foe.level-3, type: still, target: storyboard, status: draft, path: assets/foe.level-3.webp}
+  - {id: foe.level-4, type: still, target: storyboard, status: draft, path: assets/foe.level-4.webp}
+  - {id: "foe.warden~phase-1", type: still, target: storyboard, status: draft, path: "assets/foe.warden~phase-1.webp"}
+  - {id: "foe.warden~phase-2", type: still, target: storyboard, status: draft, path: "assets/foe.warden~phase-2.webp"}
+  - {id: "foe.warden~phase-3", type: still, target: storyboard, status: draft, path: "assets/foe.warden~phase-3.webp"}
+  - {id: foe.keep-garrison, type: still, target: storyboard, status: draft, path: assets/foe.keep-garrison.webp}
   # Demo line (A1 step 8b-1, D48). Provenance: checklist id vo.loremaster.seal-break-1 -> this id.
   # Voice is provisional (Charon). No file yet: it stays unavailable (caption only) until packed.
   - {id: "seal-break.01~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep."}
