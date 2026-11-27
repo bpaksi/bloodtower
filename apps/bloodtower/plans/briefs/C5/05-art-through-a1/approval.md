@@ -96,3 +96,5 @@ Not part of EV-04 (base pack engine defaults, DEC-618; C5-05 §5). Nothing is fi
 - [ ] snd.listen-battle — shuffling and breathing — approved by Bob
 
 Change note 2026-11-27 (Gamewright ruling 30, approved by Bob): rough ffmpeg placeholders added, declared `draft` in `packs/base/pack.yaml` (type `sfx`, target `storyboard`), m4a AAC-LC mono 48 kHz, 2.0 s each, all three at about −20 LUFS so loudness alone does not tell them apart. Generated with ffmpeg only, no AI voice and no downloaded audio. No ambience (not on the 1.0 list). Nothing is ticked.
+
+Change note 2026-11-27 (ruling 30 redo, after Bob listened at 7:40 AM ET): all three redone with ffmpeg only, still `draft` and unticked, same format (m4a AAC-LC mono 48 kHz, 2.0 s, about −20 LUFS, true peak at or under −1 dBTP) over one shared near-silent stone room tone. snd.listen-nothing: an empty stone room with two sparse water drips, no wind. snd.listen-trap: an old wooden and iron latch, ratchet and grinding stone, then a trickle of grit instead of a drip. snd.listen-battle: people waiting behind a door, with shuffling steps, a crackling fire, faint breathing, a low grunt and a mail clink, all muffled.
