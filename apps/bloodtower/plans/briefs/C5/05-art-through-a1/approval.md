@@ -16,14 +16,14 @@ One line per asset id in `packs/test/assets/index.json`; EV-04 checks every id i
 - [x] painting.ch1-the-roads — approved by Bob 2026-11-27
 - [x] painting.ch2-the-keep — approved by Bob 2026-11-27
 - [x] painting.ch3-the-tower — approved by Bob 2026-11-27
-- [ ] foe.level-1 — approved by Bob 
-- [ ] foe.level-2 — approved by Bob 
-- [ ] foe.level-3 — approved by Bob 
-- [ ] foe.level-4 — approved by Bob 
+- [x] foe.level-1 — approved by Bob 2026-11-27
+- [x] foe.level-2 — approved by Bob 2026-11-27
+- [x] foe.level-3 — approved by Bob 2026-11-27
+- [x] foe.level-4 — approved by Bob 2026-11-27
 - [x] foe.warden~phase-1 — approved by Bob 2026-11-27
 - [x] foe.warden~phase-2 — approved by Bob 2026-11-27
 - [x] foe.warden~phase-3 — approved by Bob 2026-11-27
-- [ ] foe.keep-garrison — approved by Bob
+- [x] foe.keep-garrison — approved by Bob 2026-11-27
 - [x] painting.keep-crypt~left-corridor — approved by Bob 2026-11-27
 - [x] painting.keep-crypt~left-wall — approved by Bob 2026-11-27
 - [x] painting.keep-crypt~ahead-corridor — approved by Bob 2026-11-27
@@ -76,7 +76,7 @@ Change note 2026-11-26 (redo group 2, Gamewright rulings 5 and 15–19): all eig
 
 Change note 2026-11-26 (redo group 3, Gamewright rulings 20–23): redone, still `draft` and unticked: the six painting.keep-crypt~* sections (lines 27–32), painting.trap-falling-rocks (line 35), painting.tower-main-map and painting.tower-top-map (lines 37–38). Each crypt section's edges carry the same half pier, so every joint of the 8 combinations closes into one whole pier with no doubling; left, ahead and right each show a different end wall, and each wall seals its own opening. No wall torches; light is the party's only. The top map is a top-down plan with no trapdoor; the main map's floor grid is softened to a plain wash. The rockfall shows no people. painting.trap-pit and painting.tower-basement-map are unchanged.
 
-Change note 2026-11-27 (unique foe figures, Bob's review): foe.level-1, foe.level-2, foe.level-3, foe.level-4 and foe.keep-garrison are redone because the figures in each looked like the same person repeated. Each now shows three different people, each with their own build, face, age, hair and beard, gear, weapon and pose, inside the middle 960 px at 1920×1080 WebP. Level 1: road raiders behind felled trees, bows drawn: an old bald white-bearded archer, a young shaven-headed woman, a red-haired man at a stump. Level 2: harder raiders in patched mail: a huge bald black-bearded axeman, a one-eyed grey veteran with sword and kite shield, a young curly-haired spearman. Levels 1–2 show shields with the crest scratched off and no readable mark. Level 3: the Warden's sworn guard in a shield line with his crest: a young spearman in a nasal helm, an older moustached macebearer in a gambeson, a woman in scale with a sword. Level 4: oathsworn guards in dark plate, the 1981-silhouette Tower behind them (as painting.ch3-the-tower): a great-helmed greatswordsman, a grey-bearded knight with an axe, a young bare-headed woman with a war hammer. foe.keep-garrison: three different dead rising in rusted mail with the crest on their shields: a tall skeleton with a spear, a hunched rotting corpse with an axe, a small skeleton climbing from the floor. All five stay `draft` and unticked (lines 19–22, 26); the Warden phases are unchanged. In the same change, Bob's approvals of 2026-11-27 are ticked: the four places, the six story paintings, painting.cover and glow.cover, the three Warden phases, the six crypt sections, both traps, the three Tower maps, and the six base pack hero portraits. `pack.yaml` statuses are not changed.
+Change note 2026-11-27 (unique foe figures, Bob's review): foe.level-1, foe.level-2, foe.level-3, foe.level-4 and foe.keep-garrison are redone because the figures in each looked like the same person repeated. Each now shows three different people, each with their own build, face, age, hair and beard, gear, weapon and pose, inside the middle 960 px at 1920×1080 WebP. Level 1: road raiders behind felled trees, bows drawn: an old bald white-bearded archer, a young shaven-headed woman, a red-haired man at a stump. Level 2: harder raiders in patched mail: a huge bald black-bearded axeman, a one-eyed grey veteran with sword and kite shield, a young curly-haired spearman. Levels 1–2 show shields with the crest scratched off and no readable mark. Level 3: the Warden's sworn guard in a shield line with his crest: a young spearman in a nasal helm, an older moustached macebearer in a gambeson, a woman in scale with a sword. Level 4: oathsworn guards in dark plate, the 1981-silhouette Tower behind them (as painting.ch3-the-tower): a great-helmed greatswordsman, a grey-bearded knight with an axe, a young bare-headed woman with a war hammer. foe.keep-garrison: three different dead rising in rusted mail with the crest on their shields: a tall skeleton with a spear, a hunched rotting corpse with an axe, a small skeleton climbing from the floor. The five unique-figure foes (foe.level-1, foe.level-2, foe.level-3, foe.level-4 and foe.keep-garrison, lines 19–22, 26) are now also ticked, approved by Bob 2026-11-27. The Warden phases were already ticked. In total 37 rows are ticked: the four places, the six story paintings, painting.cover and glow.cover, all eight foes (levels 1–4, the three Warden phases, and keep-garrison), the six crypt sections, both traps, the three Tower maps, and the six base pack hero portraits. The 13 Loremaster lines and the three listen sounds stay unticked. `pack.yaml` statuses are not changed.
 
 ## Base pack hero portraits (Bob)
 
