@@ -157,6 +157,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     holdings: [],
   });
   let broadcastImpl: () => void = () => undefined;
+  let sendDeviceViewImpl: (deviceId: string) => void = () => undefined;
   let engine: CoreSession;
   const persistRoster = () => {
     const current = engine.state();
@@ -204,6 +205,9 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         broadcastImpl();
         persistRoster();
       },
+      onDeviceAck: (deviceId) => {
+        sendDeviceViewImpl(deviceId);
+      },
     });
     engine.restoreDevices(store.listDevices());
   } catch (error) {
@@ -238,6 +242,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
 
   const clients = new Map<WebSocket, ClientState>();
   const deviceSockets = new Map<string, Set<WebSocket>>();
+  const deviceSeq = new Map<string, number>();
   const boardTokens = new Set<string>();
   let boardSeq = 0;
   /** Known once the port is open. Until then the configured port is only a placeholder. */
@@ -332,16 +337,38 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
 
   const deviceMessage = (deviceId: string): ServerMessage | undefined => {
     try {
-      const payload = engine.projectDevice(deviceId);
-      return deviceViewMessageSchema.parse({
+      const seq = (deviceSeq.get(deviceId) ?? 0) + 1;
+      const payload = {
+        ...engine.projectDevice(deviceId),
+        seq,
+        acked: engine.ackedFor(deviceId),
+      };
+      const message = deviceViewMessageSchema.parse({
         v: PROTOCOL_VERSION,
         type: "deviceView",
         payload,
       });
+      deviceSeq.set(deviceId, seq);
+      return message;
     } catch (error: unknown) {
       const detail = error instanceof Error ? error.message : String(error);
       log.error("device-view", detail.trim() === "" ? "Device view was refused." : detail);
       return undefined;
+    }
+  };
+
+  sendDeviceViewImpl = (deviceId: string) => {
+    if (closing) return;
+    try {
+      for (const socket of deviceSockets.get(deviceId) ?? []) {
+        if (socket.readyState !== WebSocket.OPEN) continue;
+        const message = deviceMessage(deviceId);
+        if (message) send(socket, message);
+        else sendError(socket, "invalid-state", "That device state was refused.");
+      }
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
+      log.error("device-view", detail.trim() === "" ? "Device view send failed." : detail);
     }
   };
 
@@ -357,6 +384,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
           continue;
         }
         if (client.role === "device" && client.deviceId) {
+          if (socket.readyState !== WebSocket.OPEN) continue;
           const message = deviceMessage(client.deviceId);
           if (message) send(socket, message);
           else sendError(socket, "invalid-state", "That device state was refused.");

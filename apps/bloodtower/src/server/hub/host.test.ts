@@ -4,12 +4,14 @@ import { join } from "node:path";
 import { PROTOCOL_VERSION, type ServerMessage, serverMessageSchema } from "bloodtower-protocols";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
+import { OPENING_MOMENTS, openingPromptId } from "../../protocols/opening.ts";
 import { loadConfig } from "../config.ts";
 import { openDatabase } from "../db/client.ts";
 import { autosave } from "../db/schema.ts";
 import { createSessionStore } from "../db/store.ts";
 import { createEventStore } from "../events/store.ts";
 import { createHostLogger, type HostLogger } from "../log/hostLog.ts";
+import type { BloodtowerTower } from "../tower/host.ts";
 import { createMockTower } from "../tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../tower/testAdapter.ts";
 import { type SessionHost, startSessionHost } from "./host.ts";
@@ -474,5 +476,321 @@ describe("a format 3 autosave (C3-01 EV-07)", () => {
       return view?.type === "deviceView" && view.payload.screen !== "pick-story";
     });
     expect(readAutosave(databasePath)?.format).toBe(3);
+  });
+});
+
+const deviceViews = (client: Device) =>
+  client.log.filter(
+    (m): m is Extract<ServerMessage, { type: "deviceView" }> => m.type === "deviceView",
+  );
+
+const boardViews = (client: ReturnType<typeof track> & { socket: WebSocket }) =>
+  client.log.filter(
+    (m): m is Extract<ServerMessage, { type: "boardView" }> => m.type === "boardView",
+  );
+
+describe("CU17 seq and acked on deviceView (EV-01 to EV-05)", () => {
+  it("CU17 EV-01: every device view carries integer seq (1, 2, 3...) and acked", async () => {
+    const host = await start();
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await whenOffered(device, "base-board-done");
+    await act(device, "base-board-done", "board-set-up");
+    await until(device.inbox, device.log, () =>
+      deviceViews(device).some((frame) => frame.payload.acked === 1),
+    );
+
+    const views = deviceViews(device);
+    expect(views.length).toBeGreaterThanOrEqual(2);
+    for (let index = 0; index < views.length; index += 1) {
+      const payload = views[index]?.payload;
+      expect(Number.isInteger(payload?.seq)).toBe(true);
+      expect(Number.isInteger(payload?.acked)).toBe(true);
+      expect(payload?.seq).toBe(index + 1);
+    }
+    const last = views.at(-1)?.payload;
+    expect(last?.acked).toBe(1);
+    expect(last?.screen).toBe("tower-choice");
+  });
+
+  it("CU17 EV-02: acked rises only after apply finishes, not on a timer broadcast while held", async () => {
+    const root = tempDir();
+    writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
+    const mock = createMockTower();
+    const base = bloodtowerTowerFromMock(mock);
+    let holdCalibrate = false;
+    let enteredResolve = () => {};
+    const calibrateEntered = new Promise<void>((resolve) => {
+      enteredResolve = resolve;
+    });
+    let releaseCalibrate = () => {};
+    const calibrateGate = new Promise<void>((resolve) => {
+      releaseCalibrate = resolve;
+    });
+    let triggerWatchDiff = false;
+    const tower: BloodtowerTower = {
+      snapshot: () => {
+        const snap = base.snapshot();
+        if (!triggerWatchDiff) return snap;
+        return { ...snap, calibrated: { state: "unavailable" } };
+      },
+      subscribe: (listener) => base.subscribe(listener),
+      runCapability: async (capabilityId, params, log) => {
+        const result = await base.runCapability(capabilityId, params, log);
+        if (capabilityId === "tower.calibrate" && holdCalibrate) {
+          holdCalibrate = false;
+          enteredResolve();
+          await calibrateGate;
+        }
+        return result;
+      },
+      close: () => base.close(),
+    };
+    const host = await startSessionHost({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: root,
+      packsDir: loadConfig().packsDir,
+      databasePath: join(tempDir(), "session.sqlite"),
+      tower,
+      towerWatchMs: 25,
+    });
+    hosts.push(host);
+
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await whenOffered(device, "base-board-done");
+    await act(device, "base-board-done", "board-set-up");
+    await until(device.inbox, device.log, () =>
+      deviceViews(device).some((frame) => frame.payload.acked === 1),
+    );
+    await whenOffered(device, "tower-connect");
+    await act(device, "tower-connect", "tower-connect");
+    await until(device.inbox, device.log, () =>
+      deviceViews(device).some((frame) => frame.payload.acked === 2),
+    );
+    await whenOffered(device, "tower-calibrate");
+
+    const ackedBefore = deviceViews(device).at(-1)?.payload.acked ?? -1;
+    expect(ackedBefore).toBe(2);
+
+    holdCalibrate = true;
+    await act(device, "tower-calibrate", "tower-calibrate");
+    await calibrateEntered;
+
+    // Fire a timer broadcast while apply is held.
+    const viewsBeforeTimer = deviceViews(device).length;
+    triggerWatchDiff = true;
+    await until(device.inbox, device.log, () => deviceViews(device).length > viewsBeforeTimer);
+    const timerFrame = deviceViews(device).at(-1)?.payload;
+    expect(timerFrame?.acked).toBe(ackedBefore);
+    expect(timerFrame?.screen).toBe("tower-wake");
+
+    // Release apply: the very first frame after release must have acked + 1 and the press's screen.
+    const viewsBeforeRelease = deviceViews(device).length;
+    releaseCalibrate();
+    await until(device.inbox, device.log, () => deviceViews(device).length > viewsBeforeRelease);
+    const afterRelease = deviceViews(device)[viewsBeforeRelease]?.payload;
+    expect(afterRelease?.acked).toBe(ackedBefore + 1);
+    expect(afterRelease?.screen).toBe("pick-story");
+    expect(
+      deviceViews(device).some(
+        (frame) => frame.payload.acked === ackedBefore + 1 && frame.payload.screen !== "pick-story",
+      ),
+    ).toBe(false);
+  });
+
+  it("CU17 EV-03: refused and no-op presses still ack and preserve error logs and frames", async () => {
+    const errors: Array<{ code: string; message: string }> = [];
+    const real = createHostLogger({ dataDir: tempDir(), mirror: false });
+    const log: HostLogger = {
+      ...real,
+      error: (code, message, fields) => {
+        errors.push({ code, message });
+        real.error(code, message, fields);
+      },
+    };
+    const root = tempDir();
+    writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
+    const waitFires: Array<() => void> = [];
+    const host = await startSessionHost({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: root,
+      packsDir: loadConfig().packsDir,
+      databasePath: join(tempDir(), "session.sqlite"),
+      tower: bloodtowerTowerFromMock(createMockTower({ log })),
+      towerWatchMs: 0,
+      waitTimer: (fire) => {
+        waitFires.push(fire);
+        return () => {
+          const index = waitFires.indexOf(fire);
+          if (index >= 0) waitFires.splice(index, 1);
+        };
+      },
+      allowTestSeed: true,
+      log,
+    });
+    hosts.push(host);
+
+    const pad1 = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    const pad2 = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await until(pad1.inbox, pad1.log, () => deviceViews(pad1).length > 0);
+    await until(pad2.inbox, pad2.log, () => deviceViews(pad2).length > 0);
+
+    // (a) hero-hold take with no heroId -> still acks.
+    const pad2BeforeA = deviceViews(pad2).at(-1)?.payload.acked ?? 0;
+    await act(pad2, "hero-hold", "take", {});
+    await until(pad2.inbox, pad2.log, () =>
+      deviceViews(pad2).some((frame) => frame.payload.acked === pad2BeforeA + 1),
+    );
+
+    // (c) gear action "bogus" -> logs gear-act error and still acks.
+    const pad2BeforeC = deviceViews(pad2).at(-1)?.payload.acked ?? 0;
+    await act(pad2, "gear", "bogus", {});
+    await until(pad2.inbox, pad2.log, () =>
+      deviceViews(pad2).some((frame) => frame.payload.acked === pad2BeforeC + 1),
+    );
+    expect(errors.some((entry) => entry.code === "gear-act")).toBe(true);
+
+    // Walk pad1 into an open event while pad2 holds no heroes, then test (b) event refusal on pad2.
+    const pressAck = async (
+      device: Device,
+      promptId: string,
+      actionId: string,
+      args: Record<string, unknown> = {},
+    ) => {
+      const before = deviceViews(device).at(-1)?.payload.acked ?? 0;
+      await act(device, promptId, actionId, args);
+      await until(device.inbox, device.log, () =>
+        deviceViews(device).some((frame) => (frame.payload.acked ?? 0) > before),
+      );
+    };
+    await whenOffered(pad1, "base-board-done");
+    await pressAck(pad1, "base-board-done", "board-set-up");
+    await pressAck(pad1, "play-without-tower", "play-without-tower");
+    await pressAck(pad1, "continue-pick-story-test", "continue");
+    await pressAck(pad1, "set-setting", "set", { settingId: "hints", optionId: "off" });
+    await pressAck(pad1, "continue-game-settings", "continue");
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      await pressAck(pad1, "hero-hold", "take", { heroId });
+    }
+    await pressAck(pad1, "continue-claim-heroes", "continue");
+    for (let step = 0; step < 12; step += 1) {
+      const spin = offered(pad1).find((a) => a.promptId.startsWith("spin-setup-"));
+      if (spin) {
+        await pressAck(pad1, spin.promptId, "spin");
+        continue;
+      }
+      const next = offered(pad1).find((a) => a.promptId.startsWith("continue-setup-"));
+      if (!next) break;
+      await pressAck(pad1, next.promptId, "continue");
+    }
+    await pressAck(pad1, "continue-begin", "continue");
+    for (const moment of OPENING_MOMENTS) {
+      await pressAck(pad1, openingPromptId(moment), "continue");
+    }
+    // Dismiss chapter 1's auto-advancing card wait so the day 1 move roll is offered immediately.
+    while (waitFires.length > 0) waitFires.shift()?.();
+    await until(pad1.inbox, pad1.log, () =>
+      offered(pad1).some((action) => action.open && action.promptId.endsWith("-roll-done")),
+    );
+    const roll = offered(pad1).find(
+      (action) => action.open && action.promptId.endsWith("-roll-done"),
+    );
+    if (!roll) throw new Error("No roll prompt.");
+    await pressAck(pad1, roll.promptId, roll.actionId);
+    const pad1Table = deviceViews(pad1).at(-1)?.payload.table;
+    const actingGroup = pad1Table?.groups.find((group) => group.heroId === pad1Table.actingHeroId);
+    const spaceId = actingGroup?.spaceId;
+    if (!spaceId) throw new Error("No acting group space.");
+    await host.applyTestSeed(`~test-skulls:${spaceId}=1~test-event:hazard-storm`);
+    await until(pad1.inbox, pad1.log, () =>
+      offered(pad1).some((action) => action.open && action.actionId === "end-turn"),
+    );
+    const endTurn = offered(pad1).find((action) => action.open && action.actionId === "end-turn");
+    if (!endTurn) throw new Error("No end-turn prompt.");
+    await pressAck(pad1, endTurn.promptId, endTurn.actionId);
+    await until(pad1.inbox, pad1.log, () =>
+      offered(pad1).some((action) => action.open && action.actionId === "choose"),
+    );
+    const eventChoice = offered(pad1).find((action) => action.open && action.actionId === "choose");
+    if (!eventChoice) throw new Error("No event choice offered.");
+
+    // (b) pad2 holds no heroes -> refused, logged, sends error frame, AND sends deviceView with acked + 1.
+    const pad2BeforeB = deviceViews(pad2).at(-1)?.payload.acked ?? 0;
+    await act(pad2, eventChoice.promptId, eventChoice.actionId);
+    await until(pad2.inbox, pad2.log, () =>
+      deviceViews(pad2).some((frame) => frame.payload.acked === pad2BeforeB + 1),
+    );
+    expect(errors.some((entry) => entry.code === "event-press-refused")).toBe(true);
+    expect(
+      pad2.log.some((frame) => frame.type === "error" && frame.payload.code === "invalid-state"),
+    ).toBe(true);
+  });
+
+  it("CU17 EV-04: acked and seq are per device", async () => {
+    const host = await start();
+    const pad1 = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    const pad2 = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await whenOffered(pad1, "base-board-done");
+    await until(pad2.inbox, pad2.log, () => deviceViews(pad2).length > 0);
+    const pad2SeqBefore = deviceViews(pad2).at(-1)?.payload.seq ?? 0;
+
+    await act(pad1, "base-board-done", "board-set-up");
+    await until(pad1.inbox, pad1.log, () =>
+      deviceViews(pad1).some((frame) => frame.payload.acked === 1),
+    );
+    await whenOffered(pad1, "play-without-tower");
+    await act(pad1, "play-without-tower", "play-without-tower");
+    await until(pad1.inbox, pad1.log, () =>
+      deviceViews(pad1).some((frame) => frame.payload.acked === 2),
+    );
+    await until(pad2.inbox, pad2.log, () =>
+      deviceViews(pad2).some((frame) => frame.payload.screen === "pick-story"),
+    );
+
+    expect(deviceViews(pad1).at(-1)?.payload.acked).toBe(2);
+    const pad2Views = deviceViews(pad2);
+    expect(pad2Views.every((frame) => frame.payload.acked === 0)).toBe(true);
+    expect(pad2Views.at(-1)?.payload.seq ?? 0).toBeGreaterThan(pad2SeqBefore);
+    for (let index = 0; index < pad2Views.length; index += 1) {
+      expect(pad2Views[index]?.payload.seq).toBe(index + 1);
+    }
+  });
+
+  it("CU17 EV-05: no tower frame on non-tower press or ack view send, and boardView has no seq or acked", async () => {
+    const root = tempDir();
+    writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
+    const mock = createMockTower();
+    const host = await startSessionHost({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: root,
+      packsDir: loadConfig().packsDir,
+      databasePath: join(tempDir(), "session.sqlite"),
+      tower: bloodtowerTowerFromMock(mock),
+      towerWatchMs: 0,
+    });
+    hosts.push(host);
+
+    const board = await helloBoard(host.port);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await whenOffered(device, "base-board-done");
+    await act(device, "base-board-done", "board-set-up");
+    await until(device.inbox, device.log, () =>
+      deviceViews(device).some((frame) => frame.payload.acked === 1),
+    );
+    // Also exercise the extra sendDeviceView path on a refused press.
+    await act(device, "hero-hold", "take", {});
+    await until(device.inbox, device.log, () =>
+      deviceViews(device).some((frame) => frame.payload.acked === 2),
+    );
+
+    expect(mock.sent()).toEqual([]);
+    const boards = boardViews(board);
+    expect(boards.length).toBeGreaterThan(0);
+    for (const frame of boards) {
+      expect("seq" in frame.payload).toBe(false);
+      expect("acked" in frame.payload).toBe(false);
+    }
   });
 });

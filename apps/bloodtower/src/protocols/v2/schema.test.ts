@@ -305,4 +305,40 @@ describe("device view", () => {
     ).toBe(false);
     expect(deviceViewPayloadSchema.safeParse({ ...view, bytes: "00" }).success).toBe(false);
   });
+
+  it("CU17 EV-01: accepts optional non-negative integer seq and acked, refuses bad values and boardView keys", () => {
+    const base = {
+      deviceId: "device-a",
+      screen: "pick-story" as const,
+      shows: "Pick a story.",
+      heroes: [],
+      actions: [openAction],
+    };
+    expect(deviceViewPayloadSchema.parse(base)).toMatchObject(base);
+    expect(deviceViewPayloadSchema.parse({ ...base, seq: 1, acked: 0 })).toMatchObject({
+      seq: 1,
+      acked: 0,
+    });
+    expect(deviceViewPayloadSchema.parse({ ...base, seq: 0, acked: 42 })).toMatchObject({
+      seq: 0,
+      acked: 42,
+    });
+
+    for (const bad of [
+      { seq: -1 },
+      { seq: 1.5 },
+      { seq: "1" },
+      { acked: -1 },
+      { acked: 1.5 },
+      { acked: "1" },
+    ]) {
+      expect(
+        deviceViewPayloadSchema.safeParse({ ...base, ...bad }).success,
+        JSON.stringify(bad),
+      ).toBe(false);
+    }
+
+    expect(boardViewPayloadSchema.safeParse({ ...board, seq: 1 }).success).toBe(false);
+    expect(boardViewPayloadSchema.safeParse({ ...board, acked: 0 }).success).toBe(false);
+  });
 });

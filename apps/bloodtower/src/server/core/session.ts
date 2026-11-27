@@ -76,6 +76,8 @@ export type CoreSessionOptions = {
   clock: Clock;
   log: HostLogger;
   onChange: () => void;
+  /** A press from `deviceId` finished without broadcasting a full view; send that device its updated `acked` view (CU/17). */
+  onDeviceAck?: (deviceId: string) => void;
   /** Holding grace after a socket drop. Tests pass a short value. */
   graceMs?: number;
   /** A tower command the pressing iPad asked for failed. The hub shows it on that iPad. */
@@ -113,6 +115,8 @@ export type CoreSession = {
   ) => void;
   projectBoard: (join: { code: string; url: string; reachable: boolean }) => BoardView;
   projectDevice: (deviceId: string) => DeviceView;
+  /** Number of presses from `deviceId` this session has finished handling (CU/17). */
+  ackedFor: (deviceId: string) => number;
   channelsFor: (deviceId: string) => string[];
   roster: () => { devices: { id: string; token: string; formFactor: "ipad" | "phone" }[] };
   restoreDevices: (
@@ -170,6 +174,14 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   if (options.playContent) state = { ...state, playContent: options.playContent };
 
   const devices = new Map<string, DeviceRecord>();
+  const ackedByDevice = new Map<string, number>();
+  const bumpAcked = (deviceId: string): void => {
+    ackedByDevice.set(deviceId, (ackedByDevice.get(deviceId) ?? 0) + 1);
+  };
+  const ackImmediate = (deviceId: string): void => {
+    bumpAcked(deviceId);
+    options.onDeviceAck?.(deviceId);
+  };
 
   // The controlled once-only demo entry (A1-8b-2). Held here, not in the engine state: it is no
   // gameplay event, so no checkpoint or replay carries it and a restore never plays it again.
@@ -379,7 +391,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     });
   };
 
-  const apply = async (raw: ShellEvent, deviceId: string | null) => {
+  const apply = async (raw: ShellEvent, deviceId: string | null, onAck?: () => void) => {
     const before = state;
     let event = raw;
     // The Tower panel's Done carries the pick its owner confirmed, so the log (and a replay) holds it.
@@ -580,7 +592,11 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     } else if (continued && state.screen === "piece-check") {
       ensurePieceCheckOffers(state);
     }
-    const outcomes = await runShellEffects(state, shellEffects, effectsCtx());
+    const outcomes = await runShellEffects(
+      state,
+      shellEffects.filter((effect) => effect.kind !== "view-refresh"),
+      effectsCtx(),
+    );
     const tellDevice = (
       message: string,
       code: ErrorCode = "tower-command-failed",
@@ -610,13 +626,20 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (effect.code === "invalid-state") tellDevice(effect.message, effect.code, target);
       else tellDevice(`${effect.message} (${effect.code})`, "invalid-state", target);
     }
+    let forwardedAck = false;
+    const takeAck = () => {
+      if (forwardedAck) return undefined;
+      forwardedAck = true;
+      return onAck;
+    };
     for (const outcome of outcomes) {
       const ok = outcome.result === "ok";
       if (outcome.capabilityId === "sound.play-stateful" && event.kind === "volume-play") {
         // Only the volume step waits on this sound; Keep opens once the tower has played it.
-        enqueue(
+        await apply(
           { kind: "volume-result", v: 1, deviceId: event.deviceId, level: event.level, ok },
           null,
+          takeAck(),
         );
         if (!ok) tellDevice("The tower did not play that volume. Nothing was retried.");
         continue;
@@ -649,7 +672,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             pressingDevice,
           );
         }
-        enqueue(
+        await apply(
           {
             kind: "piece-check-drum-result",
             v: 1,
@@ -659,6 +682,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             ...(pressingDevice ? { deviceId: pressingDevice } : {}),
           },
           pressingDevice,
+          takeAck(),
         );
         continue;
       }
@@ -667,7 +691,11 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
       // Only the Enter and a Reconnect wait on these.
       if (!state.enter && !state.reconnect) continue;
-      enqueue({ kind: "tower-result", v: 1, capabilityId: outcome.capabilityId, ok }, null);
+      await apply(
+        { kind: "tower-result", v: 1, capabilityId: outcome.capabilityId, ok },
+        null,
+        takeAck(),
+      );
       if (!ok) {
         tellDevice(
           outcome.capabilityId === "tower.connect"
@@ -676,6 +704,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         );
       }
     }
+    if (forwardedAck) return;
+    onAck?.();
     options.onChange();
     persistLobbyCheckpoint();
     persistSessionMarker();
@@ -740,24 +770,36 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   };
 
   let applyQueue: Promise<void> = Promise.resolve();
-  const enqueue = (event: ShellEvent, deviceId: string | null): void => {
+  const enqueue = (event: ShellEvent, deviceId: string | null, ackDeviceId?: string): void => {
+    let acked = false;
+    const markAcked = ackDeviceId
+      ? () => {
+          if (acked) return;
+          acked = true;
+          bumpAcked(ackDeviceId);
+        }
+      : undefined;
     applyQueue = applyQueue
-      .then(() => apply(event, deviceId))
+      .then(() => apply(event, deviceId, markAcked))
       .catch((error: unknown) => {
         const detail = error instanceof Error ? error.message : String(error);
         options.log.error(
           "core-apply",
           detail.trim() === "" ? "Core session apply failed." : detail,
         );
+        if (ackDeviceId && !acked) {
+          acked = true;
+          ackImmediate(ackDeviceId);
+        }
       });
   };
 
-  const playDemoLine = (deviceId: string, actionId: string) => {
+  const playDemoLine = (deviceId: string, actionId: string): boolean => {
     if (!isDemoAction(actionId)) {
       options.log.error("demo-line-act", `Unknown demo action "${actionId}".`, {
         device: deviceId,
       });
-      return;
+      return false;
     }
     if (demoLineId === null) {
       options.log.warn(
@@ -765,7 +807,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         `The demo entry is off. Start the host with ${DEMO_LINE_ENV}=<line id> to use it.`,
         { device: deviceId },
       );
-      return;
+      return false;
     }
     if (actionId === "play" && demoPlays > 0) {
       options.log.warn(
@@ -773,13 +815,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         `${demoLineId} has played once. The explicit replay is action "replay".`,
         { device: deviceId },
       );
-      return;
+      return false;
     }
     if (actionId === "replay" && demoPlays === 0) {
       options.log.warn("demo-line-replay", `${demoLineId} has not played yet; nothing to replay.`, {
         device: deviceId,
       });
-      return;
+      return false;
     }
     const story = options.stories.find((entry) => entry.card.id === state.boundStoryId);
     const media = story ? packMediaFor(story) : undefined;
@@ -790,7 +832,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         `Story ${state.boundStoryId} has no line asset ${demoLineId} with a speaker and text.`,
         { device: deviceId },
       );
-      return;
+      return false;
     }
     const result = runNarrate(effect, media, {
       play: demoPlays + 1,
@@ -799,7 +841,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     });
     if (!result.ok) {
       options.log.error("demo-line-narrate", result.message, { device: deviceId });
-      return;
+      return false;
     }
     if (result.line.audio === null) {
       // Caption only: the line's file is not packed or not on disk. Unavailable, not a failure.
@@ -818,17 +860,22 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }`,
       { device: deviceId },
     );
+    bumpAcked(deviceId);
     options.onChange();
+    return true;
   };
 
   const queueDemoLine = (deviceId: string, actionId: string) => {
     applyQueue = applyQueue
-      .then(() => playDemoLine(deviceId, actionId))
+      .then(() => {
+        if (!playDemoLine(deviceId, actionId)) ackImmediate(deviceId);
+      })
       .catch((error: unknown) => {
         const detail = error instanceof Error ? error.message : String(error);
         options.log.error("demo-line", detail.trim() === "" ? "The demo line failed." : detail, {
           device: deviceId,
         });
+        ackImmediate(deviceId);
       });
   };
 
@@ -876,38 +923,52 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (eventRefusal) {
         options.log.error("event-press-refused", eventRefusal);
         options.onDeviceError?.(deviceId, "invalid-state", eventRefusal);
+        ackImmediate(deviceId);
         return;
       }
       if (promptId === "hero-hold" && (actionId === "take" || actionId === "release")) {
         const heroId = args.heroId;
-        if (typeof heroId !== "string") return;
-        enqueue({ kind: "hero-hold", v: 1, deviceId, heroId, action: actionId }, deviceId);
+        if (typeof heroId !== "string") {
+          ackImmediate(deviceId);
+          return;
+        }
+        enqueue(
+          { kind: "hero-hold", v: 1, deviceId, heroId, action: actionId },
+          deviceId,
+          deviceId,
+        );
         return;
       }
       if (promptId === "focus-story" && actionId === "focus") {
         const storyId = args.storyId;
-        if (typeof storyId !== "string") return;
-        enqueue({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId);
+        if (typeof storyId !== "string") {
+          ackImmediate(deviceId);
+          return;
+        }
+        enqueue({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId, deviceId);
         return;
       }
       if (actionId === "volume-play" && /^volume-[012]$/.test(promptId)) {
         const level = Number(promptId.slice("volume-".length));
-        enqueue({ kind: "volume-play", v: 1, deviceId, level }, deviceId);
+        enqueue({ kind: "volume-play", v: 1, deviceId, level }, deviceId, deviceId);
         return;
       }
       if (promptId === "volume-keep" && actionId === "volume-keep") {
-        enqueue({ kind: "volume-answer", v: 1, deviceId, answer: "keep" }, deviceId);
+        enqueue({ kind: "volume-answer", v: 1, deviceId, answer: "keep" }, deviceId, deviceId);
         return;
       }
       if (promptId === "volume-again" && actionId === "volume-again") {
-        enqueue({ kind: "volume-answer", v: 1, deviceId, answer: "again" }, deviceId);
+        enqueue({ kind: "volume-answer", v: 1, deviceId, answer: "again" }, deviceId, deviceId);
         return;
       }
       if (promptId === "set-setting" && actionId === "set") {
         const settingId = args.settingId;
         const optionId = args.optionId;
-        if (typeof settingId !== "string" || typeof optionId !== "string") return;
-        enqueue({ kind: "set-setting", v: 1, deviceId, settingId, optionId }, deviceId);
+        if (typeof settingId !== "string" || typeof optionId !== "string") {
+          ackImmediate(deviceId);
+          return;
+        }
+        enqueue({ kind: "set-setting", v: 1, deviceId, settingId, optionId }, deviceId, deviceId);
         return;
       }
       if (promptId === DEMO_PROMPT_ID) {
@@ -925,6 +986,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           action !== "step-back"
         ) {
           options.log.error("gear-act", `Unknown gear action "${action}".`);
+          ackImmediate(deviceId);
           return;
         }
         const item = typeof args.item === "string" ? args.item : undefined;
@@ -945,10 +1007,11 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             ...(volume === 0 || volume === 1 || volume === 2 ? { volume } : {}),
           },
           deviceId,
+          deviceId,
         );
         return;
       }
-      enqueue({ kind: "press", v: 1, deviceId, promptId, actionId }, deviceId);
+      enqueue({ kind: "press", v: 1, deviceId, promptId, actionId }, deviceId, deviceId);
     },
     projectBoard: (join) => {
       const view = projectShellView(state, openGameStats());
@@ -968,6 +1031,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       };
     },
     projectDevice: (deviceId) => project(projectShellView(state), { kind: "device", deviceId }),
+    ackedFor: (deviceId) => ackedByDevice.get(deviceId) ?? 0,
     channelsFor: (deviceId) => heldHeroes(deviceId).map((hero) => `ipad:${hero}`),
     roster: () => ({
       devices: [...devices.values()].map((device) => ({

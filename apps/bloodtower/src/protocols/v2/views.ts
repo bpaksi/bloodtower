@@ -790,6 +790,10 @@ export const deviceViewPayloadSchema = z
     gear: gearViewSchema.optional(),
     /** Continue's piece check step (C2-11). Present only while screen is "piece-check". */
     pieceCheck: pieceCheckViewSchema.nullable().optional(),
+    /** Per-device broadcast counter stamped by the host (CU/17). Starts at 1 per device id in a host process. */
+    seq: z.number().int().min(0).optional(),
+    /** Count of presses from this device the host has finished handling (CU/17). */
+    acked: z.number().int().min(0).optional(),
   })
   .superRefine((value, ctx) => {
     uniqueIds(
