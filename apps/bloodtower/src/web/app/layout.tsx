@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import "../styles/game-tokens.css";
 import "../components/board/board.css";
 import { PageCapture } from "../components/errors/PageCapture.tsx";
 import { StoryAudioShell } from "../components/title/StoryAudioShell.tsx";
