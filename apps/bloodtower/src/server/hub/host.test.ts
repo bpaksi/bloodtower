@@ -584,18 +584,133 @@ describe("CU17 seq and acked on deviceView (EV-01 to EV-05)", () => {
     expect(timerFrame?.acked).toBe(ackedBefore);
     expect(timerFrame?.screen).toBe("tower-wake");
 
-    // Release apply: the very first frame after release must have acked + 1 and the press's screen.
+    // Release apply: no frame with the new acked may show tower-wake, and the frame where acked
+    // rises to ackedBefore + 1 shows the press's screen (pick-story).
     const viewsBeforeRelease = deviceViews(device).length;
     releaseCalibrate();
-    await until(device.inbox, device.log, () => deviceViews(device).length > viewsBeforeRelease);
-    const afterRelease = deviceViews(device)[viewsBeforeRelease]?.payload;
-    expect(afterRelease?.acked).toBe(ackedBefore + 1);
-    expect(afterRelease?.screen).toBe("pick-story");
+    await until(device.inbox, device.log, () =>
+      deviceViews(device)
+        .slice(viewsBeforeRelease)
+        .some((frame) => frame.payload.acked === ackedBefore + 1),
+    );
+    const afterRelease = deviceViews(device).slice(viewsBeforeRelease);
+    const firstAcked = afterRelease.find((frame) => frame.payload.acked === ackedBefore + 1);
+    expect(firstAcked?.payload.screen).toBe("pick-story");
     expect(
       deviceViews(device).some(
         (frame) => frame.payload.acked === ackedBefore + 1 && frame.payload.screen !== "pick-story",
       ),
     ).toBe(false);
+    // Every frame before the acked frame stayed at ackedBefore.
+    const ackedIndex = afterRelease.findIndex((frame) => frame.payload.acked === ackedBefore + 1);
+    for (const earlier of afterRelease.slice(0, ackedIndex)) {
+      expect(earlier.payload.acked).toBe(ackedBefore);
+      expect(earlier.payload.screen).toBe("tower-wake");
+    }
+  });
+
+  it("CU17 regression: Menu Reconnect -> Calibrate keeps play offers intact after tower-snapshot", async () => {
+    const root = tempDir();
+    writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
+    const mock = createMockTower();
+    const waitFires: Array<() => void> = [];
+    const host = await startSessionHost({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: root,
+      packsDir: loadConfig().packsDir,
+      databasePath: join(tempDir(), "session.sqlite"),
+      tower: bloodtowerTowerFromMock(mock),
+      towerWatchMs: 25,
+      waitTimer: (fire) => {
+        waitFires.push(fire);
+        return () => {
+          const index = waitFires.indexOf(fire);
+          if (index >= 0) waitFires.splice(index, 1);
+        };
+      },
+    });
+    hosts.push(host);
+
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    const pressAck = async (
+      promptId: string,
+      actionId: string,
+      args: Record<string, unknown> = {},
+    ) => {
+      const before = deviceViews(device).at(-1)?.payload.acked ?? 0;
+      await act(device, promptId, actionId, args);
+      await until(device.inbox, device.log, () =>
+        deviceViews(device).some((frame) => (frame.payload.acked ?? 0) > before),
+      );
+    };
+
+    await whenOffered(device, "base-board-done");
+    await pressAck("base-board-done", "board-set-up");
+    await pressAck("tower-connect", "tower-connect");
+    await pressAck("tower-calibrate", "tower-calibrate");
+    await pressAck("volume-1", "volume-play");
+    await pressAck("volume-keep", "volume-keep");
+    await pressAck("continue-pick-story-test", "continue");
+    await pressAck("set-setting", "set", { settingId: "hints", optionId: "off" });
+    await pressAck("continue-game-settings", "continue");
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      await pressAck("hero-hold", "take", { heroId });
+    }
+    await pressAck("continue-claim-heroes", "continue");
+    for (let step = 0; step < 12; step += 1) {
+      const spin = offered(device).find((a) => a.promptId.startsWith("spin-setup-"));
+      if (spin) {
+        await pressAck(spin.promptId, "spin");
+        continue;
+      }
+      const next = offered(device).find((a) => a.promptId.startsWith("continue-setup-"));
+      if (!next) break;
+      await pressAck(next.promptId, "continue");
+    }
+    await pressAck("continue-begin", "continue");
+    for (const moment of OPENING_MOMENTS) {
+      await pressAck(openingPromptId(moment), "continue");
+    }
+    while (waitFires.length > 0) waitFires.shift()?.();
+    await until(device.inbox, device.log, () =>
+      offered(device).some((action) => action.open && action.promptId.endsWith("-roll-done")),
+    );
+    const roll = offered(device).find(
+      (action) => action.open && action.promptId.endsWith("-roll-done"),
+    );
+    if (!roll) throw new Error("No roll prompt.");
+    await pressAck(roll.promptId, roll.actionId);
+    expect(offered(device).some((action) => action.open && action.actionId === "end-turn")).toBe(
+      true,
+    );
+
+    // Drop the tower, confirm Go on without, then reconnect via Menu -> Tower -> Reconnect -> Calibrate.
+    mock.loseConnection();
+    await until(device.inbox, device.log, () =>
+      offered(device).some((action) => action.open && action.actionId === "go-on-without"),
+    );
+    const goWithout = offered(device).find(
+      (action) => action.open && action.actionId === "go-on-without",
+    );
+    if (!goWithout) throw new Error("No go-on-without prompt.");
+    await pressAck(goWithout.promptId, goWithout.actionId);
+    expect(deviceViews(device).at(-1)?.payload.screen).toBe("play");
+
+    await pressAck("gear", "open", { item: "tower" });
+    await pressAck("gear", "pick", { pick: "Reconnect" });
+    await pressAck("gear", "done");
+    await whenOffered(device, "tower-calibrate");
+    await pressAck("tower-calibrate", "tower-calibrate");
+
+    // Let any queued tower-snapshot / watch tick settle; play offers must remain open (never wiped).
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const latest = deviceViews(device).at(-1)?.payload;
+    expect(latest?.screen).toBe("play");
+    expect(offered(device).some((action) => action.open && action.actionId === "end-turn")).toBe(
+      true,
+    );
+    expect(offered(device).some((action) => action.open && action.actionId === "walk")).toBe(true);
   });
 
   it("CU17 EV-03: refused and no-op presses still ack and preserve error logs and frames", async () => {

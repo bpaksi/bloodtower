@@ -391,7 +391,12 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     });
   };
 
-  const apply = async (raw: ShellEvent, deviceId: string | null, onAck?: () => void) => {
+  type PressAck = {
+    bump: () => void;
+    forward: () => string | undefined;
+  };
+
+  const apply = async (raw: ShellEvent, deviceId: string | null, ack?: PressAck) => {
     const before = state;
     let event = raw;
     // The Tower panel's Done carries the pick its owner confirmed, so the log (and a replay) holds it.
@@ -627,19 +632,18 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       else tellDevice(`${effect.message} (${effect.code})`, "invalid-state", target);
     }
     let forwardedAck = false;
-    const takeAck = () => {
-      if (forwardedAck) return undefined;
+    const forwardAck = () => {
       forwardedAck = true;
-      return onAck;
+      return ack?.forward();
     };
     for (const outcome of outcomes) {
       const ok = outcome.result === "ok";
       if (outcome.capabilityId === "sound.play-stateful" && event.kind === "volume-play") {
         // Only the volume step waits on this sound; Keep opens once the tower has played it.
-        await apply(
+        enqueue(
           { kind: "volume-result", v: 1, deviceId: event.deviceId, level: event.level, ok },
           null,
-          takeAck(),
+          forwardAck(),
         );
         if (!ok) tellDevice("The tower did not play that volume. Nothing was retried.");
         continue;
@@ -672,7 +676,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             pressingDevice,
           );
         }
-        await apply(
+        enqueue(
           {
             kind: "piece-check-drum-result",
             v: 1,
@@ -682,7 +686,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             ...(pressingDevice ? { deviceId: pressingDevice } : {}),
           },
           pressingDevice,
-          takeAck(),
+          forwardAck(),
         );
         continue;
       }
@@ -691,10 +695,10 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
       // Only the Enter and a Reconnect wait on these.
       if (!state.enter && !state.reconnect) continue;
-      await apply(
+      enqueue(
         { kind: "tower-result", v: 1, capabilityId: outcome.capabilityId, ok },
         null,
-        takeAck(),
+        forwardAck(),
       );
       if (!ok) {
         tellDevice(
@@ -704,9 +708,10 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         );
       }
     }
-    if (forwardedAck) return;
-    onAck?.();
-    options.onChange();
+    if (!forwardedAck) {
+      ack?.bump();
+      options.onChange();
+    }
     persistLobbyCheckpoint();
     persistSessionMarker();
     scheduleHintEnd();
@@ -771,24 +776,31 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
 
   let applyQueue: Promise<void> = Promise.resolve();
   const enqueue = (event: ShellEvent, deviceId: string | null, ackDeviceId?: string): void => {
-    let acked = false;
-    const markAcked = ackDeviceId
-      ? () => {
-          if (acked) return;
-          acked = true;
-          bumpAcked(ackDeviceId);
+    let settled = false;
+    const ack: PressAck | undefined = ackDeviceId
+      ? {
+          bump: () => {
+            if (settled) return;
+            settled = true;
+            bumpAcked(ackDeviceId);
+          },
+          forward: () => {
+            if (settled) return undefined;
+            settled = true;
+            return ackDeviceId;
+          },
         }
       : undefined;
     applyQueue = applyQueue
-      .then(() => apply(event, deviceId, markAcked))
+      .then(() => apply(event, deviceId, ack))
       .catch((error: unknown) => {
         const detail = error instanceof Error ? error.message : String(error);
         options.log.error(
           "core-apply",
           detail.trim() === "" ? "Core session apply failed." : detail,
         );
-        if (ackDeviceId && !acked) {
-          acked = true;
+        if (ackDeviceId && !settled) {
+          settled = true;
           ackImmediate(ackDeviceId);
         }
       });
