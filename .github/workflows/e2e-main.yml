@@ -48,8 +48,15 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       # Bluetooth headers for the native tower library; nothing in CI connects to a tower.
+      # Drop the unused packages.microsoft.com APT source first so transient 403s do not break apt-get update or playwright --with-deps.
       - name: bluetooth and udev headers
-        run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
+        run: |
+          for f in /etc/apt/sources.list.d/*; do
+            if [ -f "$f" ] && grep -q 'packages\.microsoft\.com' "$f"; then
+              sudo rm -f "$f"
+            fi
+          done
+          sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
       - name: pnpm install
         run: pnpm install --frozen-lockfile
       # The browser downloads are cached per Playwright version. `--with-deps` still installs the
