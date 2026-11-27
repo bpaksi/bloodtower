@@ -109,11 +109,19 @@ describe("pre-commit plan", () => {
     assert.deepEqual(todo.skipped, []);
   });
 
-  it("runs the script tests for scripts/ and the hook tests for .claude/hooks/", () => {
+  it("runs the script tests for scripts/ and the hook tests for .claude/hooks/ and .agents/hooks/", () => {
     const scripts = plan(["scripts/wt.mjs"], PACKAGES);
     assert.deepEqual([scripts.scriptTests, scripts.hookTests, scripts.packages], [true, false, []]);
-    const hooks = plan([".claude/hooks/lib.mjs"], PACKAGES);
-    assert.deepEqual([hooks.scriptTests, hooks.hookTests, hooks.packages], [false, true, []]);
+    const claudeHooks = plan([".claude/hooks/lib.mjs"], PACKAGES);
+    assert.deepEqual(
+      [claudeHooks.scriptTests, claudeHooks.hookTests, claudeHooks.packages],
+      [false, true, []],
+    );
+    const agyHooks = plan([".agents/hooks/run-guards.mjs"], PACKAGES);
+    assert.deepEqual(
+      [agyHooks.scriptTests, agyHooks.hookTests, agyHooks.packages],
+      [false, true, []],
+    );
   });
 
   it("selects no package for a file outside every package", () => {

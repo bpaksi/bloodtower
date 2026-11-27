@@ -25,9 +25,9 @@ Bob edits cards on that branch, in the session's worktree folder (give him the p
 
 ## 1. Topic
 
-If Bob passed a topic as the argument, use it. Otherwise ask with one AskUserQuestion call before reading anything else. Build the options from what is open now:
+If Bob passed a topic as the argument, use it. Otherwise ask with one `AskUserQuestion` (Claude) / `ask_question` (Antigravity) call before reading anything else. Build the options from what is open now:
 
-- Run `pnpm -s graph gaps | head -15` and read the roadmap memory (`game-design-roadmap`). The main folder may be on another branch; that is close enough for picking a topic.
+- Run `pnpm -s graph gaps | head -15` and read the roadmap memory (`game-design-roadmap`, when available in Claude; otherwise orient from `pnpm -s graph gaps` and `git log`). The main folder may be on another branch; that is close enough for picking a topic.
 - Offer up to 4 options: the next roadmap step (name the first open `Q-` ids it covers), one area with many open questions, "A new idea of mine" and "Probe a playthrough" (say if the roadmap says it is too early). Bob can always type his own.
 
 ## 2. Worktree and branch
@@ -48,7 +48,7 @@ Then give Bob a short brief: the topic, what is already decided (by ID), the ope
 
 ## 4. Work
 
-- **One question per AskUserQuestion call**, multiple choice, recommended option first. No prose questions at the end of a reply.
+- **One question per `AskUserQuestion` / `ask_question` call**, multiple choice, recommended option first. No prose questions at the end of a reply.
 - **High level first.** Settle who holds a system, what it is and its core rule before numbers. Park detail questions as new open `Q-` cards.
 - **Record each answer before the next question**: a `DEC-` card for the ruling (Bob's words in the body, `by: Bob, <date>`), `answers` link to the `Q-`, `OPT-` cards for the choices he weighed when they matter, new `Q-` cards for what it raises. Mark the `Q-` `answered`. Your own proposals go in as `status: proposed`.
 - **IDs come from `pnpm -s --dir <wt> card-id <PREFIX> [count]`**, run just before you write the cards (`DEC`, `Q`, `IDEA`, `OPT`, `MEC`…). It prints one ID per line. An ID you reserve and then do not use stays unused; IDs are never reused anyway.
@@ -63,5 +63,5 @@ Then give Bob a short brief: the topic, what is already decided (by ID), the ope
 When Bob says the session is done:
 
 1. Push the branch and open one PR titled `docs(game-design): design session <date>, <topics>`, listing the new IDs by kind. Leave it open. Gamewright reviews and squash-merges it. Bob does not merge. Wright stays off design merges.
-2. Update the `game-design-roadmap` memory with what progressed and where the next session starts. Another session may have changed it since you read it: read it again just before, and edit only the lines about your topic.
+2. Update the `game-design-roadmap` memory (when running in Claude) with what progressed and where the next session starts. Another session may have changed it since you read it: read it again just before, and edit only the lines about your topic.
 3. After the merge, stop the workbench you started (by its PID, never `pkill`) and remove the worktree from the main folder with `pnpm wt:rm <branch>`. Until then the worktree's workbench keeps showing the session's cards.

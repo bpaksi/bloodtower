@@ -87,17 +87,23 @@ Reading a shell command is a guess about where it runs. When a `cd` or `git -C` 
 | No raw-bytes message type in a tower protocol | Protocol unit test plus an `adversary-bugs` check |
 | Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits and shell changes to test files on `fix/*` branches after the first commit. Removing a `.fails` marker, and nothing else, stays allowed so the fix can be proven. |
 | Cross-app imports | Apps never import from another app's folder; shared code goes through `packages/`. `scripts/check-imports.mjs` in `pnpm check` fails on a cross-app import; `adversary-bugs` checks too. |
-| Format/lint | PostToolUse hook runs `biome check --write` on edited files |
-| Secrets | `.env*` denied in permissions |
+| Format/lint | PostToolUse hook runs `biome check --write` on edited files (`.claude/hooks/format.sh` and `.agents/hooks/format.mjs`) |
+| Secrets | `.env*` denied in `.claude/settings.json` permissions and `.agents/hooks/protect-env.mjs` |
 
-## Claude config (root, created in tower-poc M0, used by every app)
+## Agent config (root, created in tower-poc M0, used by every app)
+
+`AGENTS.md` is the single source of truth for SDLC rules, repo conventions, commands, safety rules, and hooks. `CLAUDE.md` imports `@AGENTS.md`; `GEMINI.md` points Antigravity (via T3 Code) to `AGENTS.md` and maps Claude tool/model names. `.agents/` bridges Antigravity into the shared skills and guard hooks under `.claude/` with no duplicated logic.
 
 ```text
-CLAUDE.md                       # < 1 page: repo map, commands, conventions, known mistakes
-apps/<app>/CLAUDE.md            # optional, app-specific notes only (Claude loads it when working in that folder)
+AGENTS.md                       # Agentic SDLC + repo map, commands, conventions, hooks, known mistakes
+CLAUDE.md                       # thin Claude Code entry point importing @AGENTS.md
+GEMINI.md                       # thin Antigravity (T3 Code) entry point referencing AGENTS.md + tool/model mapping
 REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; what blocks (as §4); nit cap 5
-.claude/settings.json           # hooks + permissions
-.claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
+.agents/skills.json             # exposes all shared skills from .claude/skills/ to Antigravity
+.agents/hooks.json              # Antigravity PreToolUse/PostToolUse hooks wrapping .claude/hooks/
+.agents/hooks/*.mjs             # Antigravity adapters (run-guards, protect-env, format) + hooks.test.mjs run by pnpm check
+.claude/settings.json           # Claude Code hooks + permissions
+.claude/hooks/*.mjs, format.sh    # shared guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # fresh context: runs the feature's eval.md and posts the eval table (screenshot EVs side by side, no pixel threshold); no eval.md: checks + Playwright + screenshots; reports, never fixes code or evals (model: haiku)
 .claude/agents/adversary-bugs.md  # round 1: adversarial PR review, all REVIEW.md passes (model: opus). Rounds 2-3: fix-check only (Sonnet override). Replaced reviewer.md
 .claude/agents/adversary-prd.md   # round 1 only, and only when the step claims PRD/AT/SC ids: checks them against the diff (model: haiku)
@@ -125,7 +131,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 | root | `pnpm build` | builds every app |
 | root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | make / remove a step worktree at `../BloodTower-work/<branch>` with its own `.wt.json` (see Parallel work) |
 | root | `pnpm cleanup:worktrees [--apply]` | report the local worktrees and branches whose work is on `origin/main`; with `--apply` remove them (see §8) |
-| root | `pnpm land <branch>` | optional local recheck: rebase on `main`, rerun `pnpm check`, fast-forward the local `main`. Not the merge path; PRs are. Refuses inside a Claude session. |
+| root | `pnpm land <branch>` | optional local recheck: rebase on `main`, rerun `pnpm check`, fast-forward the local `main`. Not the merge path; PRs are. Refuses inside a Claude or Antigravity session. |
 | root | `pnpm -F <app> <script>` | one app's script (same as running it inside the app folder) |
 | app | `pnpm dev` / `pnpm start` / `pnpm e2e` | defined per app in its README |
 
@@ -259,7 +265,7 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 2. CI (`.github/workflows/check.yml`) runs Gitleaks on the pull request's commits, then decides the rest from the changed paths (`scripts/ci-scope.mjs`, with its own tests):
    - **Full.** Any path outside the lite allowlist runs `pnpm check`. A push to main that touches such a path does too.
    - **Lite** (Bob / Warden, 2026-10-25/26). Every changed path is under `research/game-design/`, `docs/`, `packs/`, `assets/stories/`, or `assets/app-icon/`. It skips `pnpm check`. A `research/game-design/` change runs the card lint (`pnpm check:cards`); a `packs/` change runs the pack lint and the tests that read packs (`pnpm check:packs`).
-   - **e2e.** A pull request that touches `apps/bloodtower/`, `packages/`, `packs/`, a root config file, `scripts/` or a workflow also runs the Playwright suite. Other apps, `research/`, `docs/`, `.claude/`, root documents, and Bloodtower's own `plans/`, `docs/` and markdown files do not: nothing the build, the host or the e2e tests read is in them. Pushes to main run it from `e2e-main.yml`, which is not required.
+   - **e2e.** A pull request that touches `apps/bloodtower/`, `packages/`, `packs/`, a root config file, `scripts/` or a workflow also runs the Playwright suite. Other apps, `research/`, `docs/`, `.claude/`, `.agents/`, root documents, and Bloodtower's own `plans/`, `docs/` and markdown files do not: nothing the build, the host or the e2e tests read is in them. Pushes to main run it from `e2e-main.yml`, which is not required.
 
    The required status is still the job named `check`. It is now the last job and fails if any job before it failed or was cancelled.
 3. The verifier (`.claude/agents/verifier.md`) is launched in a fresh context, never in the implementer's session. It posts the eval table on each head that A/B review reads, and after each code-changing fix round.

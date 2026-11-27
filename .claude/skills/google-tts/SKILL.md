@@ -16,20 +16,20 @@ Generate an audio file from text using Google's Gemini TTS (Google AI Studio) AP
 
 ## Usage
 
-Run the bundled script. `${CLAUDE_SKILL_DIR}` is the skill's directory. The output file's extension (`.wav` or `.mp3`) sets the format automatically, or pass `--format` explicitly.
+Run the bundled script. In Claude Code `${CLAUDE_SKILL_DIR}` points to the skill's directory; otherwise it falls back to `.claude/skills/google-tts` from the repo root. The output file's extension (`.wav` or `.mp3`) sets the format automatically, or pass `--format` explicitly.
 
 ```bash
 # Inline text → WAV (default voice Kore, model gemini-3.8-flash-tts)
-node "${CLAUDE_SKILL_DIR}/scripts/generate.mjs" --text "Hello world" --out hello.wav
+node "${CLAUDE_SKILL_DIR:-.claude/skills/google-tts}/scripts/generate.mjs" --text "Hello world" --out hello.wav
 
 # A document → MP3 (ffmpeg required)
-node "${CLAUDE_SKILL_DIR}/scripts/generate.mjs" --input notes.txt --out notes.mp3
+node "${CLAUDE_SKILL_DIR:-.claude/skills/google-tts}/scripts/generate.mjs" --input notes.txt --out notes.mp3
 
 # Piped from stdin
-cat article.md | node "${CLAUDE_SKILL_DIR}/scripts/generate.mjs" --stdin --out article.wav
+cat article.md | node "${CLAUDE_SKILL_DIR:-.claude/skills/google-tts}/scripts/generate.mjs" --stdin --out article.wav
 
 # Choose voice and style
-node "${CLAUDE_SKILL_DIR}/scripts/generate.mjs" --text "Big news today." --voice Puck --style "excitable" --out news.wav
+node "${CLAUDE_SKILL_DIR:-.claude/skills/google-tts}/scripts/generate.mjs" --text "Big news today." --voice Puck --style "excitable" --out news.wav
 ```
 
 ## Options

@@ -22,7 +22,14 @@ const CARDS_TREE = "research/game-design";
 const PACKS_TREE = "packs";
 
 /** Trees the Bloodtower build and its e2e run never read. `packs` is not one: the host loads it. */
-const E2E_SAFE_TREES = ["research", "docs", "assets/stories", "assets/app-icon", ".claude"];
+const E2E_SAFE_TREES = [
+  "research",
+  "docs",
+  "assets/stories",
+  "assets/app-icon",
+  ".claude",
+  ".agents",
+];
 
 const under = (path, tree) => path === tree || path.startsWith(`${tree}/`);
 
