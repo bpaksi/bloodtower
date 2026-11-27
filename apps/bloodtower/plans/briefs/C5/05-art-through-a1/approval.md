@@ -86,3 +86,13 @@ Not part of EV-04 (base pack, not `packs/test`). Nothing is final until Bob tick
 - [ ] portrait.hero-d — scout — approved by Bob
 - [ ] portrait.hero-e — ranger — approved by Bob
 - [ ] portrait.hero-f — bard — approved by Bob
+
+## Base pack listen sounds (Bob)
+
+Not part of EV-04 (base pack engine defaults, DEC-618; C5-05 §5). Nothing is final until Bob ticks it here.
+
+- [ ] snd.listen-nothing — still air — approved by Bob
+- [ ] snd.listen-trap — a click and a drip — approved by Bob
+- [ ] snd.listen-battle — shuffling and breathing — approved by Bob
+
+Change note 2026-11-27 (Gamewright ruling 30, approved by Bob): rough ffmpeg placeholders added, declared `draft` in `packs/base/pack.yaml` (type `sfx`, target `storyboard`), m4a AAC-LC mono 48 kHz, 2.0 s each, all three at about −20 LUFS so loudness alone does not tell them apart. Generated with ffmpeg only, no AI voice and no downloaded audio. No ambience (not on the 1.0 list). Nothing is ticked.

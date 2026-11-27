@@ -52,9 +52,9 @@ Not counted above:
 |---|---|---|---|---|
 | `portrait.hero-a` … `portrait.hero-f` (6) | portrait | Claim Heroes, the hunter roll and iPad cards (`PortraitCard.tsx`; `pack.yaml:17,27,37,47,57,67`) | draft, 2048×2048 (`packs/base/assets/portrait.hero-{a..f}.webp`; `pack.yaml:95-100`; AI drafts 2026-11-26) | final text (hero names are still "Hero A"–"Hero F") and Bob's ticks (approval.md, base pack list) |
 | ~~`vo.hero-a` … `vo.hero-f` (6)~~ | voice line | retired from 1.0. **Ruled 2026-11-26 (Bob):** heroes are not voiced; only the Loremaster is (DEC-099). The asset entries are removed; each hero keeps its `voice:` id (`pack.yaml:18,28,38,48,58,68`) because the schema still requires it | retired (not counted) | nothing |
-| `snd.listen-nothing` | effect | Tomb listen, no room (C5-05:108; engine default, DEC-618) | missing file | Bob's art hold |
-| `snd.listen-trap` | effect | Tomb listen, trap (C5-05:109) | missing file | Bob's art hold |
-| `snd.listen-battle` | effect | Tomb listen, battle (C5-05:110) | missing file | Bob's art hold |
+| `snd.listen-nothing` | effect | Tomb listen, no room (C5-05:108; engine default, DEC-618) | draft (`packs/base/pack.yaml`, `packs/base/assets/snd.listen-nothing.m4a`, ffmpeg placeholder, m4a 2.0 s, ≈ −20 LUFS, 2026-11-27) | Bob's tick in approval.md (base pack listen sounds) |
+| `snd.listen-trap` | effect | Tomb listen, trap (C5-05:109) | draft (`packs/base/pack.yaml`, `packs/base/assets/snd.listen-trap.m4a`, ffmpeg placeholder, m4a 2.0 s, ≈ −20 LUFS, 2026-11-27) | Bob's tick in approval.md (base pack listen sounds) |
+| `snd.listen-battle` | effect | Tomb listen, battle (C5-05:110) | draft (`packs/base/pack.yaml`, `packs/base/assets/snd.listen-battle.m4a`, ffmpeg placeholder, m4a 2.0 s, ≈ −20 LUFS, 2026-11-27) | Bob's tick in approval.md (base pack listen sounds) |
 
 ### packs/test: The Ruined Keep
 
@@ -303,7 +303,7 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
 7. **Ruined Keep ambience.** Ids: `startup-ambient.m4a`, `night1-ambient.m4a`, `night2-ambient.m4a`, `pg-music.m4a`, or else drop them from `tracks.ts`. kind:art. Touches: `packs/test/audio/` (new), `apps/bloodtower/src/web/lib/audio/tracks.ts:33-40`.
 8. **Base pack hero portraits.** Ids: `portrait.hero-a`…`f`. kind:art. Touches: `packs/base/assets/` (new), `packs/base/pack.yaml:95-100`. **Drafts made 2026-11-26:** all six declared `draft` at 2048×2048 (`pack.yaml:95-100`), head and shoulders facing the viewer. Left: Bob's ticks, and the final hero names.
 9. ~~**Base pack hero voice lines: rule on them or retire them.**~~ Done: ruled 2026-11-26 (Bob), retired from 1.0 (DEC-099). Left over: the hero schema's required `voice` field (`apps/bloodtower/src/protocols/pack-v2/base.ts`), a code change for a later PR.
-10. **Base pack listen sounds.** Ids: `snd.listen-nothing`, `snd.listen-trap`, `snd.listen-battle`. kind:art. Touches: `packs/base/assets/` (new), `packs/base/pack.yaml`.
+10. **Base pack listen sounds.** Ids: `snd.listen-nothing`, `snd.listen-trap`, `snd.listen-battle`. kind:art. Touches: `packs/base/assets/` (new), `packs/base/pack.yaml`. **Placeholders made 2026-11-27** (Gamewright ruling 30, approved by Bob): all three declared `draft` in `packs/base/pack.yaml` as ffmpeg-only m4a files, 2.0 s, about −20 LUFS each. Left: Bob's ticks, `index.json` (made by `assets:pack`, not run), and final sounds if wanted.
 11. **Dracula script: finish the drafts.** Ids: D-06 manifest groups 1–6 (255 lines), `n5-flooded-room` lines, `traitor.marta-unmasked~vo-01`, and the 44 over-long captions. Then rewrite `packs/dracula/script.yaml` and retire its old ids. kind:story. Touches: `research/game-design/specs/dracula/script/`, `D-06-vo-manifest.md`, `packs/dracula/script.yaml`, `packs/dracula/cast.yaml`.
 12. **Dracula pictures: declare and approve the 106 rendered files.** Ids: every D-06 id that has a file (section 1). kind:art. Touches: `packs/dracula/pack.yaml` (an `assets:` block, or `assets/index.json`), `packs/dracula/assets/`.
 13. **Dracula missing pictures.** Ids: `item.ludmila-tome`, `painting.lair~ludmilas-chapel`, `portrait.marta`. The ones on hold are `portrait.ludmila` and `painting.n5-lift`. kind:art. Touches: `packs/dracula/assets/`.
@@ -352,7 +352,7 @@ Screens are from spec.md D20 (`spec.md:35`): splash, tower-connect, pick-story, 
     - `packs/dracula/script.yaml` has 346 old-plot lines.
     - D-06-vo-manifest has 255 new DRAFT lines, and D-06:254 says to retire the old ids.
     - `research/game-design/specs/dracula/inventory.md` says script.yaml has "710 lines" and cast.yaml "27 ids". Today script.yaml has 346 voice lines over 1076 file lines, and cast.yaml has 25 ids.
-11. **Base listen sounds.** C5-05:104-118 (SD-01) puts `snd.listen-*` in `packs/base/assets/`. `packs/base/pack.yaml` doesn't declare them. `packs/base/assets/` exists since the hero portrait drafts (2026-11-26) but has no sounds.
+11. **Base listen sounds.** C5-05:104-118 (SD-01) puts `snd.listen-*` in `packs/base/assets/`. **Fixed 2026-11-27:** `packs/base/pack.yaml` declares them as `draft` and `packs/base/assets/` has the three ffmpeg placeholder m4a files (ruling 30).
 12. **Files that nothing references:**
     - `public/board/dialog-frame/dialog-frame.png` and `@2x.png`
     - `public/landing/window-mask/window-mask.svg`, `window-mask-{a,b,c,d}.png`, `window-mask-sections.png` and `window-glow.png` (READMEs only)

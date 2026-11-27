@@ -116,6 +116,8 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 
 The listen sounds must not tell the room kind apart by loudness alone; a wrong hint (1 in 5, DEC-618) must sound the same as a true one.
 
+**Placeholders (Gamewright ruling 30, approved by Bob 2026-11-27):** rough ffmpeg placeholders are OK for the three listen sounds. They are in `packs/base/assets/` as `draft` (`sfx`, `storyboard`): m4a AAC-LC mono 48 kHz, 2.0 s, each at about −20 LUFS integrated with true peak at or under −1 dBTP. All three share one quiet low room tone: nothing adds a slow swell of still air, trap a double click and a drip, battle two breaths and scuffing feet. Each id is one file, so a wrong hint plays the same sound as a true one. They were generated with ffmpeg only (no AI voice, no downloaded audio); the WAV masters stay outside git. Ambience is not on the 1.0 list.
+
 **Loremaster lines** (voiced; quoted only from `research/stories/ruined-keep/script.md`, 1.0 lines accepted by Bob 2026-11-06). The full ID-to-line mapping is in §6.3 and §6.4: 13 lines.
 
 **Acceptance checks**
