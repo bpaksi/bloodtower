@@ -8,19 +8,19 @@ Keep this a checklist; do not write a second design doc.
 - Feature: 06-tuning-pass
 - Kind: engine
 - Owner: Gamewright (plan, evals); a Wright developer (build)
-- Related AREA/docs: AREA-097, DEC-500, DEC-131, DEC-699 to DEC-703
+- Related AREA/docs: AREA-097, DEC-500, DEC-131, DEC-959, DEC-699 to DEC-703, DEC-823, DEC-815, DEC-816, DEC-817
 - Evals: ./eval.md
 - Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 04, and its `approval.md` on `main`
 - Touches: `packs/base/tuning.yaml`, `apps/bloodtower/src/sim/**` (report only)
-- Builds: DEC-500, DEC-131
+- Builds: DEC-500, DEC-131, DEC-959
 - Deps change: no
 - Runs: cloud
 
 ## What it does
 
-300 headless games in all: 100 at 2 heroes, 100 at 3, and 100 at 4. No solo (Gamewright, 2026-11-27, under Bob's delegation via Warden). The two table playtests are G-C3 (#617) and G-C4 (#618), not new games. A number moves only when the sim and those gates agree (Q-C5-05). Target bands are not locked: C5/06, DEC-131 and DEC-500 state none. They stay unset until Bob names them. No number is guessed.
+300 headless games in all: 100 at 2 heroes, 100 at 3, and 100 at 4. No solo. Length unset is Standard, at normal difficulty (DEC-959, Gamewright, 2026-11-27, under Bob's delegation via Warden). The win-rate band is DEC-823's: about 80% is the floor, and a cell above about 95% is flagged, not tuned down. The pass lifts only a cell below about 80%. Length and falls are reported and are not a pass or a fail. The two table playtests are G-C3 (#617) and G-C4 (#618), not new games. A number moves only when the sim and those gates agree (Q-C5-05), and any 1.0 change is listed for Bob before merge (DEC-817).
 
 ## Cutover
 
@@ -44,6 +44,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] DEC-500: closed before coding (`decided`).
 - [ ] DEC-131: closed before coding (`decided`).
+- [ ] DEC-959: closed before coding (`decided`).
 - [ ] DEC-699 to DEC-703: closed before coding (`decided`).
 
 ## OPEN questions

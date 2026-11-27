@@ -9,11 +9,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## Checks
 
 ### EV-01 — Sim report at 2, 3 and 4 heroes, 100 each (Gamewright, 2026-11-27, under Bob's delegation via Warden)
-- Requirement: Q-C5-05. 300 games in all. No solo (1-hero) games.
+- Requirement: Q-C5-05, DEC-959. 300 games in all. No solo (1-hero) games. Length unset is Standard. Difficulty is normal.
 - Method: unit
 - How: (sim) run the report: 100 games at 2 heroes, 100 at 3, 100 at 4.
-- Pass evidence: win rate, length and falls for 2, 3 and 4 heroes, and no 1-hero row.
-- Fails if: a size is missing, a solo row is present, or the total is not 300.
+- Pass evidence: win rate, length and falls for the three cells, and no 1-hero row. Each cell's win rate is read against about 80% as the floor (DEC-823). A cell above about 95% is flagged in the report and is not tuned down. A cell below about 80% is the only one marked to lift. Length and falls are reported with no pass/fail band.
+- Fails if: a size is missing, a solo row is present, the total is not 300, the 80% floor is missing, a cell above about 95% is tuned down, or length or falls are a pass/fail band.
 
 ### EV-02 — Every change cited
 - Requirement: DEC-500.
@@ -46,4 +46,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Resolved Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 - Amended (Gamewright, 2026-11-27, under Bob's delegation via Warden): the 300 are 100 at 2 heroes, 100 at 3 and 100 at 4. No solo. The two table playtests are the existing gates G-C3 (#617) and G-C4 (#618). No new playtests are added.
-- Blocker, targets unset: C5/06, DEC-131 and DEC-500 do not state numeric v1.0 calibration bands. DEC-131 keeps OPT-010 as placeholders until Bob tunes them. DEC-500 does not list targets. This brief says bands are proposed in the sim report. No number is locked here, and none is guessed.
+- Resolved (Gamewright, 2026-11-27, under Bob's delegation via Warden; DEC-959): the v1.0 win-rate band is DEC-823's. About 80% is the floor. A cell above about 95% is flagged, not tuned down. Length and falls have no band.

@@ -67,7 +67,7 @@ The seat-order tie-break under batch 1 B2 is the default from DEC-556. Bob did n
 | Id | Ruling | Where |
 |---|---|---|
 | #464-1 | 300 headless games in all: 100 at 2 heroes, 100 at 3, 100 at 4. The old 900 is retired | C5/06 EV-01, EV-03 |
-| #464-2 | Targets stay unset. See the blocker below | C5/06 |
+| #464-2 | v1.0 targets are DEC-823's band on three Standard cells (DEC-959). About 80% is the floor. Above about 95% is flagged, not tuned down | DEC-959, C5/06 |
 | #464-4 | The two table playtests are G-C3 (#617) and G-C4 (#618). No new playtests | C5/06, and the ledger |
 | #590 | Touches and the meaning of concurrent load | see Issue ledger |
 | #595 | Depends on #593. Mockups already match DEC-233 (Bob, 2026-11-22). No new mockup approval | C3/13 and C3/14 approval notes |
@@ -76,10 +76,6 @@ The seat-order tie-break under batch 1 B2 is the default from DEC-556. Bob did n
 | #616 | Three waiting specs | see Issue ledger |
 | #619-1 | Tower UI cards are filed in this PR, ahead of #465 | UI-066, UI-067 |
 | #638-1 | A group with 0 present heroes cannot run a quest and is not paid. An illegal state, not a payout of 0 | DEC-957 |
-
-## Blocker: #464-2 targets are not locked
-
-C5/06, DEC-131 and DEC-500 do not state numeric v1.0 calibration bands. DEC-131 keeps OPT-010 as placeholders until Bob tunes them. DEC-500 does not list targets. The brief says the bands are proposed in the sim report. No number was guessed. The targets stay unset until Bob names them.
 
 ## Issue ledger (not edited on GitHub; Bob edits the issues after review)
 
@@ -97,5 +93,4 @@ C5/06, DEC-131 and DEC-500 do not state numeric v1.0 calibration bands. DEC-131 
 - #446: what a reward deck holds at levels other than 3.
 - Which of the two finale options Vote for selects (DEC-954). The second-tie line is Loremaster's "Tied again. The draw decides." It does not name the result.
 - Whether a real game can reach a group with 0 heroes (DEC-957 guards it either way).
-- The v1.0 calibration numbers (#464-2), until Bob names them.
 - Any gap these batches do not name.
