@@ -20,8 +20,10 @@ import type { PlayState } from "../chapter/playState.ts";
 import { groupById, nextPlayRng } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, isFallen, setHeroSheet } from "../day/clock.ts";
 import { buildingMenu } from "../day/rules.ts";
+import { eventState } from "../event/state.ts";
 import { openQuestAt } from "../quest/quest.ts";
 import { ensureQuests } from "../quest/store.ts";
+import { shellState } from "../session/shellRef.ts";
 
 /** Prices and amounts for the 1.0 picks. Defaults match packs/base/tuning.yaml (DEC-703). */
 export type PickTuning = {
@@ -68,7 +70,20 @@ export const VIRTUE_TILES = [
   "anointed",
 ] as const;
 export const MAX_VIRTUE_TILES = 4;
-export const SILVER_TONGUE_HERO = "bard";
+/** The hero role that grants Silver Tongue's building discount (DEC-681, DEC-936). */
+export const SILVER_TONGUE_ROLE = "bard";
+/** Legacy hero-id alias kept for backward compatibility with older unit test fixtures. */
+export const SILVER_TONGUE_HERO = SILVER_TONGUE_ROLE;
+
+/** Base-pack hero roles matching packs/base/pack.yaml (DEC-378, DEC-936). */
+export const BASE_HERO_ROLES: Readonly<Record<string, string>> = {
+  "hero-a": "fighter",
+  "hero-b": "healer",
+  "hero-c": "magic-user",
+  "hero-d": "scout",
+  "hero-e": "ranger",
+  "hero-f": "bard",
+};
 
 export type PickKind = "rally" | "virtue-draw" | "cure" | "rest" | "cleanse";
 
@@ -116,6 +131,8 @@ export type PicksStore = {
   freePending?: Record<string, string>;
   /** The buildings each group has Cleansed this turn; a new turn clears the list (DEC-572, DEC-946). */
   cleansed?: Record<string, string[]>;
+  /** Hero roles known for this game (heroId -> role), synced from the story or configured. */
+  heroRoles?: Record<string, string>;
   log: PickEvent[];
 };
 
@@ -141,11 +158,16 @@ export const ensurePicks = (play: PlayState): PicksStore => {
 
 export const configurePicks = (
   play: PlayState,
-  options: { tuning?: PickTuning; chapter?: number },
+  options: {
+    tuning?: PickTuning;
+    chapter?: number;
+    heroRoles?: Readonly<Record<string, string>>;
+  },
 ): PicksStore => {
   const store = ensurePicks(play);
   if (options.tuning) store.tuning = options.tuning;
   if (options.chapter !== undefined) store.chapter = options.chapter;
+  if (options.heroRoles) store.heroRoles = { ...options.heroRoles };
   return store;
 };
 
@@ -192,8 +214,57 @@ const LABEL_TO_KIND: Record<string, PickKind> = {
 /** A quarter off, rounded up so 5 becomes 4 (DEC-681, P-003). */
 export const silverTonguePrice = (price: number): number => Math.ceil((price * 3) / 4);
 
+const UNBOUND_SHELL_MESSAGE = "Shell state is not bound for loop execution.";
+
+const readBoundShell = () => {
+  try {
+    return shellState();
+  } catch (error) {
+    // Outside a shell step (unit tests, view projection), no shell is bound — expected, not an error.
+    if (error instanceof Error && error.message === UNBOUND_SHELL_MESSAGE) return null;
+    throw error;
+  }
+};
+
+/** Captures hero roles from the active story while a shell step is bound, without overwriting explicit roles. */
+const syncShellHeroRoles = (play: PlayState, store: PicksStore): void => {
+  const shell = readBoundShell();
+  if (!shell || shell.play !== play) return;
+  const bound = shell.stories.find((story) => story.card.id === shell.boundStoryId);
+  const ordered = bound
+    ? [bound, ...shell.stories.filter((story) => story !== bound)]
+    : shell.stories;
+  let updated: Record<string, string> | null = null;
+  for (const story of ordered) {
+    for (const hero of story.heroes) {
+      const role = hero.card?.role;
+      if (!role) continue;
+      if (store.heroRoles?.[hero.id] !== undefined || updated?.[hero.id] !== undefined) continue;
+      updated ??= { ...store.heroRoles };
+      updated[hero.id] = role;
+    }
+  }
+  if (updated) store.heroRoles = updated;
+};
+
+const heroRoleOf = (play: PlayState, heroId: string): string | undefined => {
+  const store = ensurePicks(play);
+  if (store.heroRoles?.[heroId] === undefined) syncShellHeroRoles(play, store);
+  const configured = store.heroRoles?.[heroId];
+  if (configured !== undefined) return configured;
+  const ledger = eventState(play).heroes[heroId]?.role;
+  if (ledger) return ledger;
+  return BASE_HERO_ROLES[heroId];
+};
+
+const isBard = (play: PlayState, heroId: string): boolean => {
+  const role = heroRoleOf(play, heroId);
+  if (role !== undefined) return role === SILVER_TONGUE_ROLE;
+  return heroId === SILVER_TONGUE_HERO;
+};
+
 const hasBard = (play: PlayState, groupId: string): boolean =>
-  Boolean(groupById(play, groupId)?.heroIds.includes(SILVER_TONGUE_HERO));
+  Boolean(groupById(play, groupId)?.heroIds.some((heroId) => isBard(play, heroId)));
 
 const basePrice = (store: PicksStore, kind: PickKind): number => {
   if (kind === "rally") return store.tuning.rally.gold;
@@ -598,11 +669,16 @@ export const restorePicks = (play: PlayState, saved: string): PicksStore => {
 export const restorePicksFromLog = (
   play: PlayState,
   log: readonly PickEvent[],
-  base: { tuning?: PickTuning; chapter: number },
+  base: {
+    tuning?: PickTuning;
+    chapter: number;
+    heroRoles?: Readonly<Record<string, string>>;
+  },
 ): PicksStore => {
   stores.delete(play);
   const store = ensurePicks(play);
   if (base.tuning) store.tuning = base.tuning;
+  if (base.heroRoles) store.heroRoles = { ...base.heroRoles };
   store.chapter = base.chapter;
   store.log = [...log];
   store.freeCures = rebuildFreeCures(log);
@@ -634,6 +710,7 @@ export const purseKnown = (play: PlayState, groupId: string): boolean => {
 
 export const loadLive = (play: PlayState, groupId: string, movesLeft: number): void => {
   const store = ensurePicks(play);
+  syncShellHeroRoles(play, store);
   const group = groupById(play, groupId);
   const clock = ensureClock(play);
   // The pool: every seated hero's gold across all groups (D5, DEC-911).
