@@ -9,35 +9,35 @@
 
 One line per asset id in `packs/test/assets/index.json`; EV-04 checks every id is ticked.
 
-- [ ] place.village — approved by Bob 
-- [ ] place.bazaar — approved by Bob 
-- [ ] place.citadel — approved by Bob 
-- [ ] place.sanctuary — approved by Bob 
-- [ ] painting.ch1-the-roads — approved by Bob 
-- [ ] painting.ch2-the-keep — approved by Bob 
-- [ ] painting.ch3-the-tower — approved by Bob 
+- [x] place.village — approved by Bob 2026-11-27
+- [x] place.bazaar — approved by Bob 2026-11-27
+- [x] place.citadel — approved by Bob 2026-11-27
+- [x] place.sanctuary — approved by Bob 2026-11-27
+- [x] painting.ch1-the-roads — approved by Bob 2026-11-27
+- [x] painting.ch2-the-keep — approved by Bob 2026-11-27
+- [x] painting.ch3-the-tower — approved by Bob 2026-11-27
 - [ ] foe.level-1 — approved by Bob 
 - [ ] foe.level-2 — approved by Bob 
 - [ ] foe.level-3 — approved by Bob 
 - [ ] foe.level-4 — approved by Bob 
-- [ ] foe.warden~phase-1 — approved by Bob 
-- [ ] foe.warden~phase-2 — approved by Bob 
-- [ ] foe.warden~phase-3 — approved by Bob 
+- [x] foe.warden~phase-1 — approved by Bob 2026-11-27
+- [x] foe.warden~phase-2 — approved by Bob 2026-11-27
+- [x] foe.warden~phase-3 — approved by Bob 2026-11-27
 - [ ] foe.keep-garrison — approved by Bob
-- [ ] painting.keep-crypt~left-corridor — approved by Bob
-- [ ] painting.keep-crypt~left-wall — approved by Bob
-- [ ] painting.keep-crypt~ahead-corridor — approved by Bob
-- [ ] painting.keep-crypt~ahead-wall — approved by Bob
-- [ ] painting.keep-crypt~right-corridor — approved by Bob
-- [ ] painting.keep-crypt~right-wall — approved by Bob
-- [ ] painting.keep-sealed-door — approved by Bob 
-- [ ] painting.trap-pit — approved by Bob
-- [ ] painting.trap-falling-rocks — approved by Bob
-- [ ] painting.tower-basement-map — approved by Bob
-- [ ] painting.tower-main-map — approved by Bob
-- [ ] painting.tower-top-map — approved by Bob
-- [ ] painting.finale-win — approved by Bob 
-- [ ] painting.finale-loss — approved by Bob 
+- [x] painting.keep-crypt~left-corridor — approved by Bob 2026-11-27
+- [x] painting.keep-crypt~left-wall — approved by Bob 2026-11-27
+- [x] painting.keep-crypt~ahead-corridor — approved by Bob 2026-11-27
+- [x] painting.keep-crypt~ahead-wall — approved by Bob 2026-11-27
+- [x] painting.keep-crypt~right-corridor — approved by Bob 2026-11-27
+- [x] painting.keep-crypt~right-wall — approved by Bob 2026-11-27
+- [x] painting.keep-sealed-door — approved by Bob 2026-11-27
+- [x] painting.trap-pit — approved by Bob 2026-11-27
+- [x] painting.trap-falling-rocks — approved by Bob 2026-11-27
+- [x] painting.tower-basement-map — approved by Bob 2026-11-27
+- [x] painting.tower-main-map — approved by Bob 2026-11-27
+- [x] painting.tower-top-map — approved by Bob 2026-11-27
+- [x] painting.finale-win — approved by Bob 2026-11-27
+- [x] painting.finale-loss — approved by Bob 2026-11-27
 - [ ] chapter-card.01~vo-01 — approved by Bob
 - [ ] chapter-card.02~vo-01 — approved by Bob
 - [ ] chapter-card.03~vo-01 — approved by Bob
@@ -51,8 +51,8 @@ One line per asset id in `packs/test/assets/index.json`; EV-04 checks every id i
 - [ ] finale-loss.skulls~vo-01 — approved by Bob
 - [ ] finale-loss.corruption~vo-01 — approved by Bob
 - [ ] finale-loss.fallen-buildings~vo-01 — approved by Bob
-- [ ] painting.cover — 16:9 Ruined Keep cover for 1.0 (Bob locked Nov 2 2026 via Warden)
-- [ ] glow.cover — approved by Bob
+- [x] painting.cover — 16:9 Ruined Keep cover for 1.0 (Bob locked Nov 2 2026 via Warden) — approved by Bob 2026-11-27
+- [x] glow.cover — approved by Bob 2026-11-27
 
 Change note 2026-11-02: avatar.loremaster (portrait, anchor, mouth-A–H) removed — talking portrait deferred, not in 1.0 (Bob, Nov 1: Loremaster is audio + captions). Cover locked as painting.cover. Small tweak; no re-approval per Bob's Nov 1 rule.
 
@@ -76,16 +76,18 @@ Change note 2026-11-26 (redo group 2, Gamewright rulings 5 and 15–19): all eig
 
 Change note 2026-11-26 (redo group 3, Gamewright rulings 20–23): redone, still `draft` and unticked: the six painting.keep-crypt~* sections (lines 27–32), painting.trap-falling-rocks (line 35), painting.tower-main-map and painting.tower-top-map (lines 37–38). Each crypt section's edges carry the same half pier, so every joint of the 8 combinations closes into one whole pier with no doubling; left, ahead and right each show a different end wall, and each wall seals its own opening. No wall torches; light is the party's only. The top map is a top-down plan with no trapdoor; the main map's floor grid is softened to a plain wash. The rockfall shows no people. painting.trap-pit and painting.tower-basement-map are unchanged.
 
+Change note 2026-11-27 (unique foe figures, Bob's review): foe.level-1, foe.level-2, foe.level-3, foe.level-4 and foe.keep-garrison are redone because the figures in each looked like the same person repeated. Each now shows three different people, each with their own build, face, age, hair and beard, gear, weapon and pose, inside the middle 960 px at 1920×1080 WebP. Level 1: road raiders behind felled trees, bows drawn: an old bald white-bearded archer, a young shaven-headed woman, a red-haired man at a stump. Level 2: harder raiders in patched mail: a huge bald black-bearded axeman, a one-eyed grey veteran with sword and kite shield, a young curly-haired spearman. Levels 1–2 show shields with the crest scratched off and no readable mark. Level 3: the Warden's sworn guard in a shield line with his crest: a young spearman in a nasal helm, an older moustached macebearer in a gambeson, a woman in scale with a sword. Level 4: oathsworn guards in dark plate, the 1981-silhouette Tower behind them (as painting.ch3-the-tower): a great-helmed greatswordsman, a grey-bearded knight with an axe, a young bare-headed woman with a war hammer. foe.keep-garrison: three different dead rising in rusted mail with the crest on their shields: a tall skeleton with a spear, a hunched rotting corpse with an axe, a small skeleton climbing from the floor. All five stay `draft` and unticked (lines 19–22, 26); the Warden phases are unchanged. In the same change, Bob's approvals of 2026-11-27 are ticked: the four places, the six story paintings, painting.cover and glow.cover, the three Warden phases, the six crypt sections, both traps, the three Tower maps, and the six base pack hero portraits. `pack.yaml` statuses are not changed.
+
 ## Base pack hero portraits (Bob)
 
 Not part of EV-04 (base pack, not `packs/test`). Nothing is final until Bob ticks it here.
 
-- [ ] portrait.hero-a — fighter — approved by Bob
-- [ ] portrait.hero-b — healer — approved by Bob
-- [ ] portrait.hero-c — magic-user — approved by Bob
-- [ ] portrait.hero-d — scout — approved by Bob
-- [ ] portrait.hero-e — ranger — approved by Bob
-- [ ] portrait.hero-f — bard — approved by Bob
+- [x] portrait.hero-a — fighter — approved by Bob 2026-11-27
+- [x] portrait.hero-b — healer — approved by Bob 2026-11-27
+- [x] portrait.hero-c — magic-user — approved by Bob 2026-11-27
+- [x] portrait.hero-d — scout — approved by Bob 2026-11-27
+- [x] portrait.hero-e — ranger — approved by Bob 2026-11-27
+- [x] portrait.hero-f — bard — approved by Bob 2026-11-27
 
 ## Base pack listen sounds (Bob)
 
