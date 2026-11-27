@@ -110,7 +110,8 @@ body.bt { margin: 0; background: var(--bt-grain), var(--bt-void); color: var(--b
 .bt-panel::after { bottom: -14px; right: -12px; transform: rotate(180deg); }
 
 /* Theme B engraved corner frame: dark engraved mount with gold corners around a parchment page.
-   Markup: <div class="bt-frame"><div class="bt-parchment bt-frame__page">…</div></div> */
+   Used on the Story Board (TV) card. On the iPad (.bt-device), DEC-233 uses the edge-to-edge
+   full-parchment page with ART-080 engraved corners instead of a dark inset. */
 .bt-frame {
   position: relative; display: flex; flex-direction: column;
   border: 30px solid transparent;
@@ -132,7 +133,7 @@ body.bt { margin: 0; background: var(--bt-grain), var(--bt-void); color: var(--b
 .bt-btn--primary:hover { background: var(--bt-umber); color: var(--bt-candle); }
 .bt-btn--secondary { background: transparent; color: var(--bt-iron-gall); border: 2px solid var(--bt-iron-gall); box-shadow: inset 0 0 0 3px var(--bt-parchment), inset 0 0 0 4px var(--bt-vellum-shadow); }
 .bt-btn--secondary:hover { color: var(--bt-blood); border-color: var(--bt-blood); }
-.bt-on-dark .bt-btn--secondary, .bt-panel .bt-btn--secondary, .bt-bar .bt-btn--secondary { color: var(--bt-bone); border-color: var(--bt-engrave-gold); box-shadow: none; }
+.bt-on-dark .bt-btn--secondary, .bt-panel .bt-btn--secondary { color: var(--bt-bone); border-color: var(--bt-engrave-gold); box-shadow: none; }
 .bt-btn:disabled, .bt-btn[aria-disabled="true"] { background: color-mix(in srgb, var(--bt-parchment-dark) 60%, transparent); color: var(--bt-vellum-shadow); border: 1px dashed var(--bt-vellum-shadow); outline: none; box-shadow: none; cursor: not-allowed; }
 .bt-btn--block { width: 100%; }
 .bt-iconbtn { display: inline-flex; align-items: center; gap: var(--bt-sp-2); min-height: var(--bt-tap); padding: 0 var(--bt-sp-3); background: none; border: 0; color: inherit; font-family: var(--bt-font-title); font-weight: 700; font-size: var(--bt-fs-md); cursor: pointer; }
@@ -158,17 +159,75 @@ body.bt { margin: 0; background: var(--bt-grain), var(--bt-void); color: var(--b
 .bt-badge--outline { background: transparent; color: var(--bt-iron-gall); border-color: var(--bt-vellum-shadow); }
 .bt-badge--pulse { animation: bt-badge var(--bt-dur-badge-pulse) ease-in-out infinite; }
 
-/* ---- device frame: iPad portrait 820x1180, collapses to 390 wide ---- */
+/* ---- device frame: iPad portrait (DEC-233 full parchment with ART-080 engraved corners) ---- */
 .bt-device {
+  position: relative;
   width: min(820px, 100vw); height: min(1180px, 100vh); margin: 0 auto;
   display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
-  background: var(--bt-void); outline: 10px solid #111; outline-offset: 0;
+  background-color: var(--bt-parchment);
+  background-image:
+    var(--bt-grain),
+    radial-gradient(ellipse at 50% 40%, transparent 55%, rgb(138 111 71 / .28) 100%);
+  color: var(--bt-iron-gall);
+  box-shadow: inset 0 0 60px rgb(90 60 25 / .32);
+  outline: 10px solid #111; outline-offset: 0;
 }
 .bt-device--phone { width: 390px; height: 844px; }
-.bt-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--bt-sp-3); padding: var(--bt-sp-2) var(--bt-sp-4); background: var(--bt-chrome); color: var(--bt-bone); border-bottom: 1px solid var(--bt-chrome-edge); }
-.bt-bar--bottom { border-bottom: 0; border-top: 1px solid var(--bt-chrome-edge); justify-content: center; padding: var(--bt-sp-3) var(--bt-sp-4); }
-.bt-stage { overflow: auto; padding: var(--bt-sp-3); }
+.bt-device:not(:has(.bt-ipad-corners))::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  background-image:
+    url("../../../public/ipad/corners/corner-tl.png"),
+    url("../../../public/ipad/corners/corner-tr.png"),
+    url("../../../public/ipad/corners/corner-bl.png"),
+    url("../../../public/ipad/corners/corner-br.png");
+  background-position: left top, right top, left bottom, right bottom;
+  background-size: min(22%, 168px) auto;
+  background-repeat: no-repeat;
+}
+.bt-ipad-corners {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+.bt-ipad-corner {
+  position: absolute;
+  display: block;
+  width: 22%;
+  max-width: 168px;
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+.bt-ipad-corner-tl { top: 0; left: 0; background-position: left top; background-image: url("../../../public/ipad/corners/corner-tl.png"); }
+.bt-ipad-corner-tr { top: 0; right: 0; background-position: right top; background-image: url("../../../public/ipad/corners/corner-tr.png"); }
+.bt-ipad-corner-bl { bottom: 0; left: 0; background-position: left bottom; background-image: url("../../../public/ipad/corners/corner-bl.png"); }
+.bt-ipad-corner-br { bottom: 0; right: 0; background-position: right bottom; background-image: url("../../../public/ipad/corners/corner-br.png"); }
+.bt-bar {
+  position: relative; z-index: 21;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--bt-sp-3);
+  padding: clamp(18px, 3.5%, 28px) clamp(56px, 14%, 112px) var(--bt-sp-2);
+  background: transparent; color: var(--bt-iron-gall); border-bottom: 0;
+}
+.bt-bar--bottom {
+  border-bottom: 0; border-top: 1px solid var(--bt-vellum-shadow);
+  justify-content: center; padding: var(--bt-sp-3) var(--bt-sp-5);
+  background: transparent; color: var(--bt-iron-gall);
+}
+.bt-bar--bottom .bt-iconbtn {
+  background: var(--bt-bone); color: var(--bt-iron-gall);
+  border: 2px solid var(--bt-vellum-shadow);
+  min-width: var(--bt-tap); justify-content: center;
+}
+.bt-stage { position: relative; z-index: 10; overflow: auto; padding: var(--bt-sp-2) clamp(24px, 10%, 84px) var(--bt-sp-4); }
+.bt-page { min-height: 100%; padding: var(--bt-sp-2) var(--bt-sp-4); }
 .bt-stage > .bt-frame { min-height: 100%; }
+.bt-device .bt-frame { border: 0; background: none; }
+.bt-device .bt-frame__page { background: none; box-shadow: none; outline: 0; padding: var(--bt-sp-2) var(--bt-sp-4); }
 @media (max-width: 480px) {
   .bt-device { outline: 0; }
   .bt-frame { border-width: 20px; border-image-width: 20px; }
@@ -192,4 +251,4 @@ body.bt { margin: 0; background: var(--bt-grain), var(--bt-void); color: var(--b
 .bt-flicker { animation: bt-candle 3.7s steps(1, end) infinite; }
 @media (prefers-reduced-motion: reduce) { .bt-ink-in { animation: bt-fade-in 300ms ease-out both; } .bt-flicker, .bt-badge--pulse { animation: none; } }
 
-/* Engraved corners are drawn inside --bt-frame-engraved (same gold line + weights as the border), one continuous frame. No raster corners. */
+/* Story Board frames use --bt-frame-engraved. iPad (.bt-device) uses DEC-233 full parchment with ART-080 engraved corner PNGs (#593, #595). */
