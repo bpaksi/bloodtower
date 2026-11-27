@@ -325,6 +325,42 @@ describe("IMP assets:import test", () => {
     for (const name of ["village", "bazaar", "citadel", "sanctuary"]) {
       writeFileSync(join(packDir, "assets", `place-${name}.jpg`), tiny);
     }
+    // The story paintings, foes, Tomb sections, traps and Tower maps pack.yaml declares as drafts (2026-11-26), and the cover `cover:` now names (painting.cover.webp), need a source file too.
+    const webp = await sharp({
+      create: { width: 16, height: 9, channels: 3, background: "#442266" },
+    })
+      .webp()
+      .toBuffer();
+    for (const id of [
+      "painting.cover",
+      "painting.ch1-the-roads",
+      "painting.ch2-the-keep",
+      "painting.ch3-the-tower",
+      "painting.keep-sealed-door",
+      "painting.finale-win",
+      "painting.finale-loss",
+      "foe.level-1",
+      "foe.level-2",
+      "foe.level-3",
+      "foe.level-4",
+      "foe.warden~phase-1",
+      "foe.warden~phase-2",
+      "foe.warden~phase-3",
+      "foe.keep-garrison",
+      "painting.keep-crypt~left-corridor",
+      "painting.keep-crypt~left-wall",
+      "painting.keep-crypt~ahead-corridor",
+      "painting.keep-crypt~ahead-wall",
+      "painting.keep-crypt~right-corridor",
+      "painting.keep-crypt~right-wall",
+      "painting.trap-pit",
+      "painting.trap-falling-rocks",
+      "painting.tower-basement-map",
+      "painting.tower-main-map",
+      "painting.tower-top-map",
+    ]) {
+      writeFileSync(join(packDir, "assets", `${id}.webp`), webp);
+    }
     const argv = ["test", "--work-folder", f.work, "--packs-dir", f.packs];
     const r = run(argv, f, FAKE, false);
     expect(r.out).toContain("matched 4, skipped 0, failed 0");

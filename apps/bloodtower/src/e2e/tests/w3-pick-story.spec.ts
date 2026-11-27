@@ -23,7 +23,7 @@ const BOARD_SIZES = [
 ] as const;
 
 const TEST_COVER = join(import.meta.dirname, "../../../../../packs/test/assets/cover.png");
-const DAY_SLICE = "[COPY: The Ruined Keep tagline]";
+const DAY_SLICE = "Raiders have closed the roads around Greyford. The herald asks for help.";
 const COUNT_LINE = "The Count has taken Lenka. Bring her home before she's his.";
 const WAITING = "Waiting for an iPad to choose a story.";
 const PLAYERS = "1\u20134 players";

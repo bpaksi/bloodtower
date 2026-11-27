@@ -10,6 +10,7 @@ Design-only handoff by Gamewright, 2026-11-10 (ET), for Illusionist. It gives ev
 - **Pipeline (LOCKED):** AI drafts through A1, then Bob approves each final in the studio (Q-C5-06); masters and WAVs stay in the work folder; shipped files are content-hashed WebP and m4a with `index.json` (DEC-386, DEC-622). Old saves keep working because IDs are stable (DEC-202; C5-05 EV-05).
 - **Panning Paintings (LOCKED):** a story Painting that drifts is 16:9 at 3840×2160, 1.5× max zoom, key detail out of the bottom third (DEC-206, DEC-575). Base-game-style stills that do not move need only 1080p (DEC-347).
 - **Spoiler rule (from DEC-662, script):** no art shown before The Barrow may show the Warden's crest whole. Raiders' shields have the crest scratched off; the sworn guard wear it openly only in chapter 3.
+- **The Warden's crest (kept, Gamewright ruling 5, 2026-11-26; DEC-662, FO-02):** a tower on a shield. On The Lock's gate it sits on a round iron boss with the ring-sized hollow at its centre (`painting.keep-sealed-door`, `painting.ch3-the-tower`). Levels 1–2 show it scratched off, with no readable mark; the sworn guard, the Barrow's garrison and the Warden show it whole.
 - **Voice (LOCKED):** only the Loremaster's lines are voiced (Q-C5-07; DEC-349), audio plus captions, no Portrait (approval change note, Nov 2). Voice, format, loudness and duration rules are as for `seal-break.01~vo-01` in [A1-art-specs.md](A1-art-specs.md) §3: Charon, locked (Bob 2026-11-10, DEC-902); WAV master to m4a; about −18 LUFS (R3-UI-60, game-look §6); estimated over 20 s rejected (A1-P2 D6); caption ≤ 120 characters (DEC-576).
 
 ---
@@ -40,6 +41,8 @@ All five chapter/scene paintings and both endings: kind `painting`; **3840×2160
 
 Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at the centre (DEC-329), stills with only the hit shake and spell flash (DEC-347, DEC-562). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×1080, 16:9 (DEC-347: no drift, so 1080p suffices). Subject inside the central 90% so the hit shake never shows an edge. In Tomb and Tower battles the battle screen takes over the 8:9 view half (DEC-592), so the painting is fitted into it, not shown 1:1: keep the foe's head and body inside the central 8:9 column (the middle 960 px of 1920) so a fit-to-height crop still reads. Master PNG, shipped WebP.
 
+**Group framing (Gamewright ruling 15, 2026-11-26; DEC-592):** a group foe shows 2–3 whole figures inside the middle 960 px; flankers past it may be cropped. Level 4's Tower uses the physical 1981 silhouette (ruling 19, as `painting.ch3-the-tower`).
+
 **Foe levels.** One painting per foe level, swapping C4's placeholders (Q-C4-15). Each is a Beginning-state painting; the other four foe states fall back to it (DEC-332). Levels rise one step a chapter (DEC-185; `packs/base/tuning.yaml` chapter_1: 1).
 
 | Asset id | PROPOSED subject |
@@ -51,7 +54,7 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 
 **The Barrow's guardian (§6.6, ADOPTED):** `foe.keep-garrison`, the keep's dead garrison rising in rusted mail, shields bearing the Warden's crest (script; DEC-608, DEC-662). Shown only inside the Tomb, so the crest may show.
 
-**The Warden's phases.** Three paintings, one per phase (Q-C5-02); a phase change at two thirds and one third of his wounds (DEC-567), shown with a shake and sound when no tower is connected (Q-C5-08). He is the keep's fallen last lord, a ruined knight (DEC-661), “in what is left of his armour” (script, boss-screen opening). Same figure, face and armour in all three. `foe.warden~phase-1` is also his one Portrait under DEC-661 (§6.5 (d)); no `portrait.warden`.
+**The Warden's phases.** Three paintings, one per phase (Q-C5-02); a phase change at two thirds and one third of his wounds (DEC-567), shown with a shake and sound when no tower is connected (Q-C5-08). He is the keep's fallen last lord, a ruined knight (DEC-661), “in what is left of his armour” (script, boss-screen opening). Same figure, face and armour in all three. **Look (ADOPTED, Gamewright ruling 18, 2026-11-26; DEC-661, FO-03):** old, bald and grey-bearded in all three phases. **The Tower's call (ruling 17; game-look §2):** a cold grey-white light, never green or blue-green; verdigris stays for holy and ward effects. **Framing (ruling 16):** his head and sword stay inside the central 90% in every phase. `foe.warden~phase-1` is also his one Portrait under DEC-661 (§6.5 (d)); no `portrait.warden`.
 
 | Asset id | PROPOSED subject |
 |---|---|
@@ -76,9 +79,10 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 | `tomb.keep-crypt~left-wall`, `~ahead-wall`, `~right-wall` | That section closed by a solid wall (DEC-584) |
 
 - **Size, CONFIRMED (Wright screen check 2026-11-10):** each section 1920×2160 (8:9, the view half at 4K, DEC-583), master PNG, shipped WebP. Left, ahead and right join edge to edge at 5760×2160 with **no overlap**; the blend is painted into each section's edges, so any corridor/wall mix joins without a seam (DEC-585).
+- **Joins, views and light (Gamewright rulings 20–21, 2026-11-26; DEC-583–585, TB-01):** every section's outer edges carry the same painted half of one square stone pier, so each joint, of any corridor/wall mix, closes into one whole pier, with no doubled niches. The three views differ at the end wall: left a low round arch beside a sarcophagus, ahead a tall pointed arch with steps and rusted mail on a hook, right a ragged broken hole; each wall seals that same opening (bricked arch, filled arch, rubble). No wall torches: the only light is the party's, falling from the viewer.
 - **Traps.** 1.0 has two traps, one painting each (DEC-606), which take over the view half while the group takes the loss (DEC-592). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×2160 (8:9), filling the view half (DEC-592); a single picture, not a tomb-section frame and not joined to the sections.
   - `trap.pit` (ADOPTED `painting.trap-pit`): the floor gives way under one hero. Source: “The floor gives way. Choose one hero to take the fall and lose 4 hit points.”
-  - `trap.falling-rocks` (ADOPTED `painting.trap-falling-rocks`): stones crashing from the vault onto the group. Source: “Stones crash from the ceiling. Every hero loses 2 hit points.”
+  - `trap.falling-rocks` (ADOPTED `painting.trap-falling-rocks`): stones crashing from the vault onto the group. Source: “Stones crash from the ceiling. Every hero loses 2 hit points.” The final shows no countable party (Gamewright ruling 23, 2026-11-26; DEC-606): the redo shows only the stones, a dropped shield and a fallen torch, so it fits any party size. `painting.trap-pit` keeps its generic falling hero.
 
 **Acceptance checks**
 
@@ -93,6 +97,7 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 `map.tower-basement`, `map.tower-main`, `map.tower-top` (ADOPTED `painting.tower-{basement,main,top}-map`, §6.1): the Tower's three levels (DEC-364, DEC-566), each with distinct art (DEC-364). The board reuses the Tomb's two halves (Q-C5-01): the level's room map left, the room view right; DEC-566 says “One picture: the level's room map.”
 
 - **PROPOSED content:** one painted backdrop per level for the map half, a top-down plan in aged ink on dark parchment that the engine draws rooms on: basement (rough-hewn, damp), main (great hall stone), top (open battlements, sky). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×2160 (8:9, the map half at 4K); static, no drift.
+- **Plan view and grid (Gamewright ruling 22, 2026-11-26; game-look §4a):** all three are top-down plans. The top is the open battlement ring, merlons and the stair head, with no trapdoor. The main hall's floor carries no flagstone grid, only a soft wash, so the engine's rooms read over it.
 - **Acceptance:** distinct per level at TV distance; engine-drawn rooms, the glowing current room and labels stay legible over it (game-look §4a); IDs pass A1-15 under the §6.1 renames.
 
 ## 5. Sounds and Loremaster lines
@@ -110,6 +115,8 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 | `snd.listen-battle` | `snd.listen_battle` | Shuffling and breathing | 1.5–2.5 s |
 
 The listen sounds must not tell the room kind apart by loudness alone; a wrong hint (1 in 5, DEC-618) must sound the same as a true one.
+
+**Placeholders (Gamewright ruling 30, approved by Bob 2026-11-27):** rough ffmpeg placeholders are OK for the three listen sounds. They are in `packs/base/assets/` as `draft` (`sfx`, `storyboard`): m4a AAC-LC mono 48 kHz, 2.5 s (the top of the PROPOSED range, to fit the music), each at about −20 LUFS integrated with true peak at or under −1 dBTP. **Bob's direction, 2026-11-27 (7:40 and 8:00 AM ET):** the feeling is a cavern with ambient sounds, and “all 3 should have music, slight different variances”. All three carry one low, dark cavern motif, a D minor drone (D2, D3, A3, D4, detuned pairs) with a soft upper note, in a slightly different variation each, over one shared cavern bed (a near-silent stone room tone and an ffmpeg-made stone reverb). snd.listen-nothing: the calm variation (F4 sighing to E4) with a faint drip, drip, well back, and a very slight breeze. snd.listen-trap: **ambience drops out, dread music only, no mechanism.** It opens on the shared bed and motif (room tone, very slight breeze, one far faint drip); by about 1.0 s the ambience drains away unnaturally fast and only the dread variation remains (F4 falling to E-flat, an E-flat cluster and a tritone G-sharp swell rising in). snd.listen-battle: **low talking and fire.** Two muffled voices talking low and a crackling fire, as if through a door, over the tenser variation (the drone throbs on a slow pulse, F4 rising to G4); no footsteps or hits. This direction overrides the DEC-618 content wording above (“still air”, “a click and a drip”, “shuffling and breathing”) and the “Ambience is not on the 1.0 list” line of ruling 30 for these three sounds; the bed and music live inside each 2.5 s sound, and there are still no separate ambience tracks. **Gamewright follow-up:** update the DEC-618 card to match (the cards are not edited here). Each id is one file, so a wrong hint plays the same sound as a true one. All are made with ffmpeg only (no AI voice, no downloaded audio, no samples); the WAV masters stay outside git.
 
 **Loremaster lines** (voiced; quoted only from `research/stories/ruined-keep/script.md`, 1.0 lines accepted by Bob 2026-11-06). The full ID-to-line mapping is in §6.3 and §6.4: 13 lines.
 
@@ -200,5 +207,7 @@ The listen sounds must not tell the room kind apart by loudness alone; a wrong h
 Citation fix: final approval of every asset is C5-05 **EV-04** (`eval.md`); `approval.md`'s “EV-05 checks every id is ticked” was corrected to EV-04 in this branch (docs-only).
 
 ## 7. No repaint
+
+**Superseded 2026-11-26:** Gamewright ruling 3 (oil wins, DEC-335, DEC-478) and Bob's go-ahead lifted this hold. All four places are repainted in oil at 1920×1080 as drafts, to match the story paintings; Bob ticks each in approval.md (lines 12–15) as before. The Bazaar's oil repaint keeps both lantern tops whole (ruling 24). The original text follows for the record.
 
 `place.village`, `place.bazaar`, `place.citadel` and `place.sanctuary` need **no repaint**: A1 step 6 imports the existing `packs/test/assets/place-*.jpg` as drafts for Bob's approval (A1-06b; A1-P2 inventory). Observed only: `place-bazaar.jpg` is 864×1152 (portrait), the other three 1280×720.

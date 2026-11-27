@@ -25,6 +25,7 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
     // Everything else in the manifest is still pinned to the baseline.
     const {
       title: oldTitle,
+      cover: oldCover,
       assets: oldAssets,
       tagline: oldTagline,
       chapters: _oldChapters,
@@ -32,6 +33,7 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
     } = before;
     const {
       title: newTitle,
+      cover: newCover,
       assets: newAssets,
       tagline: newTagline,
       chapters: _newChapters,
@@ -42,13 +44,193 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
     } = after;
     expect(oldTitle).toBe("Proving Grounds");
     expect(newTitle).toBe("The Ruined Keep");
+    // Gamewright ruling 9 (2026-11-26): `cover:` names the painting.cover file, not cover.png.
+    expect(oldCover).toBe("assets/cover.png");
+    expect(newCover).toBe("assets/painting.cover.webp");
     expect(oldTagline).toBe("AREA-077 day slice — Enter and Leave only.");
-    expect(newTagline).toBe("[COPY: The Ruined Keep tagline]");
+    expect(newTagline).toBe(
+      "Raiders have closed the roads around Greyford. The herald asks for help.",
+    );
     expect(restAfter).toEqual(restBefore);
     expect(after.pack_id).toBe("test");
     const rows = newAssets as unknown[];
     expect(rows.slice(0, (oldAssets as unknown[]).length)).toEqual(oldAssets);
     expect(rows.slice((oldAssets as unknown[]).length)).toEqual([
+      {
+        id: "painting.ch1-the-roads",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.ch1-the-roads.webp",
+      },
+      {
+        id: "painting.ch2-the-keep",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.ch2-the-keep.webp",
+      },
+      {
+        id: "painting.ch3-the-tower",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.ch3-the-tower.webp",
+      },
+      {
+        id: "painting.keep-sealed-door",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.keep-sealed-door.webp",
+      },
+      {
+        id: "painting.finale-win",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.finale-win.webp",
+      },
+      {
+        id: "painting.finale-loss",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.finale-loss.webp",
+      },
+      {
+        id: "foe.level-1",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.level-1.webp",
+      },
+      {
+        id: "foe.level-2",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.level-2.webp",
+      },
+      {
+        id: "foe.level-3",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.level-3.webp",
+      },
+      {
+        id: "foe.level-4",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.level-4.webp",
+      },
+      {
+        id: "foe.warden~phase-1",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.warden~phase-1.webp",
+      },
+      {
+        id: "foe.warden~phase-2",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.warden~phase-2.webp",
+      },
+      {
+        id: "foe.warden~phase-3",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.warden~phase-3.webp",
+      },
+      {
+        id: "foe.keep-garrison",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/foe.keep-garrison.webp",
+      },
+      {
+        id: "painting.keep-crypt~left-corridor",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.keep-crypt~left-corridor.webp",
+      },
+      {
+        id: "painting.keep-crypt~left-wall",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.keep-crypt~left-wall.webp",
+      },
+      {
+        id: "painting.keep-crypt~ahead-corridor",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.keep-crypt~ahead-corridor.webp",
+      },
+      {
+        id: "painting.keep-crypt~ahead-wall",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.keep-crypt~ahead-wall.webp",
+      },
+      {
+        id: "painting.keep-crypt~right-corridor",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.keep-crypt~right-corridor.webp",
+      },
+      {
+        id: "painting.keep-crypt~right-wall",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.keep-crypt~right-wall.webp",
+      },
+      {
+        id: "painting.trap-pit",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.trap-pit.webp",
+      },
+      {
+        id: "painting.trap-falling-rocks",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.trap-falling-rocks.webp",
+      },
+      {
+        id: "painting.tower-basement-map",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.tower-basement-map.webp",
+      },
+      {
+        id: "painting.tower-main-map",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.tower-main-map.webp",
+      },
+      {
+        id: "painting.tower-top-map",
+        type: "still",
+        target: "storyboard",
+        status: "draft",
+        path: "assets/painting.tower-top-map.webp",
+      },
       {
         id: LINE_ID,
         type: "line",
@@ -184,8 +366,33 @@ describe("A1-8b-1 Done when 2: assets:needs lists the demo ids", () => {
       "finale-loss.skulls~vo-01",
       "finale-win.oath~vo-01",
       "finale-win.shattered~vo-01",
+      "foe.keep-garrison",
+      "foe.level-1",
+      "foe.level-2",
+      "foe.level-3",
+      "foe.level-4",
+      "foe.warden~phase-1",
+      "foe.warden~phase-2",
+      "foe.warden~phase-3",
       "glow.cover",
+      "painting.ch1-the-roads",
+      "painting.ch2-the-keep",
+      "painting.ch3-the-tower",
       "painting.cover",
+      "painting.finale-loss",
+      "painting.finale-win",
+      "painting.keep-crypt~ahead-corridor",
+      "painting.keep-crypt~ahead-wall",
+      "painting.keep-crypt~left-corridor",
+      "painting.keep-crypt~left-wall",
+      "painting.keep-crypt~right-corridor",
+      "painting.keep-crypt~right-wall",
+      "painting.keep-sealed-door",
+      "painting.tower-basement-map",
+      "painting.tower-main-map",
+      "painting.tower-top-map",
+      "painting.trap-falling-rocks",
+      "painting.trap-pit",
       "place.bazaar",
       "place.citadel",
       "place.sanctuary",
@@ -287,6 +494,8 @@ describe("A1-8b-1 Done when 2: assets:needs lists the demo ids", () => {
 });
 
 describe("A1-8b-1 Done when 3: fake providers, render, pack --drafts, loader", () => {
+  // Renders every declared picture of packs/test at 3840x2160 with fake providers. With the
+  // 31 draft pictures (2026-11-26) it took 157 s alone on the box, so the limit is 300 s (was 120 s).
   it("exposes the line and the mask entries on a temp copy of packs/test", async () => {
     const packs = tempDir("packs");
     cpSync(join(REPO_PACKS, "test"), join(packs, "test"), { recursive: true });
@@ -330,7 +539,7 @@ describe("A1-8b-1 Done when 3: fake providers, render, pack --drafts, loader", (
     };
     expect(index.assets[LINE_ID]?.captions).toEqual([LINE_TEXT]);
     writeFileSync(join(workFolder, ".keep"), "");
-  }, 120000);
+  }, 300000);
 });
 
 describe("A1-8b-1 Done when 7: no packed files are committed under packs/test/assets", () => {

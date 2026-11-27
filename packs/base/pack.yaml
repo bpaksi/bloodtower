@@ -92,9 +92,12 @@ board:
   spaces: []
 
 assets:
-  - {id: portrait.hero-a, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-b, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-c, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-d, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-e, type: portrait, target: ipad, status: placeholder}
-  - {id: portrait.hero-f, type: portrait, target: ipad, status: placeholder}
+  - {id: portrait.hero-a, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-a.webp}
+  - {id: portrait.hero-b, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-b.webp}
+  - {id: portrait.hero-c, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-c.webp}
+  - {id: portrait.hero-d, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-d.webp}
+  - {id: portrait.hero-e, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-e.webp}
+  - {id: portrait.hero-f, type: portrait, target: ipad, status: draft, path: assets/portrait.hero-f.webp}
+  - {id: snd.listen-nothing, type: sfx, target: storyboard, status: draft, path: assets/snd.listen-nothing.m4a}
+  - {id: snd.listen-trap, type: sfx, target: storyboard, status: draft, path: assets/snd.listen-trap.m4a}
+  - {id: snd.listen-battle, type: sfx, target: storyboard, status: draft, path: assets/snd.listen-battle.m4a}
