@@ -7,7 +7,7 @@ import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts"
 import { OPENING_MOMENTS, openingPromptId } from "../../protocols/opening.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore } from "../db/store.ts";
-import { createEventStore } from "../events/store.ts";
+import { createEventStore, type EventStore } from "../events/store.ts";
 import { createHostLogger, type HostLogger } from "../log/hostLog.ts";
 import { stepClock } from "../timing/clock.ts";
 import { createMockTower } from "../tower/mock.ts";
@@ -27,12 +27,14 @@ const bootSession = async (options?: {
   onChange?: () => void;
   onDeviceAck?: (deviceId: string) => void;
   onDeviceError?: (deviceId: string, code: string, message: string) => void;
+  wrapStore?: (store: EventStore) => EventStore;
 }) => {
   const dir = mkdtempSync(join(tmpdir(), "bloodtower-acked-"));
   dirs.push(dir);
   const opened = openDatabase(join(dir, "session.sqlite"));
   closers.push(() => opened.close());
-  const store = createEventStore(opened.db);
+  const rawStore = createEventStore(opened.db);
+  const store = options?.wrapStore ? options.wrapStore(rawStore) : rawStore;
   createSessionStore(opened.db).saveRoster({
     sessionId: "session-1",
     packId: "test",
@@ -184,5 +186,57 @@ describe("CU17 CoreSession acked tracking", () => {
         (entry) => entry.deviceId === pad2.deviceId && entry.code === "invalid-state",
       ),
     ).toBe(true);
+  });
+
+  it("when a forwarded tower-result follow-up throws, outer tail still runs, core-apply is logged, and acked rises exactly once", async () => {
+    let onChangeCount = 0;
+    let checkpointsWritten = 0;
+    const { session, errors, ackedCallbacks } = await bootSession({
+      onChange: () => {
+        onChangeCount += 1;
+      },
+      wrapStore: (raw) => ({
+        ...raw,
+        writeCheckpoint: (input) => {
+          checkpointsWritten += 1;
+          return raw.writeCheckpoint(input);
+        },
+        append: (input) => {
+          const payload = input.payload as { event?: { kind?: string } };
+          if (input.kind === "shell" && payload.event?.kind === "tower-result") {
+            throw new Error("simulated tower-result store failure");
+          }
+          return raw.append(input);
+        },
+      }),
+    });
+
+    const pad = session.join({ joinCode: "000000", formFactor: "ipad" });
+    await session.whenIdle();
+    if (!pad.ok) throw new Error("join refused");
+
+    session.act(pad.deviceId, "base-board-done", "board-set-up", {});
+    await session.whenIdle();
+    expect(session.ackedFor(pad.deviceId)).toBe(1);
+
+    const onChangeBefore = onChangeCount;
+    const checkpointsBefore = checkpointsWritten;
+    session.act(pad.deviceId, "tower-connect", "tower-connect", {});
+    await session.whenIdle();
+
+    // Outer press ran both its pre-tower onViewRefresh and its tail onChange before the enqueued follow-up threw.
+    expect(onChangeCount).toBe(onChangeBefore + 2);
+    expect(checkpointsWritten).toBeGreaterThanOrEqual(checkpointsBefore);
+    // The follow-up failure was logged under core-apply.
+    expect(
+      errors.some(
+        (entry) =>
+          entry.code === "core-apply" &&
+          entry.message.includes("simulated tower-result store failure"),
+      ),
+    ).toBe(true);
+    // Ack ownership transferred cleanly: acked rose exactly once (1 -> 2, not 1 or 3).
+    expect(session.ackedFor(pad.deviceId)).toBe(2);
+    expect(ackedCallbacks).toEqual([pad.deviceId]);
   });
 });

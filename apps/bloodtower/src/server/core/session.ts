@@ -632,9 +632,10 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       else tellDevice(`${effect.message} (${effect.code})`, "invalid-state", target);
     }
     let forwardedAck = false;
-    const forwardAck = () => {
-      forwardedAck = true;
-      return ack?.forward();
+    const forwardAck = (): string | undefined => {
+      const next = ack?.forward();
+      if (next !== undefined) forwardedAck = true;
+      return next;
     };
     for (const outcome of outcomes) {
       const ok = outcome.result === "ok";
@@ -708,10 +709,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         );
       }
     }
-    if (!forwardedAck) {
-      ack?.bump();
-      options.onChange();
-    }
+    if (!forwardedAck) ack?.bump();
+    options.onChange();
     persistLobbyCheckpoint();
     persistSessionMarker();
     scheduleHintEnd();

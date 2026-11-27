@@ -360,9 +360,12 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   sendDeviceViewImpl = (deviceId: string) => {
     if (closing) return;
     try {
-      for (const socket of deviceSockets.get(deviceId) ?? []) {
-        if (socket.readyState !== WebSocket.OPEN) continue;
-        const message = deviceMessage(deviceId);
+      const openSockets = [...(deviceSockets.get(deviceId) ?? [])].filter(
+        (socket) => socket.readyState === WebSocket.OPEN,
+      );
+      if (openSockets.length === 0) return;
+      const message = deviceMessage(deviceId);
+      for (const socket of openSockets) {
         if (message) send(socket, message);
         else sendError(socket, "invalid-state", "That device state was refused.");
       }
@@ -376,6 +379,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     try {
       lastSnapshot = JSON.stringify(tower.snapshot());
       const board = storyboardMessage();
+      const deviceMessages = new Map<string, ServerMessage | undefined>();
       for (const [socket, client] of clients) {
         if (client.role === "storyboard") {
           if (board) send(socket, board);
@@ -385,7 +389,13 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         }
         if (client.role === "device" && client.deviceId) {
           if (socket.readyState !== WebSocket.OPEN) continue;
-          const message = deviceMessage(client.deviceId);
+          let message: ServerMessage | undefined;
+          if (deviceMessages.has(client.deviceId)) {
+            message = deviceMessages.get(client.deviceId);
+          } else {
+            message = deviceMessage(client.deviceId);
+            deviceMessages.set(client.deviceId, message);
+          }
           if (message) send(socket, message);
           else sendError(socket, "invalid-state", "That device state was refused.");
         }

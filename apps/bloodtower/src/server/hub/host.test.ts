@@ -703,14 +703,73 @@ describe("CU17 seq and acked on deviceView (EV-01 to EV-05)", () => {
     await whenOffered(device, "tower-calibrate");
     await pressAck("tower-calibrate", "tower-calibrate");
 
-    // Let any queued tower-snapshot / watch tick settle; play offers must remain open (never wiped).
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    const latest = deviceViews(device).at(-1)?.payload;
-    expect(latest?.screen).toBe("play");
-    expect(offered(device).some((action) => action.open && action.actionId === "end-turn")).toBe(
-      true,
-    );
+    // Wait for the play screen and confirm play offers stay open (never wiped by tower-snapshot)
+    // and remain pressable.
+    await until(device.inbox, device.log, () => {
+      const latest = deviceViews(device).at(-1)?.payload;
+      return (
+        latest?.screen === "play" &&
+        latest.actions.some((action) => action.open && action.actionId === "end-turn")
+      );
+    });
     expect(offered(device).some((action) => action.open && action.actionId === "walk")).toBe(true);
+    const endTurn = offered(device).find((action) => action.open && action.actionId === "end-turn");
+    if (!endTurn) throw new Error("No open end-turn after Menu Reconnect -> Calibrate.");
+    await pressAck(endTurn.promptId, endTurn.actionId);
+    expect(deviceViews(device).at(-1)?.payload.screen).toBe("play");
+  });
+
+  it("CU17 EV-01: two open sockets for the same device share one gap-free seq sequence", async () => {
+    const host = await start();
+    const first = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await whenOffered(first, "base-board-done");
+    const welcome = first.log.find(
+      (frame): frame is Extract<ServerMessage, { type: "welcome" }> => frame.type === "welcome",
+    );
+    if (!welcome) throw new Error("No welcome frame on first socket.");
+
+    // Open a second socket for the same device token while the first socket is still open.
+    const second = await helloDevice(host.port, {
+      formFactor: "ipad",
+      token: welcome.payload.token,
+    });
+    await until(second.inbox, second.log, () => deviceViews(second).length > 0);
+
+    // Exercise both broadcastImpl (valid press) and sendDeviceViewImpl (refused press).
+    await act(first, "base-board-done", "board-set-up");
+    await until(first.inbox, first.log, () =>
+      deviceViews(first).some((frame) => frame.payload.acked === 1),
+    );
+    await until(second.inbox, second.log, () =>
+      deviceViews(second).some((frame) => frame.payload.acked === 1),
+    );
+
+    await act(second, "hero-hold", "take", {});
+    await until(first.inbox, first.log, () =>
+      deviceViews(first).some((frame) => frame.payload.acked === 2),
+    );
+    await until(second.inbox, second.log, () =>
+      deviceViews(second).some((frame) => frame.payload.acked === 2),
+    );
+
+    const firstSeqs = deviceViews(first).map((frame) => frame.payload.seq);
+    const secondSeqs = deviceViews(second).map((frame) => frame.payload.seq);
+    expect(firstSeqs.length).toBeGreaterThanOrEqual(4);
+    expect(secondSeqs.length).toBeGreaterThanOrEqual(3);
+
+    // First socket sees 1, 2, 3, ... with no gap or repeat.
+    for (let index = 0; index < firstSeqs.length; index += 1) {
+      expect(firstSeqs[index]).toBe(index + 1);
+    }
+    // Second socket sees consecutive integers starting at its join broadcast, matching first's tail.
+    const startSeq = secondSeqs[0] ?? 0;
+    expect(startSeq).toBeGreaterThan(1);
+    for (let index = 0; index < secondSeqs.length; index += 1) {
+      expect(secondSeqs[index]).toBe(startSeq + index);
+    }
+    expect(secondSeqs.at(-1)).toBe(firstSeqs.at(-1));
+    expect(deviceViews(first).at(-1)?.payload.acked).toBe(2);
+    expect(deviceViews(second).at(-1)?.payload.acked).toBe(2);
   });
 
   it("CU17 EV-03: refused and no-op presses still ack and preserve error logs and frames", async () => {
