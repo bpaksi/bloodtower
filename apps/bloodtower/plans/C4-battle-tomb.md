@@ -3,7 +3,7 @@
 **Status:** draft for Bob, 2026-10-31. Gamewright plans only and writes no code. Not yet at G0.
 **Source:** [1.0-milestones.md](1.0-milestones.md) (C4 row, on `docs/bloodtower-c2-plan`), [C3-ruined-keep.md](C3-ruined-keep.md) ("Out of scope" and "Risks"), the battle loop (MEC-024, MEC-038), the Tomb (MEC-026, DEC-593, AREA-094), Cursed (DEC-466, accepted 2026-10-31), the chapters (DEC-662) and the seals (DEC-303).
 **Goal:** the deferred C3 pieces go live: Fight (`fight_enabled: true`), chapters 2 and 3 (`c3_end_after_chapter_1: false`), the seal break and its lines, Cursed, the full battle loop and The Barrow as the 1.0 Tomb.
-**Exit condition:** every feature's eval table is all-pass on its PR, and Bob signs off at G-C4: a battle won, a battle retreated from, and the Tomb cleared, in a game of The Ruined Keep played through chapter 3 (1.0-milestones.md).
+**Exit condition:** every feature's eval table is all-pass on its PR, and Bob signs off at G-C4: a battle won, a battle retreated from, and the Tomb cleared, in a game of The Ruined Keep played through chapter 3, and the same three moments in one no-tower game (Bob, 2026-11-27, via Warden). No separate Cursed-in-battle check and no chapter 1–2 seal-break check are added. (1.0-milestones.md).
 
 ## Who does what
 
@@ -153,7 +153,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 06, 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Tomb*.tsx` (new), `apps/bloodtower/src/web/components/device/TombPicker.tsx` (new)
 - Builds: DEC-583, DEC-584, DEC-585, DEC-591, DEC-592
-- Done-when: EV-01 … EV-18
+- Done-when: EV-01 … EV-19
 - Open: Q-C4-15, Q-C4-17
 
 ### Feature 13: The seal break live on the board, chapters 1 and 2
@@ -162,7 +162,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 07, C3 15, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/SealBreak.tsx`, `apps/bloodtower/src/web/components/device/SkullPlacer.tsx`
 - Builds: UI-044
-- Done-when: EV-01 … EV-16
+- Done-when: EV-01 … EV-24
 - Open: Q-C4-10, Q-C4-17
 
 ### Feature 14: Fight on the event and quest scenes

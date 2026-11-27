@@ -8,12 +8,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Checks
 
-### EV-01 — Sim report at 2, 3, 4 heroes (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
-- Requirement: Q-C5-05.
+### EV-01 — Sim report at 2, 3 and 4 heroes, 100 each (Gamewright, 2026-11-27, under Bob's delegation via Warden)
+- Requirement: Q-C5-05. 300 games in all. No solo (1-hero) games.
 - Method: unit
-- How: (sim) run the report.
-- Pass evidence: win rate, length, falls per group size.
-- Fails if: missing size.
+- How: (sim) run the report: 100 games at 2 heroes, 100 at 3, 100 at 4.
+- Pass evidence: win rate, length and falls for 2, 3 and 4 heroes, and no 1-hero row.
+- Fails if: a size is missing, a solo row is present, or the total is not 300.
 
 ### EV-02 — Every change cited
 - Requirement: DEC-500.
@@ -22,12 +22,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: each changed key names its sim row and playtest.
 - Fails if: uncited.
 
-### EV-03 — No hang in 900 games
-- Requirement: MEC-032.
+### EV-03 — No hang in 300 games
+- Requirement: MEC-032. Gamewright, 2026-11-27, under Bob's delegation via Warden: 100 games at each of 2, 3 and 4 heroes. Not 900. No solo.
 - Method: unit
-- How: (sim) 300 seeds at each of 2, 3 and 4 heroes (900 games).
-- Pass evidence: all end.
-- Fails if: hang.
+- How: (sim) 100 seeds at 2 heroes, 100 at 3, 100 at 4.
+- Pass evidence: all 300 end. No 1-hero game is run.
+- Fails if: a hang, a solo game, or a count other than 300.
 
 ## Survival evals (one per survival invariant in plan.md)
 
@@ -45,3 +45,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - Resolved Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- Amended (Gamewright, 2026-11-27, under Bob's delegation via Warden): the 300 are 100 at 2 heroes, 100 at 3 and 100 at 4. No solo. The two table playtests are the existing gates G-C3 (#617) and G-C4 (#618). No new playtests are added.
+- Blocker, targets unset: C5/06, DEC-131 and DEC-500 do not state numeric v1.0 calibration bands. DEC-131 keeps OPT-010 as placeholders until Bob tunes them. DEC-500 does not list targets. This brief says bands are proposed in the sim report. No number is locked here, and none is guessed.

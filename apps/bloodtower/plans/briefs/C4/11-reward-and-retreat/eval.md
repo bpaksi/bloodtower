@@ -12,15 +12,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-040.
 - Method: playwright
 - How: win a battle.
-- Pass evidence: gold and card on a Reveal.
-- Fails if: no Reveal.
+- Pass evidence: gold and card on a Reveal. A level-3 win shows the gold and no card (Bob, 2026-11-27, via Warden; DEC-120).
+- Fails if: no Reveal, or a level-3 win draws a card.
 
 ### EV-02 — Who takes it is picked on the iPad
-- Requirement: UI-040.
+- Requirement: UI-040. With one hero present, the card goes to that hero and no pick is shown (Bob, 2026-11-27, via Warden).
 - Method: playwright
-- How: 2 heroes.
-- Pass evidence: iPad lists both; pick gives the card.
-- Fails if: auto-given.
+- How: 2 heroes, then 1 hero.
+- Pass evidence: with 2, the iPad lists both and the pick gives the card; with 1, the card is that hero's and no pick is shown.
+- Fails if: the 2-hero card is auto-given, or the solo hero is asked to pick.
 
 ### EV-03 — Retreat shows the step-up
 - Requirement: UI-039.

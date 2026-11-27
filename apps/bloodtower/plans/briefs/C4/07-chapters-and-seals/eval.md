@@ -23,11 +23,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: other count.
 
 ### EV-03 — Seal line per chapter (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
-- Requirement: Q-C4-10.
+- Requirement: Q-C4-10. Chapter 3 is The Warden's Seal and plays live before the Tower (Bob, 2026-11-27, via Warden; DEC-303).
 - Method: unit
-- How: break the seal after chapters 1, 2 and 3.
-- Pass evidence: each plays its own key: `seal break ch1, Loremaster`, `seal break ch2, Loremaster`, `seal break ch3, Loremaster`.
-- Fails if: shared or missing key.
+- How: break the seal after chapters 1, 2 and 3, with the tower.
+- Pass evidence: each plays its own key: `seal break ch1, Loremaster`, `seal break ch2, Loremaster`, `seal break ch3, Loremaster`. Chapter 3's break is the live seal break, and Enter the Tower is not offered until that break has played.
+- Fails if: shared or missing key, chapter 3 is not live, or the Tower is offered first.
 
 ### EV-04 — No seal without the tower
 - Requirement: DEC-306.
@@ -36,12 +36,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no seal, no freed skulls.
 - Fails if: seal step.
 
-### EV-05 — The Lock needs the Signet
-- Requirement: DEC-662.
+### EV-05 — The Lock needs the Signet (Amended 2026-11-27, Bob via Warden)
+- Requirement: DEC-662, DEC-674. In a split party, only the group holding the Signet can open it.
 - Method: unit
-- How: (sim) reach The Lock without, then with, the Signet.
-- Pass evidence: without the Signet The Lock's option is `enabled: false` with the reason `[COPY: needs the Warden's Signet]`; with it, The Lock is done.
-- Fails if: The Lock opens without the Signet, or no reason is given.
+- How: (sim) reach The Lock without, then with, the Signet. Then two groups on the space: group A holds the Signet, group B does not.
+- Pass evidence: without the Signet The Lock's option is `enabled: false` with the reason `[COPY: needs the Warden's Signet]`; with it, The Lock is done. Group B's option stays disabled with that reason; group A's option is enabled.
+- Fails if: The Lock opens without the Signet, group B can open it, or no reason is given.
 
 ### EV-06 — Chapter 3 plays
 - Requirement: DEC-662.

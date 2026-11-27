@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-06; survival evals last (EV-06).
+- Done-when: EV-01 … EV-09; survival evals last (EV-08).
+- Amended 2026-11-27 (Bob, via Warden): EV-03 allows a retreat and keeps damage; EV-09 moved here from C4/04 and is not required there.
 
 ## Checks
 
@@ -22,12 +23,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: phase 2 then 3; +1 Rend each.
 - Fails if: missed.
 
-### EV-03 — Nothing but wounds ends it
-- Requirement: DEC-567, DEC-361. (Inventive, DEC-549, is 1.1: no potions in 1.0, DEC-502, DEC-581. Its block returns with 1.1. Changed 2026-11-12 by Gamewright under Bob's 11/1 small-tweak rule; the original check cannot run in 1.0.)
+### EV-03 — Wounds end him; a retreat keeps the damage (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-567, DEC-361, DEC-360. (Inventive, DEC-549, is 1.1: no potions in 1.0, DEC-502, DEC-581. Its block returns with 1.1. Changed 2026-11-12 by Gamewright under Bob's 11/1 small-tweak rule; the original check cannot run in 1.0.)
 - Method: unit
-- How: The Warden in phase 3 at 2 wounds; the group takes every round action the 1.0 engine offers.
-- Pass evidence: his wounds change only by a Fight cut; the battle ends only at 0 wounds (won) or when every hero falls; there is no Inventive card in the 1.0 pool (DEC-581).
-- Fails if: any action ends the battle early or changes his wounds otherwise.
+- How: (a) The Warden in phase 3 at 2 wounds; the group takes every round action the 1.0 engine offers. (b) The same battle after a Fight cut has lowered his wounds; the group Retreats with a move left.
+- Pass evidence: (a) his wounds change only by a Fight cut; he falls only at 0 wounds; a fall of every hero ends the battle; there is no Inventive card in the 1.0 pool (DEC-581). (b) Retreat is offered and ends the battle; the wounds already cut stay cut.
+- Fails if: an action other than a Fight cut, a total fall, or a retreat ends the battle or changes his wounds; a retreat is refused; or a retreat restores wounds.
 
 ### EV-04 — Falls at 0
 - Requirement: DEC-567.
@@ -65,6 +66,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: phase 2, quit, Continue.
 - Pass evidence: phase 2.
 - Fails if: phase 1.
+
+### EV-09 — Ward and boss deck end to end through the session (moved from C4/04 EV-09; Bob, 2026-11-27, via Warden)
+- Requirement: R04's Ward and boss-deck cases; DEC-908, DEC-909. Not required by C4/04.
+- Method: unit
+- How: one test that drives a seeded game through the session step shell by presses (as `towerLost.test.ts` does) into the Warden's battle: (a) Lightning and Magic Missile in round 1; (b) a second seed where a won round crosses a phase line with 3 cards in the draw pile.
+- Pass evidence: (a) the foe count drops by 4 and the Missile is the cancelled spell; (b) the next round's view data shows cards left 3 + 1 and Rends left one higher, and the card face-up when the phase fired was resolved, not replaced.
+- Fails if: any step needs a direct state write after the start, the Ward cancels the strong spell, or the phase touches the face-up card.
 
 ## Assumptions surfaced
 

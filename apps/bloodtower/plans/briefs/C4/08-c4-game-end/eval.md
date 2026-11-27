@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; survival evals last (EV-05).
+- Done-when: EV-01 … EV-06; survival evals last (EV-05).
+- Amended 2026-11-27 (Bob, via Warden): EV-02 adds chapter 1 and chapter 3 losses; EV-04's two kinds are approved; EV-06 adds the end rule to Best time.
 
 ## Checks
 
@@ -15,12 +16,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: won; `[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden's door is open, for now."]` key.
 - Fails if: no end.
 
-### EV-02 — A loss in chapter 2 ends it
+### EV-02 — A loss in chapter 1, 2 or 3 ends it (Amended 2026-11-27, Bob via Warden)
 - Requirement: DEC-117.
 - Method: unit
-- How: (sim) third corruption in chapter 2.
-- Pass evidence: lost.
-- Fails if: continues.
+- How: (sim) a third corruption in chapter 1, then the same in chapter 2, then the same in chapter 3.
+- Pass evidence: each game is lost. Chapter 3 does not play on, and chapter 1 does not open chapter 2.
+- Fails if: any of the three continues.
 
 ### EV-03 — Battle stats counted
 - Requirement: DEC-116.
@@ -29,12 +30,19 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: stats fields `battles_won` 2, `retreats` 1, `falls` 1, `tomb_rooms` 5.
 - Fails if: any field missing or a different value.
 
-### EV-04 — New key moments
-- Requirement: Q-C3-18.
+### EV-04 — New key moments (approved Bob, 2026-11-27, via Warden)
+- Requirement: DEC-955.
 - Method: unit
 - How: win a battle, clear the Tomb.
 - Pass evidence: the stats' key moments include `km.battle_won` and `km.tomb_cleared`, once each.
 - Fails if: either id missing or listed twice.
+
+### EV-06 — Best time's key includes the end rule (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-917.
+- Method: unit
+- How: two won games of the same story, length, difficulty and party size. One ends under `c4_end_after_chapter_3` at 40 min. The other plays on to the Tower and wins at 90 min. Read each game's best.
+- Pass evidence: the chapter-3 win's best is 40 min, not 90; the Tower win's best is 90 min, not 40.
+- Fails if: either game uses the other's time as its best.
 
 ## Survival evals (one per survival invariant in plan.md)
 

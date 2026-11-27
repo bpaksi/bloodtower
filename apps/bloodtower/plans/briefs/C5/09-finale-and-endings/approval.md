@@ -4,3 +4,4 @@
 |------|-------------|------------------------|-----------|------------------------------|
 | eval.md | Bob | 2026-10-31 6:16 PM ("Approve all") | | |
 | mockup.html | Bob | 2026-10-31 6:16 PM ("Approve all") | | |
+| eval.md | Bob, via Warden | 2026-11-27, gap-check batches 1–5 | | |

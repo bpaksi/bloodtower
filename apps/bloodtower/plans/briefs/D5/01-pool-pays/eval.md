@@ -38,12 +38,12 @@ All fixtures: the test pack, base tuning (rally 5 gold and 1 move, virtue draw 1
 - Pass evidence: pool 9: Virtue draw greyed with "Not enough gold." and the press refused `no-gold`; no gold moves. Pool 10: enabled; after the draw both heroes hold 0.
 - Fails if: the draw is enabled at 9, any gold moves on the refusal, or it is greyed at 10.
 
-### EV-05 — The odd coins come from the heroes holding the most
-- Requirement: DEC-911 step 1; DEC-646 (ties by seat).
+### EV-05 — The remainder comes from one richest hero (Amended 2026-11-27, Bob via Warden)
+- Requirement: DEC-911 step 1; DEC-646. All of the remainder, not one coin each. A tie is the first in seat order (hero-a, then hero-b, then hero-c).
 - Method: unit
 - How: `pay.test.ts` "EV-05". Group A: hero-a 7, hero-b 7, hero-c 4. A pays 5.
-- Pass evidence: hero-a 5, hero-b 5, hero-c 3.
-- Fails if: hero-c pays a leftover coin, or one hero pays both leftover coins.
+- Pass evidence: hero-a 4, hero-b 6, hero-c 3. Equal shares of 1, then both leftover gold from hero-a.
+- Fails if: hero-c pays a leftover coin, or the 2 is split across heroes.
 
 ### EV-06 — Conservation over seeded fixtures
 - Requirement: DEC-911 (the pool falls by exactly the price; no hero below 0; absent heroes pay only on a present shortfall).

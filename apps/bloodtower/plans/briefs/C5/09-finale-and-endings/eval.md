@@ -16,11 +16,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: fewer.
 
 ### EV-02 — Tie re-vote shown (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
-- Requirement: Q-C5-03.
+- Requirement: Q-C5-03. A second tie shows `[COPY: finale second-tie, Loremaster]` (Bob, 2026-11-27, via Warden). The words are with Loremaster. This eval does not write them.
 - Method: playwright
-- How: split vote.
-- Pass evidence: "A tie. Vote once more." (Copy table: tie.line) then a second vote.
-- Fails if: no re-vote.
+- How: split vote, then split the re-vote.
+- Pass evidence: "A tie. Vote once more." (Copy table: tie.line) then a second vote; after that second tie the line key is exactly `[COPY: finale second-tie, Loremaster]`.
+- Fails if: no re-vote, or the second tie shows any other line.
 
 ### EV-03 — Line for the flag
 - Requirement: DEC-664.

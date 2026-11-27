@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; survival evals last (EV-05).
+- Done-when: EV-01 … EV-06; survival evals last (EV-05).
+- Amended 2026-11-27 (Bob, via Warden): EV-06 names which 4 Advantages counted. The board line is not this check.
 
 ## Checks
 
@@ -35,6 +36,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: (sim) 10,000 seeded draws for heroes holding no corruption, from the C4 set of 6 (Cruel, Greedy, Feral, Lost, Tempted, Cursed).
 - Pass evidence: Cursed rate 1/6 = 0.167 ± 0.01; 0 draws give a hero one they hold.
 - Fails if: rate outside 0.157–0.177, or a duplicate.
+
+### EV-06 — The engine names the 4 that counted (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-466.
+- Method: unit
+- How: the EV-01 hero: Advantages worth +1, +1, +1, +2, +2, +3, each with its own id.
+- Pass evidence: the round record names the four that counted, and they are the +3, the +2, the other +2, and one +1; the other two +1s are not named; strength is still 10.
+- Fails if: the record only has the total, names a weaker card ahead of a stronger one, or names more or fewer than 4.
 
 ## Survival evals (one per survival invariant in plan.md)
 

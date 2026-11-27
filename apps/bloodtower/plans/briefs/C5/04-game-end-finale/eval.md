@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; survival evals last (EV-05).
+- Done-when: EV-01 … EV-06; survival evals last (EV-05).
+- Amended 2026-11-27 (Bob, via Warden): EV-06 is hook, then flag, then outcome. No new e2e spec is filed for the retired end-switch paths.
 
 ## Checks
 
@@ -44,6 +45,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: fixture save; Continue.
 - Pass evidence: finale.
 - Fails if: outcome.
+
+### EV-06 — Hook, then flag, then outcome (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-689, MEC-076.
+- Method: unit
+- How: win the Warden's battle.
+- Pass evidence: the log order is the Tower end hook, then the finale flag, then the outcome. Each once.
+- Fails if: the outcome precedes the hook or the flag, or any of the three is missing.
 
 ## Assumptions surfaced
 

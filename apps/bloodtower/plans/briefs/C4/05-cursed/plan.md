@@ -37,7 +37,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-05 all pass (verifier table on PR).
+- [ ] EV-01 … EV-06 all pass (verifier table on PR). EV-06 names the 4 Advantages (Bob, 2026-11-27, via Warden).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist

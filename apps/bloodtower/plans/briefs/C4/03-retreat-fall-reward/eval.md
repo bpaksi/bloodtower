@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-14; survival evals last (EV-11, EV-14).
+- Done-when: EV-01 … EV-15; survival evals last (EV-11, EV-14).
+- Amended 2026-11-27 (Bob, via Warden): EV-01 level 3 is gold only; EV-15 is the retreat guard prompt. The Tower part of that prompt is C5/01 EV-05, not this brief.
 - Amended 2026-11-18: EV-12 to EV-14 moved from F1 / 01-tomb-to-battle (#505), Bob 2026-11-18 7:12 AM ET (F1 became cards-only). Needs Bob's new approval row.
 
 ## Checks
@@ -13,8 +14,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-120.
 - Method: unit
 - How: win vs level 3.
-- Pass evidence: gold = 2 × 3 = 6 (`battle.reward_gold_per_level` = 2, DEC-547, DEC-703); exactly one card, drawn from the level-3 reward deck (`battle.reward_deck[3]`).
-- Fails if: any other gold, no card, or a card from another level's deck.
+- Pass evidence: gold = 2 × 3 = 6 (`battle.reward_gold_per_level` = 2, DEC-547, DEC-703); no card is drawn. The 1.0 level-3 reward deck is gold only (Bob, 2026-11-27, via Warden). With two present heroes the 6 is split 3 and 3 (DEC-178).
+- Fails if: any other gold, or a card is given.
 
 ### EV-02 — A foe steps up 1 in 3, +1 level, stopping at lethal
 - Requirement: DEC-555, DEC-703.
@@ -78,6 +79,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: leave a level-2 foe unfought for 5 days.
 - Pass evidence: still level 2.
 - Fails if: any step.
+
+### EV-15 — Retreat asks the guard prompt once (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-680. The Tower part of this check is C5/01 EV-05, not here.
+- Method: unit
+- How: (a) retreat from a level-3 foe; one standing hero has a guard virtue. (b) the same retreat with no guard virtue present.
+- Pass evidence: (a) the prompt is asked once, before the last attack; covering makes that attack a guarded hit on the guard (DEC-556); (b) the prompt is not asked and the last attack lands as a normal retreat hit.
+- Fails if: the prompt is skipped when a guard is present, asked when none is, asked twice, or the cover is not a guarded hit.
 
 ### Moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: retreat keeps the room uncleared (EV-12, EV-13)
 

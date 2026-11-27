@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-300 headless games at 2, 3 and 4 heroes, then two table playtests; a number moves only when both agree (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-05). Target bands are proposed in the sim report for Bob.
+300 headless games in all: 100 at 2 heroes, 100 at 3, and 100 at 4. No solo (Gamewright, 2026-11-27, under Bob's delegation via Warden). The two table playtests are G-C3 (#617) and G-C4 (#618), not new games. A number moves only when the sim and those gates agree (Q-C5-05). Target bands are not locked: C5/06, DEC-131 and DEC-500 state none. They stay unset until Bob names them. No number is guessed.
 
 ## Cutover
 
