@@ -5,13 +5,14 @@
 // A branch checked out in a step worktree (`pnpm wt`) is rebased and checked there, and the
 // worktree is left for `pnpm wt:rm`. Any other branch is rebased and checked in this checkout and
 // deleted after landing. On a conflict or a failed check nothing on main moves.
-// Bob owns merges (docs/sdlc.md), so it refuses when it can tell it is inside a Claude session.
-// That refusal is a courtesy, not a lock: it reads one environment variable.
+// Bob owns merges (docs/sdlc.md), so it refuses when it can tell it is inside an agent session.
+// That refusal is a courtesy, not a lock: it reads environment variables.
 import { execFileSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const MAIN = "main";
+const AGENT_ENV_VARS = ["CLAUDECODE", "ANTIGRAVITY_AGENT", "ANTIGRAVITY_CONVERSATION_ID"];
 
 /** The worktree path that has `branch` checked out, other than `cwd`, or undefined. */
 export const worktreeOf = (cwd, branch) => {
@@ -51,9 +52,9 @@ export const land = ({ cwd, branch, runCheck, env = process.env }) => {
   };
   const dirtyIn = (dir) => gitIn(dir, "status", "--porcelain", "--untracked-files=no") !== "";
 
-  if ("CLAUDECODE" in env) {
+  if (AGENT_ENV_VARS.some((name) => name in env)) {
     throw new Error(
-      "Merging to main is Bob's to do. Run this in your own terminal, not in Claude.",
+      "Merging to main is Bob's to do. Run this in your own terminal, not in an agent session.",
     );
   }
   if (!branch) throw new Error("Usage: pnpm land <branch>");

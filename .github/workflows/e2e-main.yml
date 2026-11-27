@@ -16,6 +16,7 @@ on:
       - "assets/stories/**"
       - "assets/app-icon/**"
       - ".claude/**"
+      - ".agents/**"
       - "apps/bloodtower/plans/**"
       - "apps/bloodtower/docs/**"
       - "apps/bloodtower/**/*.md"

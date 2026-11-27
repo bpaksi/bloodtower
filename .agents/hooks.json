@@ -1,0 +1,50 @@
+{
+  "bloodtower-guards": {
+    "PreToolUse": [
+      {
+        "matcher": "read_file|view_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/run-guards.mjs protect-env",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "write_file|edit_file|write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/run-guards.mjs protect-env worktree-guard protect-intent pin-guard test-lock",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/run-guards.mjs protect-env worktree-guard no-main-commit protect-intent pin-guard test-lock",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "bloodtower-format": {
+    "PostToolUse": [
+      {
+        "matcher": "write_file|edit_file|write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/format.mjs",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

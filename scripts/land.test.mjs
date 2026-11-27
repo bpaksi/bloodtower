@@ -135,9 +135,11 @@ describe("land", () => {
     assert.match(git("status", "--porcelain"), /\?\? notes\.txt/);
   });
 
-  it("refuses inside a Claude session, even when the variable is empty", () => {
+  it("refuses inside a Claude or Antigravity session, even when the variable is empty", () => {
     refuses({ branch: "work", env: { CLAUDECODE: "1" } }, /Bob's to do/);
     refuses({ branch: "work", env: { CLAUDECODE: "" } }, /Bob's to do/);
+    refuses({ branch: "work", env: { ANTIGRAVITY_AGENT: "1" } }, /Bob's to do/);
+    refuses({ branch: "work", env: { ANTIGRAVITY_CONVERSATION_ID: "abc" } }, /Bob's to do/);
   });
 
   it("refuses with no branch, with main, and with a branch that does not exist", () => {

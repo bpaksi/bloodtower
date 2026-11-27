@@ -5,7 +5,7 @@
 // Every code commit runs Biome and the static repo checks (pins, cross-app imports, briefs).
 // Then, from the staged paths:
 //   - a root config file (ROOT_CONFIG)        the full `pnpm check`
-//   - scripts/ or .claude/hooks/              that folder's own tests
+//   - scripts/, .claude/hooks/, or .agents/hooks/  that folder's own tests
 //   - a file inside a workspace package       typecheck and tests for that package, the
 //                                             packages that depend on it, and the rest of its app
 //   - packs/                                  the pack lint and every Bloodtower part
@@ -104,7 +104,7 @@ export const plan = (staged, packages) => {
     skipped: skipped.sort(),
     packLint: packs || selected.has("bloodtower-server"),
     scriptTests: paths.some((path) => under(path, "scripts")),
-    hookTests: paths.some((path) => under(path, ".claude/hooks")),
+    hookTests: paths.some((path) => under(path, ".claude/hooks") || under(path, ".agents/hooks")),
   };
 };
 
@@ -188,7 +188,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   run("cross-app imports", "node", ["scripts/check-imports.mjs"]);
   run("briefs", "node", ["scripts/check-briefs.mjs"]);
   if (todo.scriptTests) run("script tests", "node", ["--test", "scripts/*.test.mjs"]);
-  if (todo.hookTests) run("hook tests", "node", ["--test", ".claude/hooks/*.test.mjs"]);
+  if (todo.hookTests) {
+    run("hook tests", "node", ["--test", ".claude/hooks/*.test.mjs", ".agents/hooks/*.test.mjs"]);
+  }
 
   if (todo.packages.length > 0) {
     const filters = todo.packages.flatMap((name) => ["--filter", name]);

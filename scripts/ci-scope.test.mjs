@@ -70,7 +70,10 @@ describe("ci-scope", () => {
       "apps/tower-poc/src/server/server.ts",
       "apps/game-workbench/src/web/lib/cards.ts",
       ".claude/hooks/lib.mjs",
+      ".agents/hooks.json",
+      ".agents/hooks/run-guards.mjs",
       "CLAUDE.md",
+      "GEMINI.md",
       "research/decisions/0003-error-logging.md",
     ]) {
       assert.deepEqual(flags([path]), { ...NONE, needs_full_ci: true }, path);
