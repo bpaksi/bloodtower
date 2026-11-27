@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ChromeBar } from "./ChromeBar.tsx";
 import { IpadCorners } from "./IpadCorners.tsx";
+import { JoinScreen } from "./JoinScreen.tsx";
 
 const APP_ROOT = join(import.meta.dirname, "../../../..");
 const MOCK_JPEG = "/ipad/b-engraved-ipad-move-map.jpg";
@@ -43,5 +44,23 @@ describe("DEC-233 theme B iPad corners", () => {
       "92625a3660c9bffe189c66ca13636b75b9c56e2c7b890bd3ca4c7f8488dc4f6f",
     );
     expect(Buffer.compare(served, mock)).toBe(0);
+  });
+
+  it("styles #594 Theme B typography, chamfered buttons, join borders, and corner-clear toolbar", () => {
+    const joinHtml = renderToStaticMarkup(createElement(JoinScreen, { live: true, code: null }));
+    expect(joinHtml).toMatch(/name="code"[^>]*border-2|border-2[^>]*name="code"/);
+    expect(joinHtml).toMatch(/name="token"[^>]*border-2|border-2[^>]*name="token"/);
+
+    const layout = readFileSync(join(import.meta.dirname, "../../app/layout.tsx"), "utf8");
+    expect(layout).toContain("game-tokens.css");
+
+    const globals = readFileSync(join(import.meta.dirname, "../../app/globals.css"), "utf8");
+    expect(globals).toContain("var(--bt-grain)");
+    expect(globals).toContain("var(--bt-font-body)");
+    expect(globals).toContain("var(--bt-font-title)");
+    expect(globals).toContain("var(--bt-font-label)");
+    expect(globals).toContain("clip-path: polygon(");
+    expect(globals).toContain(".bt-bottom-bar::before");
+    expect(globals).toContain(".bt-bottom-bar .bt-ghost.bt-help");
   });
 });
