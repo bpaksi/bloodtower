@@ -5,7 +5,7 @@ title: The Ruined Keep
 cover: assets/painting.cover.webp
 version: 0.1.0
 engine_min: 0.1.0
-tagline: "[COPY: The Ruined Keep tagline]"
+tagline: "Raiders have closed the roads around Greyford. The herald asks for help."
 base_pack: base
 playable: true
 players: {min: 1, max: 4}
@@ -76,7 +76,7 @@ chapters:
         - kind: narrate
           target: storyboard
           lines:
-            - {speaker: narrator, text: "[COPY: chapter 2 opens, Brynthia opens and the ruined keep is in view]"}
+            - {speaker: narrator, text: "The east road is open. The ruined keep stands close, and a fire still burns in it."}
     quests:
       - {id: barrow, quest_type: tomb, place: {space: E-utars-barrows, type: wild}}
       - {id: shrine, scene: shrine, place: {space: E-greater-tombstones, type: village}}
@@ -90,7 +90,7 @@ chapters:
         - kind: narrate
           target: storyboard
           lines:
-            - {speaker: narrator, text: "[COPY: chapter 3 opens, the whole board and the road to the Tower]"}
+            - {speaker: narrator, text: "Every road is open. The Tower stands ahead, and the gate on its road is still sealed."}
     # The last choice is the plain scene `tower-end`; its flag picks the win line (DEC-664).
     end:
       effects:

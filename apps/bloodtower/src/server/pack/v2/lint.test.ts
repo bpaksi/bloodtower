@@ -312,7 +312,9 @@ assets:
       "Stand each hero on their start building.",
     ]);
     expect(testStory?.card.title).toBe("The Ruined Keep");
-    expect(testStory?.card.tagline).toMatch(/^\[COPY: /);
+    expect(testStory?.card.tagline).toBe(
+      "Raiders have closed the roads around Greyford. The herald asks for help.",
+    );
   });
 
   it("lints every door under the configured packs folder", () => {
@@ -690,8 +692,11 @@ describe("The Ruined Keep pack (C3-03)", () => {
       "pack.yaml.scenes.0.options.1.label", // herald / ask-pay-first
       "pack.yaml.scenes.1.options.0.label", // ambush / fight (hidden in C3)
       "pack.yaml.scenes.1.options.1.label", // ambush / pay-the-toll
+      "pack.yaml.tagline",
       "pack.yaml.chapters.0.start.effects.0.lines.0.text", // the-roads start / opening
       "pack.yaml.chapters.0.end.effects.0.lines.0.text", // the-roads end / chapter 1 win
+      "pack.yaml.chapters.1.start.effects.0.lines.0.text", // the-keep start / chapter 2 opening
+      "pack.yaml.chapters.2.start.effects.0.lines.0.text", // the-tower start / chapter 3 opening
       "pack.yaml.chapters.2.end.effects.0.lines.0.text", // the-tower end / last choice, part 1
       "pack.yaml.chapters.2.end.effects.0.lines.1.text", // the-tower end / last choice, part 2
       "pack.yaml.scenes.2.options.0.label", // shrine / pray-at-the-altar

@@ -48,7 +48,9 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
     expect(oldCover).toBe("assets/cover.png");
     expect(newCover).toBe("assets/painting.cover.webp");
     expect(oldTagline).toBe("AREA-077 day slice — Enter and Leave only.");
-    expect(newTagline).toBe("[COPY: The Ruined Keep tagline]");
+    expect(newTagline).toBe(
+      "Raiders have closed the roads around Greyford. The herald asks for help.",
+    );
     expect(restAfter).toEqual(restBefore);
     expect(after.pack_id).toBe("test");
     const rows = newAssets as unknown[];
