@@ -6,7 +6,7 @@ Draft by Claude for Bob's review, chapter by chapter (DEC-833). One script for 1
 
 **How to read it:** each row is one slot. The tag is the plan's `[COPY: …]` tag. A tag marked *new* is one the plans don't name yet; the code step adds it. "Was" shows the plan's sample line when there is one (DEC-836).
 
-**Status:** 1.0's story lines are accepted by Bob, 2026-11-06: the opening, chapters 1 to 3, the finale and the endings, working names included. Still to come: the shared lines (regroup, events, counter saved, the battle and reward boards), help text and UI labels (DEC-836), and 1.1's additions (DEC-835).
+**Status:** 1.0's story lines are accepted by Bob, 2026-11-06: the opening, chapters 1 to 3, the finale and the endings, working names included. The pack `tagline` and the chapter 2 and chapter 3 opening narration were accepted by Bob, 2026-11-27 (Gamewright ruling #2). Still to come: the shared lines (regroup, events, counter saved, the battle and reward boards), help text and UI labels (DEC-836), and 1.1's additions (DEC-835).
 
 ## Names
 
@@ -23,6 +23,7 @@ Working names, Bob's to change.
 
 | Tag | Line | Cards |
 |---|---|---|
+| `tagline` | Raiders have closed the roads around Greyford. The herald asks for help. | DEC-665 (gives nothing of the reveal away). One line on the Pick Story card. Pack: `[COPY: The Ruined Keep tagline]` |
 | `opening` *new* | The roads out of Greyford are closed. Raiders have taken every cart for a month, and the lord's men are not coming. | DEC-661, DEC-663 |
 
 ## Chapter 1: The Roads (1.0)
@@ -79,6 +80,7 @@ Brynthia opens, and Arisilon stays walkable. Two quests in either order: The Bar
 
 | Tag | Line | Cards |
 |---|---|---|
+| `chapter 2 opening` | The east road is open. The ruined keep stands close, and a fire still burns in it. | DEC-662, UI-020. Pack: `[COPY: chapter 2 opens, Brynthia opens and the ruined keep is in view]`. Does not name the reveal; that stays in The Barrow |
 | `chapter 2 name` *new* | The Keep | DEC-662 |
 | `chapter 2 goal` *new* | Go down into the barrow under the old keep. Find the shrine on the road beside it. | DEC-662, UI-020 |
 
@@ -125,6 +127,7 @@ The whole board opens. Two quests: The Lock and The Last Stand. When both are do
 
 | Tag | Line | Cards |
 |---|---|---|
+| `chapter 3 opening` | Every road is open. The Tower stands ahead, and the gate on its road is still sealed. | DEC-662, DEC-645, UI-020. Pack: `[COPY: chapter 3 opens, the whole board and the road to the Tower]` |
 | `chapter 3 name` *new* | The Tower | DEC-662 |
 | `chapter 3 goal` *new* | Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb. | DEC-662, DEC-645, UI-020 |
 
