@@ -59,7 +59,7 @@ The seat-order tie-break under batch 1 B2 is the default from DEC-556. Bob did n
 | Id | Ruling | Where |
 |---|---|---|
 | #464-3 | Solo (1-hero) games stay out of the sim | C5/06 |
-| #466-1 | After a second finale-vote tie, the line key is `[COPY: finale second-tie, Loremaster]`. The words are with Loremaster. None are invented | C5/09 EV-02 |
+| #466-1 | After a second finale-vote tie the board says "Tied again. The draw decides." (`tie.again`, Loremaster 2026-11-27), then `board.decided`. The line does not name the result. Pack id if voiced: `finale-tie.again~vo-01` | C5/09 copy table and EV-02 |
 | #594 | A phone is not a supported 1.0 device. Drop phone-viewport work from 1.0 Done-when. Keep the iPad, including the opacity-aware contrast check at 768×1024 | DEC-958 |
 
 ## Gamewright, 2026-11-27, under Bob's delegation via Warden
@@ -95,7 +95,7 @@ C5/06, DEC-131 and DEC-500 do not state numeric v1.0 calibration bands. DEC-131 
 ## Left open
 
 - #446: what a reward deck holds at levels other than 3.
-- Which of the two finale options Vote for selects (DEC-954). The second-tie line is a Loremaster placeholder, not that choice.
+- Which of the two finale options Vote for selects (DEC-954). The second-tie line is Loremaster's "Tied again. The draw decides." It does not name the result.
 - Whether a real game can reach a group with 0 heroes (DEC-957 guards it either way).
 - The v1.0 calibration numbers (#464-2), until Bob names them.
 - Any gap these batches do not name.

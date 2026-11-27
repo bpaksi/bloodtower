@@ -25,7 +25,7 @@ The board shows "The Warden falls. Beneath the keep lies the shard he swore to g
 
 ## Buttons (exact labels)
 
-- Vote: **Shatter the shard**, **Swear the oath** on each present iPad. A tie shows the same two again under "A tie. Vote once more." (Copy table: tie.line).
+- Vote: **Shatter the shard**, **Swear the oath** on each present iPad. A tie shows the same two again under "A tie. Vote once more." (Copy table: tie.line). A second tie shows "Tied again. The draw decides." (Copy table: `tie.again`), then "The choice is made." (Copy table: `board.decided`). That line does not name the result. The seeded draw still breaks the tie (Q-C5-03, DEC-011).
 - The win line and the outcome: no button; the board advances (no credits, Q-C5-09 pick a).
 
 ## Tokens
