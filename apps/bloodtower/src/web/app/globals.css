@@ -182,35 +182,181 @@ body {
   color: var(--bt-accent);
 }
 
-/* #592 / DEC-233 theme B: the iPad is one full parchment page with dark ink. The ink and
- * the control colours are re-pointed here, so every iPad control reads dark on parchment. */
+/* #592 / #594 / DEC-233 theme B: the iPad is one full parchment page with dark ink,
+ * local Cormorant/IM Fell faces, parchment grain (--bt-grain), and chamfered double-rule controls. */
 .bt-device {
-  --bt-fg: #2a1d14;
+  --bt-fg: var(--bt-iron-gall);
   --bt-muted: #5a4630;
-  --bt-card: #f3ead2;
-  --bt-line: #8a6f47;
-  --bt-accent: #3b2a1e;
-  --bt-accent-ink: #f3ead2;
-  --bt-danger: #8e1b1b;
+  --bt-card: var(--bt-bone);
+  --bt-line: var(--bt-vellum-shadow);
+  --bt-accent: var(--bt-umber);
+  --bt-accent-ink: var(--bt-bone);
+  --bt-danger: var(--bt-blood);
+  --bt-radius: 0;
+  --bt-chamfer: 8px;
   display: flex;
   flex-direction: column;
   height: 100dvh;
   overflow: hidden;
   color: var(--bt-fg);
-  background-color: #e9d9b4;
-  background-image: radial-gradient(
-    ellipse at 50% 40%,
-    transparent 55%,
-    rgb(138 111 71 / 28%) 100%
+  font-family: var(--bt-font-body);
+  font-weight: 500;
+  background-color: var(--bt-parchment);
+  background-image:
+    var(--bt-grain),
+    radial-gradient(ellipse at 50% 40%, transparent 55%, rgb(138 111 71 / 28%) 100%);
+}
+
+.bt-device h1,
+.bt-device h2,
+.bt-device .bt-title {
+  font-family: var(--bt-font-title);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.bt-device .bt-kicker,
+.bt-device .bt-label {
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.12em;
+}
+
+.bt-device label {
+  font-family: var(--bt-font-label);
+}
+
+.bt-device input,
+.bt-device select,
+.bt-device .bt-input {
+  border: 2px solid var(--bt-accent);
+  border-radius: 0;
+  background-color: var(--bt-card);
+  color: var(--bt-fg);
+  font-family: var(--bt-font-body);
+}
+
+.bt-device input:focus-visible,
+.bt-device select:focus-visible,
+.bt-device .bt-input:focus-visible {
+  outline: 2px solid var(--bt-candle);
+  outline-offset: 2px;
+}
+
+.bt-device .bt-primary,
+.bt-device .bt-secondary,
+.bt-device .bt-ghost {
+  border-radius: 0;
+  font-family: var(--bt-font-title);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  clip-path: polygon(
+    var(--bt-chamfer) 0,
+    calc(100% - var(--bt-chamfer)) 0,
+    100% var(--bt-chamfer),
+    100% calc(100% - var(--bt-chamfer)),
+    calc(100% - var(--bt-chamfer)) 100%,
+    var(--bt-chamfer) 100%,
+    0 calc(100% - var(--bt-chamfer)),
+    0 var(--bt-chamfer)
   );
+  transition: transform 120ms ease-out;
+}
+
+.bt-device .bt-primary {
+  --bt-muted: var(--bt-parchment);
+  background-color: var(--bt-iron-gall);
+  background-image: var(--bt-grain);
+  color: var(--bt-bone);
+  border: 3px double var(--bt-candle);
+  box-shadow: inset 0 0 0 1px var(--bt-umber);
+}
+
+.bt-device .bt-secondary {
+  background-color: var(--bt-card);
+  background-image: var(--bt-grain);
+  color: var(--bt-iron-gall);
+  border: 3px double var(--bt-iron-gall);
+  box-shadow:
+    inset 0 0 0 2px var(--bt-parchment),
+    inset 0 0 0 3px var(--bt-vellum-shadow);
+}
+
+.bt-device .bt-ghost {
+  --bt-chamfer: 6px;
+  background-color: var(--bt-card);
+  background-image: var(--bt-grain);
+  color: var(--bt-iron-gall);
+  border: 3px double var(--bt-umber);
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.06em;
+}
+
+.bt-device .bt-primary:disabled,
+.bt-device .bt-secondary:disabled {
+  --bt-muted: var(--bt-iron-gall);
+  background-color: var(--bt-parchment-dark);
+  background-image: var(--bt-grain);
+  color: var(--bt-iron-gall);
+  border: 1px dashed var(--bt-vellum-shadow);
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+.bt-device .bt-ghost:disabled {
+  background-color: transparent;
+  background-image: none;
+  color: var(--bt-iron-gall);
+  border: 1px dashed var(--bt-vellum-shadow);
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.bt-device .bt-primary:active:not(:disabled),
+.bt-device .bt-secondary:active:not(:disabled),
+.bt-device .bt-ghost:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.bt-device .bt-primary:focus-visible,
+.bt-device .bt-secondary:focus-visible,
+.bt-device .bt-ghost:focus-visible {
+  outline: 2px solid var(--bt-candle);
+  outline-offset: -4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-device .bt-primary,
+  .bt-device .bt-secondary,
+  .bt-device .bt-ghost {
+    transition: none;
+  }
+
+  .bt-device .bt-primary:active:not(:disabled),
+  .bt-device .bt-secondary:active:not(:disabled),
+  .bt-device .bt-ghost:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 .bt-scroll {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: max(2rem, calc(var(--bt-ipad-corner) * 0.78))
-    max(1.5rem, calc(var(--bt-ipad-corner) * 0.72)) 1rem;
+  padding: max(2rem, calc(var(--bt-ipad-corner) * 0.48))
+    max(1.5rem, calc(var(--bt-ipad-corner) * 0.56)) 1.5rem;
+}
+
+/* Keep the move-map header compact so every compass node clears the bottom bar at 768x1024. */
+.bt-device:has([data-move-map]) [data-roster] {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.bt-device:has([data-move-map]) [data-hero-panel] {
+  display: inline-block;
+  vertical-align: top;
+  margin-top: 0.25rem;
+  margin-right: 1rem;
 }
 
 /* Acting iPad move controls (UI-023). Text and icons only: no board, no mini. */
@@ -218,21 +364,22 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
 }
 
 .bt-tower-up {
   text-align: center;
   color: var(--bt-muted);
-  letter-spacing: 0.08em;
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.85rem;
 }
 
 .bt-compass {
   position: relative;
-  width: min(100%, 34rem);
+  width: min(100%, 26rem);
   aspect-ratio: 1;
   margin-inline: auto;
 }
@@ -266,13 +413,16 @@ body {
 }
 
 .bt-compass-name {
-  font-weight: 600;
+  font-family: var(--bt-font-title);
+  font-weight: 700;
+  letter-spacing: 0.04em;
   line-height: 1.15;
   font-size: 0.95rem;
 }
 
 .bt-compass-badge {
   color: var(--bt-accent);
+  font-family: var(--bt-font-label);
   font-size: 0.75rem;
   letter-spacing: 0.15em;
 }
@@ -284,6 +434,7 @@ body {
 }
 
 .bt-compass-slot button {
+  --bt-chamfer: 5px;
   width: 100%;
   min-height: 2.75rem;
   padding: 0.35rem 0.4rem;
@@ -313,11 +464,23 @@ body {
   justify-content: center;
   gap: 0.75rem;
   padding: 0.5rem 1.5rem calc(0.5rem + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--bt-line);
+  border-top: 0;
   /* Transparent: the parchment page and the bottom corners show through. */
   background: transparent;
   position: relative;
   z-index: 21;
+}
+
+/* Top rule sits strictly between the two bottom engraved corners so it never crosses corner art. */
+.bt-bottom-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--bt-ipad-corner);
+  right: var(--bt-ipad-corner);
+  height: 1px;
+  background: var(--bt-line);
+  pointer-events: none;
 }
 
 .bt-bar--bottom {
@@ -437,6 +600,13 @@ body {
   font-size: 1.05rem;
 }
 
+.bt-bottom-bar .bt-ghost.bt-help {
+  font-family: var(--bt-font-title);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .bt-menu-dialog {
   position: fixed;
   top: 50%;
@@ -448,17 +618,31 @@ body {
   max-height: calc(100dvh - 15rem);
   overflow-y: auto;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--bt-line);
+  border: 3px double var(--bt-iron-gall);
+  outline: 1px solid var(--bt-umber);
+  outline-offset: 4px;
   border-radius: var(--bt-radius);
-  background: var(--bt-card);
+  background-color: var(--bt-card);
+  background-image: var(--bt-grain);
+  color: var(--bt-fg);
+  box-shadow: inset 0 0 28px rgb(90 60 25 / 25%);
 }
 
 .bt-menu-dialog h2 {
   margin: 0.75rem 0 0.35rem;
-  font-size: 0.85rem;
+  font-family: var(--bt-font-label);
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--bt-muted);
+  color: var(--bt-blood);
+}
+
+.bt-device .bt-menu-dialog .bt-gear-item.bt-row--disabled {
+  background-color: transparent;
+  background-image: none;
+  color: var(--bt-iron-gall);
+  border: 1px dashed var(--bt-vellum-shadow);
+  box-shadow: none;
 }
 
 .bt-menu-dialog section:first-child h2 {

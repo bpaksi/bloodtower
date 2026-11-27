@@ -8,3 +8,5 @@
 | eval.md | Bob | 2026-11-14 6:05 PM ET, in chat ("Approve the batch"), step 44 batch re-approval | | blob 80e4d9cd |
 
 Approved by Bob 2026-10-31: the proposal lines at 10:27 AM ET and the merge in chat at 6:30 PM ET.
+
+Note (#595, 2026-11-27): `mockup.html` iPad frames updated from the superseded dark framed inset to the already-approved DEC-233 full-parchment frame (Bob, 2026-11-22; #593). Per the PR #651 gap-check ruling, this is not a new mockup approval.

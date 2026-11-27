@@ -69,7 +69,7 @@ export function JoinScreen({
             <label className="flex flex-col gap-2 text-lg">
               Join code
               <input
-                className="min-h-14 bg-[var(--bt-card)] px-3 text-3xl tracking-[0.35em]"
+                className="min-h-14 border-2 border-[var(--bt-accent)] bg-[var(--bt-card)] px-3 text-3xl tracking-[0.35em]"
                 name="code"
                 suppressHydrationWarning
                 inputMode="numeric"
@@ -99,7 +99,7 @@ export function JoinScreen({
             <label className="flex flex-col gap-2 text-lg">
               Rejoin token
               <input
-                className="min-h-14 bg-[var(--bt-card)] px-3 text-xl"
+                className="min-h-14 border-2 border-[var(--bt-accent)] bg-[var(--bt-card)] px-3 text-xl"
                 name="token"
                 suppressHydrationWarning
                 value={token}

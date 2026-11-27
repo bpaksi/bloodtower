@@ -3,29 +3,35 @@
   font-family: "Cormorant Garamond";
   src: url("/fonts/CormorantGaramond-VF.ttf") format("truetype");
   font-weight: 300 700;
+  font-display: swap;
 }
 @font-face {
   font-family: "Cormorant Garamond";
   src: url("/fonts/CormorantGaramond-Italic-VF.ttf") format("truetype");
   font-weight: 300 700;
   font-style: italic;
+  font-display: swap;
 }
 @font-face {
   font-family: "Cormorant SC";
   src: url("/fonts/CormorantSC-Bold.ttf") format("truetype");
   font-weight: 700;
+  font-display: swap;
 }
 @font-face {
   font-family: "IM Fell English SC";
   src: url("/fonts/IMFeENsc28P.ttf") format("truetype");
+  font-display: swap;
 }
 @font-face {
   font-family: "IM Fell English";
   src: url("/fonts/IMFeENrm28P.ttf") format("truetype");
+  font-display: swap;
 }
 @font-face {
   font-family: "UnifrakturMaguntia";
   src: url("/fonts/UnifrakturMaguntia-Book.ttf") format("truetype");
+  font-display: swap;
 }
 
 :root {
@@ -41,10 +47,15 @@
   --bt-blood: #8e1b1b;
   --bt-verdigris: #4f7a6a;
   --bt-bone: #f3ead2;
-  --bt-font-body: "Cormorant Garamond", "IM Fell English", Georgia, serif;
-  --bt-font-label: "IM Fell English SC", "Cormorant SC", serif;
-  --bt-font-title: "Cormorant SC", "IM Fell English SC", serif;
-  --bt-font-initial: "UnifrakturMaguntia", "Cormorant SC", serif;
+  --bt-font-body:
+    var(--font-cormorant-garamond), "Cormorant Garamond", var(--font-im-fell), "IM Fell English",
+    Georgia, serif;
+  --bt-font-label:
+    var(--font-im-fell-sc), "IM Fell English SC", var(--font-cormorant-sc), "Cormorant SC", serif;
+  --bt-font-title:
+    var(--font-cormorant-sc), "Cormorant SC", var(--font-im-fell-sc), "IM Fell English SC", serif;
+  --bt-font-initial:
+    var(--font-unifraktur), "UnifrakturMaguntia", var(--font-cormorant-sc), "Cormorant SC", serif;
   --bt-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .16 0 0 0 0 .11 0 0 0 0 .07 0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   --bt-foxing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .12 0 0 0 .55 -.18'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
   --bt-ease-ink: cubic-bezier(0.22, 0.61, 0.36, 1);
