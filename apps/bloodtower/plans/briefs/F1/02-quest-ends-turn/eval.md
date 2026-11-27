@@ -6,7 +6,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Mockup: none
 - Risk: Med (turn end, quest progress; restore). Negative and restore evals are included.
 
-All fixtures: the proving-grounds board; the village `N-egans-end` with 0 skulls (menu Rest, Cleanse, Leave); quest defs from `loops/quest/fixtures.ts` (`herald`: "Ask for pay" +10 gold, "Take the job" the item `tomas-map`; quest gold 5 per present hero, DEC-700); "open" means the quest store's marker at the space, this chapter, not done. One group inside the village unless named, its heroes at 0 gold and 4/12 hit points, no corruption. Tests are in `questPick.test.ts` unless named. Source: DEC-821, DEC-948, R01's quest clause.
+All fixtures: the proving-grounds board; the village `N-egans-end` with 0 skulls (menu Rest, Cleanse, Leave); quest defs from `loops/quest/fixtures.ts` (`herald`: "Ask for pay" +10 gold, "Take the job" the item `tomas-map`; quest gold 10 for the group, split evenly per hero present (DEC-827, Bob 2026-11-27 via Warden)); "open" means the quest store's marker at the space, this chapter, not done. One group inside the village unless named, its heroes at 0 gold and 4/12 hit points, no corruption. Tests are in `questPick.test.ts` unless named. Source: DEC-821, DEC-948, R01's quest clause.
 
 ## Checks
 
@@ -42,8 +42,8 @@ All fixtures: the proving-grounds board; the village `N-egans-end` with 0 skulls
 - Requirement: DEC-821, DEC-948, DEC-149, DEC-472, DEC-700.
 - Method: unit
 - How: "EV-05". As EV-04, the hero also holds Feral. Press "Ask for pay". Read the model. Then press Leave and let the group's turn close (`resultUp`).
-- Pass evidence: `herald` is done; the clock's quests won is 1; `turnHasEnded` is true; moves 0; the hero's sheet gold is 13 (10 + 5 − Feral's 2) after the quest and still 13 after the turn closes; the step is the menu with no Quest row, Rest and Cleanse disabled with "No moves left.", Leave enabled.
-- Fails if: the turn goes on with 1 move, any pick is enabled, the gold is not on the sheet, or Feral's loss is taken twice (11).
+- Pass evidence: `herald` is done; the clock's quests won is 1; `turnHasEnded` is true; moves 0; the hero's sheet gold is 18 (10 + 10 − Feral's 2) after the quest and still 18 after the turn closes; the step is the menu with no Quest row, Rest and Cleanse disabled with "No moves left.", Leave enabled.
+- Fails if: the turn goes on with 1 move, any pick is enabled, the gold is not on the sheet, or Feral's loss is taken twice (16).
 
 ### EV-06 — Leaving the quest partway is a retreat: the turn ends, the progress stays
 - Requirement: DEC-821, DEC-948, DEC-151; R01's quest clause.
@@ -86,7 +86,7 @@ All fixtures: the proving-grounds board; the village `N-egans-end` with 0 skulls
 - Requirement: survival invariants 1 and 2; DEC-675, DEC-151.
 - Method: unit
 - How: `apps/bloodtower/src/server/core/questSave.test.ts`. Serialize and rehydrate the shell (a) after EV-06's Leave; (b) after EV-05's quest; then in (b) send the "Ask for pay" press again with its old serial.
-- Pass evidence: (a) `herald` progress kept and not done; the turn still ended; the menu's Quest row disabled with "No moves left."; on the next turn the quest step shows the same three buttons. (b) `herald` done once; quests won 1; gold 13; no Quest row; the old press is refused ("That press is for a step the building has moved past.") and changes nothing.
+- Pass evidence: (a) `herald` progress kept and not done; the turn still ended; the menu's Quest row disabled with "No moves left."; on the next turn the quest step shows the same three buttons. (b) `herald` done once; quests won 1; gold 18; no Quest row; the old press is refused ("That press is for a step the building has moved past.") and changes nothing.
 - Fails if: the quest store is lost or reset, the quest reopens or pays twice, or the turn is live again.
 
 ## Assumptions surfaced

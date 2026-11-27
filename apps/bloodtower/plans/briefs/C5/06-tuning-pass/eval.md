@@ -8,12 +8,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Checks
 
-### EV-01 — Sim report at 2, 3, 4 heroes (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
-- Requirement: Q-C5-05.
+### EV-01 — Sim report at 2, 3 and 4 heroes, 100 each (Gamewright, 2026-11-27, under Bob's delegation via Warden)
+- Requirement: Q-C5-05, DEC-959. 300 games in all. No solo (1-hero) games. Length unset is Standard. Difficulty is normal.
 - Method: unit
-- How: (sim) run the report.
-- Pass evidence: win rate, length, falls per group size.
-- Fails if: missing size.
+- How: (sim) run the report: 100 games at 2 heroes, 100 at 3, 100 at 4.
+- Pass evidence: win rate, length and falls for the three cells, and no 1-hero row. Each cell's win rate is read against about 80% as the floor (DEC-823). A cell above about 95% is flagged in the report and is not tuned down. A cell below about 80% is the only one marked to lift. Length and falls are reported with no pass/fail band.
+- Fails if: a size is missing, a solo row is present, the total is not 300, the 80% floor is missing, a cell above about 95% is tuned down, or length or falls are a pass/fail band.
 
 ### EV-02 — Every change cited
 - Requirement: DEC-500.
@@ -22,12 +22,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: each changed key names its sim row and playtest.
 - Fails if: uncited.
 
-### EV-03 — No hang in 900 games
-- Requirement: MEC-032.
+### EV-03 — No hang in 300 games
+- Requirement: MEC-032. Gamewright, 2026-11-27, under Bob's delegation via Warden: 100 games at each of 2, 3 and 4 heroes. Not 900. No solo.
 - Method: unit
-- How: (sim) 300 seeds at each of 2, 3 and 4 heroes (900 games).
-- Pass evidence: all end.
-- Fails if: hang.
+- How: (sim) 100 seeds at 2 heroes, 100 at 3, 100 at 4.
+- Pass evidence: all 300 end. No 1-hero game is run.
+- Fails if: a hang, a solo game, or a count other than 300.
 
 ## Survival evals (one per survival invariant in plan.md)
 
@@ -45,3 +45,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - Resolved Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- Amended (Gamewright, 2026-11-27, under Bob's delegation via Warden): the 300 are 100 at 2 heroes, 100 at 3 and 100 at 4. No solo. The two table playtests are the existing gates G-C3 (#617) and G-C4 (#618). No new playtests are added.
+- Resolved (Gamewright, 2026-11-27, under Bob's delegation via Warden; DEC-959): the v1.0 win-rate band is DEC-823's. About 80% is the floor. A cell above about 95% is flagged, not tuned down. Length and falls have no band.

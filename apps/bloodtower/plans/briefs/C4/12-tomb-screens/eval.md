@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: ./mockup.html (to be drawn from ./screen-spec.md)
-- Done-when: EV-01 … EV-16; survival evals last (EV-14 … EV-16).
+- Done-when: EV-01 … EV-19; survival evals last (EV-16 … EV-18).
+- Amended 2026-11-27 (Bob, via Warden): EV-19 is the threshold state, On guard or Leave (QD-04).
 
 ## Checks
 
@@ -135,6 +136,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: on this screen open a gear panel (Volume), restart the host, Continue.
 - Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear.
 - Fails if: the Menu or panel reopens, the game stays paused, or the toolbar is missing.
+
+### EV-19 — The threshold offers On guard or Leave (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-620, DEC-587. QD-04. The engine check is C4/06 EV-23, owned by #591.
+- Method: playwright
+- How: a listened guardian door.
+- Pass evidence: the view half shows the sealed door, then the iPad offers On guard and Leave, and not Bold.
+- Fails if: Bold is offered, or the stance is asked before the door is shown.
 
 ## Assumptions surfaced
 

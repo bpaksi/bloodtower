@@ -14,7 +14,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-491, DEC-603, DEC-604.
 - Method: unit
 - How: 100 seeds at Standard length.
-- Pass evidence: 6 or 7 rooms (guardian's included) on a 4×4 grid, entrance on an edge cell; the guardian 2–5 doors from the entrance by the shortest path; at least 1 battle and 1 trap; up to 3 corridors each.
+- Pass evidence: 6 or 7 rooms (guardian's included) on a 4×4 grid, entrance on an edge cell; the guardian 2–5 doors from the entrance by the shortest path; at least 1 battle and 1 trap; up to 3 corridors each. The same 6 or 7 when the game length is unset (Bob, 2026-11-27, via Warden; DEC-603).
 - Fails if: any count outside 6–7, the guardian outside 2–5 doors, no battle or no trap, or a room with more than 3 corridors.
 
 ### EV-02 — Each room is nothing, battle or trap
@@ -162,6 +162,24 @@ Source: F1 / 01-tomb-to-battle eval.md and docs/audits/2026-11-12-f1-tomb-to-bat
 - How: a hero at 4 HP, Pit; save after the trap is paid; restore; resume.
 - Pass evidence: hero 1 HP, corruptions 1, the trap not paid again, next room prompt offered, state equals an uninterrupted run.
 - Fails if: the trap is paid twice, the corruption repeats, or HP resets.
+
+## Checks owned by #591, not by #449 (Bob, 2026-11-27, via Warden)
+
+#449 does not add these. They are the #591 follow-up for QD-02 and QD-04.
+
+### EV-22 — A trap is the one dealt at the build (QD-02)
+- Requirement: DEC-602, DEC-606.
+- Method: unit
+- How: build one tomb; enter its trap rooms in two different orders, on two runs of the same seed.
+- Pass evidence: each trap room shows the same trap in both orders; entering does not draw a new trap.
+- Fails if: the order of entry changes which trap a room holds, or a room draws on entry.
+
+### EV-23 — The threshold stance comes after the door is shown (QD-04)
+- Requirement: DEC-620, DEC-587.
+- Method: unit
+- How: (a) a guardian threshold the group has not listened to. (b) the same door after a listen.
+- Pass evidence: (a) the sealed door is shown, then the group is offered bold, on guard or Leave; (b) the offer is on guard or Leave only.
+- Fails if: the stance is chosen before the door is shown, or a listened door still offers bold.
 
 ## Assumptions surfaced
 

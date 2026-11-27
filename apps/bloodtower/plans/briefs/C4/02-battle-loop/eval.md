@@ -76,18 +76,18 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-024 step 5, DEC-703, DEC-563.
 - Method: unit
 - How: a level-2 foe, 1 hero present (8 wounds); seed with round 1 won at round strength 3 and round 2 lost; heroes at full.
-- Pass evidence: after round 1 the foe has 6 wounds (cut = half of 3 rounded up = 2, at least 2); after round 2 exactly one present hero has lost 2 HP, the foe's level (0 if a guard virtue was used).
-- Fails if: a won round hits a hero, or a lost round cuts the foe.
+- Pass evidence: after round 1 the foe has 6 wounds (cut = half of 3 rounded up = 2, at least 2); after round 2, with no guard, exactly one present hero has lost 2 HP, the foe's level (DEC-703). Repeat the lost round with a guard virtue: the guard loses 1 HP and no other hero loses hit points (DEC-556: a quarter to half of 2, rounded up, at least 1). Gamewright, 2026-11-27, under Bob's delegation via Warden.
+- Fails if: a won round hits a hero, a lost round cuts the foe, an unguarded hit is not 2, or a guarded hit is 0.
 
 ### EV-12 — A seat silent for 30 s draws "Pick for <hero>" on the other iPads (PT-20)
-- Requirement: PT-20 (Bob, 2026-11-14, adopted): a seat silent for 30 s in battle gives the other iPads of the acting group, the iPads of sat-out heroes included, "Pick for <hero>", only for standing heroes who have not picked.
+- Requirement: PT-20 (Bob, 2026-11-14, adopted): a seat silent for 30 s in battle gives the other iPads of the acting group, the iPads of sat-out heroes included, "Pick for <hero>", only for standing heroes who have not picked. With a solo hero, the offer shows on the board (Bob, 2026-11-27, via Warden). This fixture is four heroes.
 - Method: unit
 - How: (fake clock) 4 heroes in the acting group: A, B, C standing, D sat out at 0 HP (D's iPad still in the group); A and B pick; C does not. Read the offers at 29.9 s and at 30.0 s after the action step opened.
 - Pass evidence: at 29.9 s no `pick-for` offer exists; at 30.0 s an offer for hero C is on the iPads of A, B and D and not on C's iPad, and no offer exists for A, B or D; the waiting line still names C.
 - Fails if: the offer shows early, shows on C's own iPad, is missing from the sat-out hero's iPad, is made for a hero who picked or sits out, names the wrong hero, or never shows.
 
 ### EV-13 — Pressing it sets Guard, and the round goes on (PT-20)
-- Requirement: PT-20 (Bob, 2026-11-14, adopted): "Pick for <hero>" sets Guard if hero C can Guard (DEC-129's guard action); a hero who cannot Guard gets a normal attack (EV-20).
+- Requirement: PT-20 (Bob, 2026-11-14, adopted): "Pick for <hero>" sets Guard if hero C can Guard; a hero who cannot Guard gets a normal attack (EV-20). Guard is a DEC-556 hit, not 0 (Gamewright, 2026-11-27, under Bob's delegation via Warden).
 - Method: unit
 - How: C has a guard virtue. After EV-12's offer, A's iPad presses `pick-for` C; then B's iPad presses it a moment later.
 - Pass evidence: C's pick is Guard, logged with the pressing iPad and the hero it was for; A's press wins (first press, DEC-019) and B's changes nothing and logs nothing; the round then runs with all picks (`round.actions`).

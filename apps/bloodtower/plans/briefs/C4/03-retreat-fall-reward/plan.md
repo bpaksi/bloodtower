@@ -38,7 +38,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-11 all pass (verifier table on PR).
+- [ ] EV-01 … EV-15 all pass (verifier table on PR). EV-15 is the retreat guard prompt (Bob, 2026-11-27, via Warden). The Tower part is C5/01.
 - [ ] EV-12 … EV-14 (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: a retreat or fall leaves the Tomb room uncleared with the foe's count; loss, reward and penalty happen once) pass.
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 

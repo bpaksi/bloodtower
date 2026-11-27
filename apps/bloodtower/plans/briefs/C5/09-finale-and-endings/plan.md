@@ -65,18 +65,19 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 8 | `board.waiting` | Waiting on: {hero}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 9 | `board.voted` | {hero} has voted. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 10 | `tie.line` | A tie. Vote once more. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) ('tie, vote again'); locked |
-| 11 | `ipad.vote-again` | Vote again | mockup.html (iPad title on the tie) |
-| 12 | `board.decided` | The choice is made. | locked 2026-10-31 (Loremaster); same text in screen-spec |
-| 13 | `win.shattered` | The shard shatters. The Tower's call goes quiet, and the roads are yours. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) ('finale win, seal shattered'; DEC-663) |
-| 14 | `win.holds` | You swear his oath and take up his watch. The Tower called to him once. It will call to you. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) ('finale win, seal holds'; trimmed to one breath); replaces the 10-31 line in C5-04's plan |
-| 15 | `credits` | (not used) | Q-C5-09 pick (a): no credits Scroll. If Bob picks (b): "Blood Tower: The Ruined Keep. Thank you for playing." |
-| 16 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster) |
-| 17 | `ipad.see-board` | See the Story board. | new - Loremaster (first drawn in mockup.html) |
-| 18 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
-| 19 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
-| 20 | `help.title` | Help | C2 feature 04 |
-| 21 | `help.finale-and-endings` | Each hero taps Shatter the shard or Swear the oath. A tie means one more vote, then the app draws. | locked 2026-10-31 (Loremaster); same text in screen-spec |
-| 22 | `help.close` | Close | C2 feature 04 |
+| 11 | `tie.again` | Tied again. The draw decides. | Loremaster, 2026-11-27. Shown after the second tie, before `board.decided`. It does not name the result. Pack line id, if voiced: `finale-tie.again~vo-01` |
+| 12 | `ipad.vote-again` | Vote again | mockup.html (iPad title on the tie) |
+| 13 | `board.decided` | The choice is made. | locked 2026-10-31 (Loremaster); same text in screen-spec. Plays after `tie.again` |
+| 14 | `win.shattered` | The shard shatters. The Tower's call goes quiet, and the roads are yours. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) ('finale win, seal shattered'; DEC-663) |
+| 15 | `win.holds` | You swear his oath and take up his watch. The Tower called to him once. It will call to you. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) ('finale win, seal holds'; trimmed to one breath); replaces the 10-31 line in C5-04's plan |
+| 16 | `credits` | (not used) | Q-C5-09 pick (a): no credits Scroll. If Bob picks (b): "Blood Tower: The Ruined Keep. Thank you for playing." |
+| 17 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster) |
+| 18 | `ipad.see-board` | See the Story board. | new - Loremaster (first drawn in mockup.html) |
+| 19 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 20 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 21 | `help.title` | Help | C2 feature 04 |
+| 22 | `help.finale-and-endings` | Each hero taps Shatter the shard or Swear the oath. A tie means one more vote, then the app draws. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 23 | `help.close` | Close | C2 feature 04 |
 
 ## OPEN questions
 

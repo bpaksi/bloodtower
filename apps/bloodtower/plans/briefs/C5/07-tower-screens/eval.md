@@ -36,12 +36,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: pixel diff under 1% against `#basement`, `#stair`, `#top`.
 - Fails if: any image over 1% diff.
 
-### EV-05 — Open, Rest and Retreat do what they say
-- Requirement: DEC-566, DEC-360.
+### EV-05 — Open, Rest and Retreat do what they say (Amended 2026-11-27, Bob via Warden)
+- Requirement: DEC-566, DEC-360, DEC-687. Retreat is not free.
 - Method: playwright
-- How: Open the next door; at a found shrine Rest with heroes at 5/12; then Retreat.
-- Pass evidence: Open: the next room shows on the view half; Rest: each hero 7/12 and Rest disables; Retreat: the group stands on the Tower-adjacent space and the level is kept.
-- Fails if: any button without its effect.
+- How: Open the next door; at a found shrine Rest with heroes at 5/12; then Retreat with 1 move left; then the same room with 0 moves.
+- Pass evidence: Open: the next room shows on the view half; Rest: each hero 7/12 and Rest disables; with 1 move, Retreat spends it and the group stands on the Tower-adjacent space with the level kept; with 0 moves, Retreat is not offered.
+- Fails if: any button without its effect, or Retreat spends no move.
 
 ### EV-06 — The toolbar is on every state
 - Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
@@ -71,12 +71,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the room view shows each hero's HP as exactly `8/10 HP`, and the result line reads exactly "Every hero loses 2 hit points." (locked by Loremaster; the Rocks line reused).
 - Fails if: no change shown.
 
-### EV-10 — Climb takes the stairs
-- Requirement: Gamewright ruling: the Stairs state has Climb.
+### EV-10 — Climb takes the stairs (Amended 2026-11-27, Bob via Warden)
+- Requirement: the Stairs state shows Climb and Retreat (DEC-566).
 - Method: playwright
-- How: beat the basement stair guard; press Climb.
-- Pass evidence: the iPad shows **Climb** on the Stairs state; after the press the map shows the main level, room 1.
-- Fails if: no Climb button, or the level does not change.
+- How: beat the basement stair guard, with 1 move left; read the buttons; press Climb.
+- Pass evidence: the iPad shows **Climb** and **Retreat**, and no Open or Rest; after Climb the map shows the main level, room 1.
+- Fails if: no Climb button, Retreat is missing, or the level does not change.
 
 ## Survival evals (one per survival invariant in plan.md)
 

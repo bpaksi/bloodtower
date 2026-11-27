@@ -15,12 +15,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: 1.0 section empty.
 - Fails if: any gap.
 
-### EV-02 — Two table games (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
+### EV-02 — Two table games, one of them no-tower (Bob, 2026-11-27, via Warden)
 - Requirement: Q-C5-10.
 - Method: screenshot
 - How: (manual) Bob plays.
-- Pass evidence: one win, one loss logged.
-- Fails if: fewer.
+- Pass evidence: one win and one loss logged, and exactly one of those two games is played with no tower.
+- Fails if: fewer than two games, or both games use the tower, or neither does.
 
 ### EV-03 — Every C4 and C5 eval table green
 - Requirement: sdlc.

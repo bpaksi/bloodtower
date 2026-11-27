@@ -37,7 +37,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-11 all pass (verifier table on PR).
+- [ ] EV-01 … EV-12 all pass (verifier table on PR). EV-12 is a total Tower fall, a game loss (Bob, 2026-11-27, via Warden).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; 1.1 work (DEC-502).
 
 ## AREA / DEC checklist

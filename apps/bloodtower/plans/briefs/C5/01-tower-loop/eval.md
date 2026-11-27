@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-07; survival evals last (EV-07).
+- Done-when: EV-01 … EV-12; survival evals last (EV-11).
+- Amended 2026-11-27 (Bob, via Warden): EV-05 costs a move between Tower rooms and asks the guard; EV-12 is a total Tower fall, a game loss.
 
 ## Checks
 
@@ -36,12 +37,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: still on the level.
 - Fails if: goes up.
 
-### EV-05 — Retreat costs as a battle retreat (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
-- Requirement: Q-C5-04.
+### EV-05 — Retreat costs as a battle retreat, including between Tower rooms (Bob, 2026-11-27, via Warden)
+- Requirement: Q-C5-04; DEC-687. This is the Tower part of the guard-prompt check. The prompt itself is C4/03 EV-15.
 - Method: unit
-- How: retreat.
-- Pass evidence: C4 03's retreat cost; rooms kept.
-- Fails if: free or reset.
+- How: retreat from a Tower battle, including a retreat between Tower rooms, with 1 move left and a standing guard; then the same retreat with 0 moves.
+- Pass evidence: with 1 move, the retreat spends it (moves read 0), rooms are kept, and the guard prompt is asked once before the last attack; with 0 moves, Retreat is not offered.
+- Fails if: the retreat is free, including a free exit between Tower rooms, the rooms reset, or the guard prompt is skipped when a guard is present.
 
 ### EV-06 — Each level deals guard, trap or shrine, then a stair guard
 - Requirement: DEC-566.
@@ -86,6 +87,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: reach main level, quit, Continue.
 - Pass evidence: main level, rooms cleared.
 - Fails if: reset.
+
+### EV-12 — Every hero falling in a Tower battle loses the game (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-956. A fall outside the Tower is not this check.
+- Method: unit
+- How: a Tower guard battle; every present hero falls. Then the same fall in a battle on the board.
+- Pass evidence: the Tower case ends the game lost. The board case ends the battle fallen and the game goes on (DEC-119).
+- Fails if: the Tower group returns to the board, or the board fall ends the game.
 
 ## Assumptions surfaced
 

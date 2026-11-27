@@ -16,11 +16,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: fewer.
 
 ### EV-02 — Tie re-vote shown (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
-- Requirement: Q-C5-03.
+- Requirement: Q-C5-03. A tie re-votes once, then the seeded draw (DEC-011) breaks it. A second tie shows the Loremaster line, then `board.decided` (Bob, 2026-11-27, via Warden). The line does not name the result.
 - Method: playwright
-- How: split vote.
-- Pass evidence: "A tie. Vote once more." (Copy table: tie.line) then a second vote.
-- Fails if: no re-vote.
+- How: split vote, then split the re-vote.
+- Pass evidence: "A tie. Vote once more." (Copy table: tie.line) then a second vote. After that second tie the board reads exactly "Tied again. The draw decides." (Copy table: `tie.again`), and then "The choice is made." (Copy table: `board.decided`). The second-tie line does not say Shatter or Swear.
+- Fails if: no re-vote, the second tie shows any other line, `board.decided` comes before that line, or the line names the drawn result.
 
 ### EV-03 — Line for the flag
 - Requirement: DEC-664.

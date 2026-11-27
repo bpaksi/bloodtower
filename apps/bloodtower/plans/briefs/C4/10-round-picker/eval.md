@@ -4,14 +4,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: ./mockup.html (to be drawn from ./screen-spec.md)
-- Done-when: EV-01 … EV-21; survival evals last (EV-11 … EV-12, EV-19).
+- Done-when: EV-01 … EV-23; survival evals last (EV-11 … EV-12, EV-19).
+- Amended 2026-11-27 (Bob, via Warden): EV-22 skips Fight or Retreat when Retreat is not offered; EV-23 is the guard-prompt iPad state.
 
 ## Checks
 
 ### EV-01 — Fight or Retreat first
 - Requirement: UI-027, DEC-118.
 - Method: playwright
-- How: start a round.
+- How: start a round with a move left, so Retreat is offered.
 - Pass evidence: both buttons; no actions yet.
 - Fails if: actions first.
 
@@ -86,7 +87,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: the button shows early, on C's own iPad, is missing from the sat-out hero's iPad, is offered for a hero who picked or sits out, has the wrong name, or the board stops naming C.
 
 ### EV-14 — Tapping it picks Guard for that hero (PT-20)
-- Requirement: PT-20 (Bob, 2026-11-14, adopted): "Pick for <hero>" sets Guard if the hero can Guard, otherwise a normal attack (DEC-129's no-pick default; EV-20 holds the no-Guard case).
+- Requirement: PT-20 (Bob, 2026-11-14, adopted): "Pick for <hero>" sets Guard if the hero can Guard, otherwise a normal attack (EV-20 holds the no-Guard case). Guard is a DEC-556 hit, not 0 (Gamewright, 2026-11-27, under Bob's delegation via Warden).
 - Method: playwright
 - How: C's hero has a guard virtue. After EV-13, A taps Pick for C; B taps it 200 ms later.
 - Pass evidence: the board ticks C ("{hero} has picked."); the round runs; C's pick is Guard in the log and the result; A's iPad shows the pick summary "{C}: Guard" (Copy table: pick.summary); B's button is gone or disabled and its tap is ignored (first press wins).
@@ -156,6 +157,20 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: A and B picked, C silent, button showing; restart the host; Continue.
 - Pass evidence: A's and B's picks still tick; the button is not shown at once and returns 30 s after Continue, the clock restarting at 0 (Bob, 2026-11-14, adopted; shared with C4/02 EV-19).
 - Fails if: a pick is lost, the button returns early (clock resumed), or a stale button taps a hero who has picked.
+
+### EV-22 — No Retreat: the action picks open at once (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-313.
+- Method: playwright
+- How: a round in a group's turn with 0 moves left, so Retreat is not offered.
+- Pass evidence: the iPad shows the action picks and no Fight or Retreat buttons.
+- Fails if: Fight or Retreat is shown, or the round waits with no picks.
+
+### EV-23 — Retreat asks the guard on the iPad (Bob, 2026-11-27, via Warden)
+- Requirement: DEC-680. The engine check is C4/03 EV-15.
+- Method: playwright
+- How: the group picks Retreat; one standing hero has a guard virtue. Then the same with no guard virtue.
+- Pass evidence: with a guard, the iPad shows one prompt asking whether that hero covers the last attack, before the retreat result; with none, that state is skipped.
+- Fails if: the prompt is missing when a guard is present, or shown when none is.
 
 ## Assumptions surfaced
 
