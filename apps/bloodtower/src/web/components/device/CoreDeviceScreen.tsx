@@ -1040,7 +1040,13 @@ export function CoreDeviceScreen({
   if (soundStep) {
     // Pick story opens on the volume step on the connect track (DEC-903). No iPad plays sound.
     return (
-      <main className="bt-device" data-screen={view.screen} data-sound-step="levels">
+      <main
+        className="bt-device"
+        data-screen={view.screen}
+        data-sound-step="levels"
+        data-view-seq={view.seq ?? undefined}
+        data-acked={view.acked ?? undefined}
+      >
         <div className="bt-scroll">
           {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
           <>
@@ -1117,6 +1123,8 @@ export function CoreDeviceScreen({
     <main
       className="bt-device"
       data-screen={view.screen}
+      data-view-seq={view.seq ?? undefined}
+      data-acked={view.acked ?? undefined}
       data-setup-step={setupStep}
       data-piece-check-step={pieceCheck?.stepId ?? undefined}
       data-piece-check-number={pieceCheck?.stepNumber ?? undefined}
